@@ -10,6 +10,7 @@ import Footer from '@/components/layout/Footer';
 import { products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Check } from 'lucide-react';
+import { IMAGES } from '@/config/images';
 
 /**
  * Loja - Página de Vitrine
@@ -77,7 +78,7 @@ function LojaContent() {
           <div 
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: 'url(/images/pattern.png)',
+              backgroundImage: `url(${IMAGES.pattern1})`,
               backgroundRepeat: 'repeat',
               backgroundSize: 'auto 350px',
               backgroundPosition: 'center',

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import { useAdmin } from '@/context/AdminContext';
+import { IMAGES } from '@/config/images';
 
 /**
  * Página Login
@@ -59,7 +60,7 @@ export default function LoginPage() {
         {/* Imagem de fundo */}
         <div className="fixed inset-0 z-0">
           <Image
-            src="/images/background_login.png"
+            src={IMAGES.backgroundLogin}
             alt="Background"
             fill
             className="object-cover"

@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/ui/Container';
 import { useFavorites } from '@/context/FavoritesContext';
+import { IMAGES } from '@/config/images';
 
 type TabType = 'pedidos' | 'dados' | 'enderecos' | 'pagamento' | 'favoritos';
 
@@ -45,7 +46,7 @@ export default function PerfilPage() {
         {/* Imagem de fundo com filtro vintage */}
         <div className="fixed inset-0 z-0">
           <Image
-            src="/images/profile.png"
+            src={IMAGES.profile}
             alt="Background"
             fill
             className="object-cover"

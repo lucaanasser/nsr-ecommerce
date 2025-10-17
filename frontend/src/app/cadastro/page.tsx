@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
+import { IMAGES } from '@/config/images';
 
 /**
  * Página Cadastro
@@ -19,7 +20,7 @@ export default function CadastroPage() {
         {/* Imagem de fundo */}
         <div className="fixed inset-0 z-0">
           <Image
-            src="/images/background_login.png"
+            src={IMAGES.backgroundLogin}
             alt="Background"
             fill
             className="object-cover"

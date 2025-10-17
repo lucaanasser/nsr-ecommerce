@@ -13,6 +13,7 @@ import { products } from '@/data/products';
 import { Check, Heart, Share2, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
+import { IMAGES } from '@/config/images';
 
 /**
  * Página de Detalhes do Produto
@@ -45,7 +46,7 @@ export default function PaginaDetalhesProduto() {
             <div 
               className="absolute inset-0 opacity-10"
               style={{
-                backgroundImage: 'url(/images/nasser.jpg)',
+                backgroundImage: `url(${IMAGES.nasser})`,
                 backgroundRepeat: 'repeat',
                 backgroundSize: 'auto 200px',
                 backgroundPosition: 'center',
@@ -150,7 +151,7 @@ export default function PaginaDetalhesProduto() {
           <div 
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: 'url(/images/pattern.png)',
+              backgroundImage: `url(${IMAGES.pattern1})`,
               backgroundRepeat: 'repeat',
               backgroundSize: 'auto 350px',
               backgroundPosition: 'center',

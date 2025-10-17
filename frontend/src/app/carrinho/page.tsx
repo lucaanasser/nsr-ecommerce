@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import { useCart } from '@/context/CartContext';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import ShoppingBasketIcon from '@/components/icons/ShoppingBasketIcon';
+import { IMAGES } from '@/config/images';
 
 /**
  * Página do Carrinho de Compras
@@ -32,7 +33,7 @@ export default function PaginaCarrinho() {
         {/* Background com imagem, fade escuro e filtro vintage/granulado */}
         <div className="fixed inset-0 z-0">
           <Image
-            src="/images/carrinho.png"
+            src={IMAGES.backgroundCarrinho}
             alt="Background"
             fill
             className="object-cover"

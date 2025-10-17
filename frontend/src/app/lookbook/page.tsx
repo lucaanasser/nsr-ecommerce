@@ -8,6 +8,7 @@ import { ChevronDown } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { products } from '@/data/products';
+import { IMAGES } from '@/config/images';
 
 /**
  * Lookbook NSR - Experiência Cinematográfica
@@ -63,7 +64,7 @@ export default function LookbookPage() {
         >
           <div className="absolute inset-0 bg-dark-bg/40 z-10" />
           <Image
-            src={products[0]?.images[0] || '/images/pattern.png'}
+            src={products[0]?.images[0] || IMAGES.pattern1}
             alt="NSR Lookbook"
             fill
             className="object-cover"

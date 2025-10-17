@@ -14,14 +14,13 @@ const CLOUDINARY_CLOUD = 'dvhvhgrvj';
  */
 export const VIDEOS = {
   // Vídeo otimizado para web (menor tamanho, carrega mais rápido)
-  landpage: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/video_landpage_npgtnk`,
+  landpage: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/nsr/video_landpage`,
   
   // Vídeo da página Sobre
-  sobre: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/video_sobre_oebwzm`,
+  sobre: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/nsr/video_sobre`,
   
-  // TODO: Faça upload destes vídeos no Cloudinary se necessário:
-  // nasser: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/nasser_video`,
-  // legal: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/video_legal`,
+  // Vídeo da página Legal
+  legal: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/q_auto:low,f_auto,w_1920,c_limit/nsr/video_legal`,
 } as const;
 
 /**
@@ -31,13 +30,16 @@ export const VIDEOS = {
  * w_1920 = largura máxima
  */
 export const VIDEO_POSTERS = {
-  landpage: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/so_0,q_auto,w_1920/video_landpage_npgtnk.jpg`,
-  sobre: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/so_0,q_auto,w_1920/video_sobre_oebwzm.jpg`,
+  landpage: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/so_0,q_auto,w_1920/nsr/video_landpage.jpg`,
+  sobre: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/so_0,q_auto,w_1920/nsr/video_sobre.jpg`,
+  legal: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/so_0,q_auto,w_1920/nsr/video_legal.jpg`,
 } as const;
 
 /**
  * URLs diretas sem otimização (fallback se necessário)
  */
 export const VIDEOS_DIRECT = {
-  landpage: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/video_landpage_npgtnk.webm`,
+  landpage: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/nsr/video_landpage.webm`,
+  sobre: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/nsr/video_sobre.webm`,
+  legal: `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/nsr/video_legal.webm`,
 } as const;

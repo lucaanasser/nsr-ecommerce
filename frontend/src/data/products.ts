@@ -1,3 +1,5 @@
+import { IMAGES } from '@/config/images';
+
 // Tipos TypeScript para os dados mockados
 export interface Product {
   id: string;
@@ -35,8 +37,8 @@ export const products: Product[] = [
     unavailableSizes: ['GG'], // Exemplo: GG indisponível
     colors: ['Preto', 'Bege', 'Branco'],
     images: [
-      '/images/mock_clothes/roupa1_frente.png',
-      '/images/mock_clothes/roupa1_tras.png',
+      IMAGES.roupa1Frente,
+      IMAGES.roupa1Tras,
     ],
     featured: true,
     new: true,
@@ -52,8 +54,8 @@ export const products: Product[] = [
     sizes: ['38', '40', '42', '44'],
     colors: ['Preto', 'Verde Oliva', 'Bege'],
     images: [
-      '/images/mock_clothes/roupa2_frente.png',
-      '/images/mock_clothes/roupa2_tras.png',
+      IMAGES.roupa2Frente,
+      IMAGES.roupa2Tras,
     ],
     featured: true,
     new: false,
@@ -69,8 +71,8 @@ export const products: Product[] = [
     sizes: ['P', 'M', 'G', 'GG'],
     colors: ['Preto', 'Cinza', 'Bege'],
     images: [
-      '/images/mock_clothes/roupa3_frente.png',
-      '/images/mock_clothes/roupa3_tras.png',
+      IMAGES.roupa3Frente,
+      IMAGES.roupa3Tras,
     ],
     featured: false,
     new: true,
@@ -86,8 +88,8 @@ export const products: Product[] = [
     sizes: ['PP', 'P', 'M', 'G'],
     colors: ['Preto', 'Branco', 'Dourado'],
     images: [
-      '/images/mock_clothes/roupa4_frente.png',
-      '/images/mock_clothes/roupa4_tras.png',
+      IMAGES.roupa4Frente,
+      IMAGES.roupa4Tras,
     ],
     featured: true,
     new: true,
