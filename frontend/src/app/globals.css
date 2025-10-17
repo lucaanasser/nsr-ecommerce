@@ -15,11 +15,11 @@
   font-display: swap;
 }
 
+/* Sistema de Fontes Simplificado - Apenas 3 fontes */
 :root {
-  --font-geist-sans: 'Special Elite', monospace;
-  --font-arabic: 'Amiri', serif;
-  --font-display: 'Special Elite', monospace;
-  --font-nsr: 'Nsr', sans-serif;
+  --font-sans: 'Special Elite', monospace;      /* Fonte geral do site */
+  --font-arabic: 'Amiri', serif;                 /* Fonte para textos em árabe */
+  --font-nsr: 'Nsr', sans-serif;                 /* Fonte autoral NSR */
 }
 
 * {
@@ -30,7 +30,7 @@
 
 body {
   @apply bg-dark-bg text-primary-white;
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

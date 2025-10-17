@@ -25,9 +25,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "Special Elite", "monospace"],
-        arabic: ["var(--font-arabic)", "serif"],
-        display: ["var(--font-display)", "Special Elite", "monospace"],
+        sans: ["var(--font-sans)", "Special Elite", "monospace"],
+        arabic: ["var(--font-arabic)", "Amiri", "serif"],
         nsr: ["var(--font-nsr)", "Nsr", "sans-serif"],
       },
       backgroundImage: {
