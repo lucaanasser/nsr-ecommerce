@@ -1,6 +1,5 @@
-# ناصر NSR - E-commerce Streetwear Árabe Contemporâneo
+# NSR - E-commerce
 
-![NSR Logo](https://img.shields.io/badge/NSR-%D9%86%D8%B5%D8%B1-C9A96E?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue?style=flat-square&logo=typescript)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)

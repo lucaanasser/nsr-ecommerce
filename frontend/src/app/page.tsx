@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 import { Play, Pause } from 'lucide-react';
+import { VIDEOS, VIDEO_POSTERS } from '@/config/videos';
 
 /**
  * Página Inicial
@@ -43,9 +44,12 @@ export default function Inicio() {
           loop
           muted
           playsInline
+          preload="auto"
+          poster={VIDEO_POSTERS.landpage}
           className="w-full h-full object-cover"
+          src={VIDEOS.landpage}
         >
-          <source src="/images/nasser_video.webm" type="video/webm" />
+          Seu navegador não suporta vídeos.
         </video>
         {/* Overlay escuro */}
         <div className="absolute inset-0 bg-dark-bg/50" />

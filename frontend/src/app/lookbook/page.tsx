@@ -53,8 +53,8 @@ export default function LookbookPage() {
       <div ref={containerRef} className="bg-dark-bg">
         {/* Hero Fullscreen */}
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Vídeo/Imagem de fundo com parallax */}
-        <motion.div
+          {/* Vídeo/Imagem de fundo com parallax */}
+          <motion.div
           style={{
             scale: useTransform(smoothProgress, [0, 0.2], [1, 1.2]),
             opacity: useTransform(smoothProgress, [0, 0.2], [1, 0]),

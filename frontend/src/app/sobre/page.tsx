@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { VIDEOS, VIDEO_POSTERS } from '@/config/videos';
 
 /**
  * Página Sobre
@@ -45,12 +46,14 @@ export default function SobrePage() {
               muted
               playsInline
               disablePictureInPicture
+              preload="auto"
+              poster={VIDEO_POSTERS.sobre}
               className="w-full h-full object-cover"
               style={{
                 filter: 'brightness(0.7) contrast(1.2) saturate(0.8) sepia(0.2)',
               }}
+              src={VIDEOS.sobre}
             >
-              <source src="/images/sobre.webm" type="video/webm" />
               Seu navegador não suporta o elemento de vídeo.
             </video>
             
