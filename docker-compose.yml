@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nsr-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - nsr-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  # Backend - Placeholder (a ser implementado)
+  backend:
+    image: node:20-alpine
+    container_name: nsr-backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "4000:4000"
+    networks:
+      - nsr-network
+    command: sh -c "echo 'Backend placeholder - aguardando implementação' && tail -f /dev/null"
+    restart: unless-stopped
+
+  # Database - Placeholder (a ser implementado)
+  database:
+    image: postgres:16-alpine
+    container_name: nsr-database
+    environment:
+      - POSTGRES_USER=nsr
+      - POSTGRES_PASSWORD=nsr_password
+      - POSTGRES_DB=nsr_db
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - nsr-network
+    restart: unless-stopped
+
+networks:
+  nsr-network:
+    driver: bridge
+
+volumes:
+  database-data:
