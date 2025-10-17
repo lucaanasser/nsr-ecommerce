@@ -7,8 +7,9 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import { useCart } from '@/context/CartContext';
-import { Trash2, Plus, Minus } from 'lucide-react';
+import { Trash2, Plus, Minus, CreditCard, Lock, FileText } from 'lucide-react';
 import ShoppingBasketIcon from '@/components/icons/ShoppingBasketIcon';
 import { IMAGES } from '@/config/images';
 
@@ -74,77 +75,81 @@ export default function PaginaCarrinho() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
-                      className="flex gap-6 bg-dark-card border border-dark-border rounded-sm p-6 hover:border-primary-gold/30 transition-colors"
                     >
-                      {/* Imagem do Produto */}
-                      <Link href={`/produto/${item.slug}`} className="flex-shrink-0">
-                        <div className="relative w-32 h-40 rounded-sm overflow-hidden">
-                          <Image
-                            src={item.images[0]}
-                            alt={item.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      </Link>
-
-                      {/* Informações */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <Link
-                            href={`/produto/${item.slug}`}
-                            className="text-xl font-medium hover:text-primary-gold transition-colors"
-                          >
-                            {item.name}
-                          </Link>
-                          <p className="text-sm text-primary-white/60 mt-1">
-                            {item.collection}
-                          </p>
-                          <div className="flex gap-4 mt-3 text-sm">
-                            <span className="text-primary-white/60">
-                              Tamanho: <span className="text-primary-white">{item.selectedSize}</span>
-                            </span>
-                            <span className="text-primary-white/60">
-                              Cor: <span className="text-primary-white">{item.selectedColor}</span>
-                            </span>
+                      <Card className="flex gap-6 p-6">
+                        {/* Imagem do Produto */}
+                        <Link href={`/produto/${item.slug}`} className="flex-shrink-0">
+                          <div className="relative w-32 h-40 rounded-sm overflow-hidden">
+                            <Image
+                              src={item.images[0]}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                            />
                           </div>
-                        </div>
+                        </Link>
 
-                        <div className="flex items-center justify-between mt-4">
-                          {/* Controle de Quantidade */}
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => atualizarQuantidade(item.id, item.selectedSize, -1)}
-                              className="w-8 h-8 border border-dark-border rounded-sm hover:border-primary-gold transition-colors flex items-center justify-center"
+                        {/* Informações */}
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <Link
+                              href={`/produto/${item.slug}`}
+                              className="text-xl font-medium hover:text-primary-gold transition-colors"
                             >
-                              <Minus size={16} />
-                            </button>
-                            <span className="text-lg font-medium w-8 text-center">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => atualizarQuantidade(item.id, item.selectedSize, 1)}
-                              className="w-8 h-8 border border-dark-border rounded-sm hover:border-primary-gold transition-colors flex items-center justify-center"
-                            >
-                              <Plus size={16} />
-                            </button>
-                          </div>
-
-                          {/* Preço e Remover */}
-                          <div className="flex items-center gap-6">
-                            <p className="text-xl font-bold text-gradient">
-                              R$ {(item.price * item.quantity).toFixed(2)}
+                              {item.name}
+                            </Link>
+                            <p className="text-sm text-primary-white/60 mt-1">
+                              {item.collection}
                             </p>
-                            <button
-                              onClick={() => removerDoCarrinho(item.id, item.selectedSize)}
-                              className="text-primary-white/40 hover:text-red-500 transition-colors"
-                              aria-label="Remover item"
-                            >
-                              <Trash2 size={20} />
-                            </button>
+                            <div className="flex gap-4 mt-3 text-sm">
+                              <span className="text-primary-white/60">
+                                Tamanho: <span className="text-primary-white">{item.selectedSize}</span>
+                              </span>
+                              <span className="text-primary-white/60">
+                                Cor: <span className="text-primary-white">{item.selectedColor}</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-4">
+                            {/* Controle de Quantidade */}
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="ghost"
+                                onClick={() => atualizarQuantidade(item.id, item.selectedSize, -1)}
+                                className="w-8 h-8 p-0"
+                              >
+                                <Minus size={16} />
+                              </Button>
+                              <span className="text-lg font-medium w-8 text-center">
+                                {item.quantity}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                onClick={() => atualizarQuantidade(item.id, item.selectedSize, 1)}
+                                className="w-8 h-8 p-0"
+                              >
+                                <Plus size={16} />
+                              </Button>
+                            </div>
+
+                            {/* Preço e Remover */}
+                            <div className="flex items-center gap-6">
+                              <p className="text-xl font-bold text-gradient">
+                                R$ {(item.price * item.quantity).toFixed(2)}
+                              </p>
+                              <Button
+                                variant="ghost"
+                                onClick={() => removerDoCarrinho(item.id, item.selectedSize)}
+                                className="text-primary-white/40 hover:text-red-500 p-2"
+                                aria-label="Remover item"
+                              >
+                                <Trash2 size={20} />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Card>
                     </motion.div>
                   ))}
                 </div>
@@ -156,7 +161,7 @@ export default function PaginaCarrinho() {
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="lg:col-span-1"
                 >
-                  <div className="bg-dark-card border border-dark-border rounded-sm p-8 sticky top-32">
+                  <Card className="p-8 sticky top-32">
                     <h2 className="text-2xl font-bold mb-6">Resumo do Pedido</h2>
 
                     <div className="space-y-4 mb-6">
@@ -202,13 +207,22 @@ export default function PaginaCarrinho() {
                       <p className="text-xs text-primary-white/60 text-center mb-3">
                         Aceitamos:
                       </p>
-                      <div className="flex justify-center gap-3 opacity-60">
-                        <div className="text-xs">💳 Cartão</div>
-                        <div className="text-xs">🔒 Pix</div>
-                        <div className="text-xs">📄 Boleto</div>
+                      <div className="flex justify-center gap-4 opacity-80">
+                        <div className="flex items-center gap-1 text-xs">
+                          <CreditCard size={14} className="text-primary-gold" />
+                          <span>Cartão</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs">
+                          <Lock size={14} className="text-primary-gold" />
+                          <span>Pix</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs">
+                          <FileText size={14} className="text-primary-gold" />
+                          <span>Boleto</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 </motion.div>
               </div>
             ) : (
@@ -218,9 +232,9 @@ export default function PaginaCarrinho() {
                 animate={{ opacity: 1 }}
                 className="text-center py-20"
               >
-                <div className="inline-block p-6 bg-dark-card rounded-full mb-6">
+                <Card className="inline-block p-6 mb-6">
                   <ShoppingBasketIcon size={48} className="text-primary-gold" />
-                </div>
+                </Card>
                 <h2 className="text-3xl font-bold mb-4">Seu carrinho está vazio</h2>
                 <p className="text-primary-white/60 mb-8">
                   Adicione produtos incríveis da NSR ao seu carrinho

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Button from '@/components/ui/Button';
 import { products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Check } from 'lucide-react';
@@ -177,20 +178,20 @@ function LojaContent() {
                         </div>
                         
                         {/* Botão "Ver detalhes" apenas em mobile */}
-                        <button
+                        <Button
+                          variant="ghost"
                           onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
+                            e?.preventDefault();
+                            e?.stopPropagation();
                             // No segundo clique, navega para a página
                             if (estaClicado) {
                               window.location.href = `/produto/${product.slug}`;
                             }
                           }}
-                          className="md:hidden inline-block text-base uppercase tracking-widest text-primary-gold/60 hover:text-primary-gold transition-colors"
-                          style={{ fontFamily: 'Nsr, sans-serif' }}
+                          className="md:hidden text-primary-gold/60 hover:text-primary-gold font-nsr py-2"
                         >
                           Ver detalhes
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
