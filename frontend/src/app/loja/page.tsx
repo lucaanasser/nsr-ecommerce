@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ import { ShoppingCart, Check } from 'lucide-react';
  * Preço sempre visível, hover mostra segunda imagem e tamanhos para adicionar ao carrinho direto.
  * Experiência visual e rápida de compra.
  */
-export default function LojaPage() {
+function LojaContent() {
   const parametrosBusca = useSearchParams();
   const parametroFiltro = parametrosBusca.get('filter');
   const { adicionarAoCarrinho } = useCart();
@@ -226,5 +226,13 @@ export default function LojaPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function LojaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-dark-bg flex items-center justify-center"><p className="text-primary-gold">Carregando...</p></div>}>
+      <LojaContent />
+    </Suspense>
   );
 }
