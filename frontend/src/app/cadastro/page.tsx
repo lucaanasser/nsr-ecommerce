@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import { IMAGES } from '@/config/images';
 
 /**
@@ -44,33 +46,33 @@ export default function CadastroPage() {
             <form className="space-y-4">
               {/* Nome e Sobrenome */}
               <div className="grid grid-cols-2 gap-3">
-                <input
+                <Input
                   type="text"
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                   placeholder="Nome"
                   required
+                  className="bg-dark-card/50 backdrop-blur-sm"
                 />
                 
-                <input
+                <Input
                   type="text"
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                   placeholder="Sobrenome"
                   required
+                  className="bg-dark-card/50 backdrop-blur-sm"
                 />
               </div>
               
-              <input
+              <Input
                 type="email"
-                className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                 placeholder="Email"
                 required
+                className="bg-dark-card/50 backdrop-blur-sm"
               />
               
-              <input
+              <Input
                 type="tel"
-                className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                 placeholder="Telefone"
                 required
+                className="bg-dark-card/50 backdrop-blur-sm"
               />
               
               {/* Gênero e Aniversário */}
@@ -86,48 +88,44 @@ export default function CadastroPage() {
                   <option value="nao-informar">Prefiro não informar</option>
                 </select>
                 
-                <input
+                <Input
                   type="date"
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                   placeholder="Aniversário"
                   required
+                  className="bg-dark-card/50 backdrop-blur-sm"
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-3">
-                <input
+                <Input
                   type="password"
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                   placeholder="Senha"
                   required
+                  className="bg-dark-card/50 backdrop-blur-sm"
                 />
                 
-                <input
+                <Input
                   type="password"
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                   placeholder="Confirmar Senha"
                   required
+                  className="bg-dark-card/50 backdrop-blur-sm"
                 />
               </div>
               
               {/* Checkbox para receber anúncios */}
-              <div className="flex items-start gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="receberAnuncios"
-                  className="mt-0.5 w-4 h-4 bg-dark-card/50 border border-dark-border rounded-sm accent-primary-bronze focus:ring-primary-bronze focus:ring-2 cursor-pointer"
-                />
-                <label htmlFor="receberAnuncios" className="text-xs text-primary-white/70 cursor-pointer leading-relaxed">
-                  Desejo receber anúncios, novidades e promoções exclusivas por email
-                </label>
-              </div>
+              <Input
+                type="checkbox"
+                id="receberAnuncios"
+                label="Desejo receber anúncios, novidades e promoções exclusivas por email"
+                containerClassName="pt-2"
+              />
               
-              <button
+              <Button
                 type="submit"
-                className="w-full btn-primary py-3 text-base font-semibold mt-6"
+                className="w-full mt-6"
               >
                 Criar Conta
-              </button>
+              </Button>
               
               <p className="text-center text-xs text-primary-white/50 pt-2">
                 Já tem conta? <Link href="/login" className="text-primary-gold hover:underline">Faça login</Link>

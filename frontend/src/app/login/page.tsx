@@ -4,7 +4,10 @@ import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { User, Lock } from 'lucide-react';
 import Header from '@/components/layout/Header';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import { useAdmin } from '@/context/AdminContext';
 import { IMAGES } from '@/config/images';
 
@@ -82,27 +85,23 @@ export default function LoginPage() {
             </h1>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
-                  placeholder="Email"
-                  required
-                />
-              </div>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+                className="bg-dark-card/50 backdrop-blur-sm"
+              />
               
-              <div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-dark-card/50 backdrop-blur-sm border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
-                  placeholder="Senha"
-                  required
-                />
-              </div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Senha"
+                required
+                className="bg-dark-card/50 backdrop-blur-sm"
+              />
 
               {/* Mensagem de erro */}
               {error && (
@@ -115,13 +114,13 @@ export default function LoginPage() {
                 </motion.div>
               )}
               
-              <button
+              <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full btn-primary py-3 text-base font-semibold mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full mt-6"
               >
                 {isLoading ? 'Entrando...' : 'Entrar'}
-              </button>
+              </Button>
               
               <p className="text-center text-xs text-primary-white/50 pt-2">
                 Não tem conta? <Link href="/cadastro" className="text-primary-gold hover:underline">Cadastre-se</Link>
@@ -134,27 +133,27 @@ export default function LoginPage() {
                 Credenciais para teste:
               </p>
               <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
                   onClick={() => fillCredentials('user')}
-                  className="text-xs bg-dark-card/30 hover:bg-dark-card/50 border border-dark-border hover:border-primary-gold/50 text-primary-white/60 hover:text-primary-gold px-3 py-2 rounded-sm transition-all"
+                  className="text-xs py-2 px-3"
                 >
-                  👤 Usuário
-                </button>
-                <button
-                  type="button"
+                  <User size={12} className="mr-1" /> Usuário
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => fillCredentials('admin1')}
-                  className="text-xs bg-dark-card/30 hover:bg-dark-card/50 border border-dark-border hover:border-primary-gold/50 text-primary-white/60 hover:text-primary-gold px-3 py-2 rounded-sm transition-all"
+                  className="text-xs py-2 px-3"
                 >
-                  🔐 Sócio 1
-                </button>
-                <button
-                  type="button"
+                  <Lock size={12} className="mr-1" /> Sócio 1
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => fillCredentials('admin2')}
-                  className="text-xs bg-dark-card/30 hover:bg-dark-card/50 border border-dark-border hover:border-primary-bronze/50 text-primary-white/60 hover:text-primary-bronze px-3 py-2 rounded-sm transition-all"
+                  className="text-xs py-2 px-3"
                 >
-                  � Sócio 2
-                </button>
+                  <Lock size={12} className="mr-1" /> Sócio 2
+                </Button>
               </div>
             </div>
           </motion.div>

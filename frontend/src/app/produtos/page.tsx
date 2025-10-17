@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ProductCard from '@/components/product/ProductCard';
 import Container from '@/components/ui/Container';
+import Button from '@/components/ui/Button';
 import { products } from '@/data/products';
 import { SlidersHorizontal } from 'lucide-react';
 
@@ -63,28 +64,26 @@ export default function ProdutosPage() {
                 {/* Controles */}
                 <div className="flex flex-wrap gap-4">
                   {/* Toggle Filtros Mobile */}
-                  <button
+                  <Button
+                    variant="secondary"
                     onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                    className="md:hidden flex items-center gap-2 px-4 py-2 border border-dark-border hover:border-primary-gold transition-colors rounded-sm"
+                    className="md:hidden py-2 px-4"
                   >
-                    <SlidersHorizontal size={18} />
+                    <SlidersHorizontal size={18} className="mr-2" />
                     Filtros
-                  </button>
+                  </Button>
 
                   {/* Filtro de Categoria */}
                   <div className="flex gap-2">
                     {(['todos', 'masculino', 'feminino'] as const).map((cat) => (
-                      <button
+                      <Button
                         key={cat}
                         onClick={() => setFiltro(cat)}
-                        className={`px-4 py-2 rounded-sm text-sm uppercase tracking-wider transition-all ${
-                          filtro === cat
-                            ? 'bg-primary-gold text-primary-black'
-                            : 'border border-dark-border text-primary-white/70 hover:border-primary-gold'
-                        }`}
+                        variant={filtro === cat ? 'primary' : 'secondary'}
+                        className="py-2 px-4"
                       >
                         {cat}
-                      </button>
+                      </Button>
                     ))}
                   </div>
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, FileSpreadsheet, User, Clock, Eye, Edit, Trash2 } from 'lucide-react';
 import { spreadsheets, Spreadsheet, getUserById } from '@/data/collaborationData';
 import { useAdmin } from '@/context/AdminContext';
+import Button from '@/components/ui/Button';
 
 /**
  * Página de Planilhas
@@ -24,10 +25,10 @@ export default function PlanilhasPage() {
             Crie e gerencie planilhas colaborativas
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary-gold text-dark-bg rounded-sm font-medium hover:bg-primary-bronze transition-colors">
-          <Plus size={20} />
+        <Button>
+          <Plus size={20} className="mr-2" />
           Nova Planilha
-        </button>
+        </Button>
       </div>
 
       {/* Templates Rápidos */}

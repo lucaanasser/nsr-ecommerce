@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/ui/Container';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import { useCart } from '@/context/CartContext';
 import { CreditCard, Truck, MapPin, ShoppingBag } from 'lucide-react';
 
@@ -56,12 +58,9 @@ export default function CheckoutPage() {
               <p className="text-primary-white/60 mb-8">
                 Adicione produtos ao carrinho antes de finalizar a compra.
               </p>
-              <button
-                onClick={() => router.push('/loja')}
-                className="btn-primary py-3 px-8"
-              >
+              <Button onClick={() => router.push('/loja')}>
                 Ir para a Loja
-              </button>
+              </Button>
             </div>
           </Container>
         </main>
@@ -157,40 +156,40 @@ export default function CheckoutPage() {
 
                     <form onSubmit={handleSubmitEntrega} className="space-y-4">
                       <div className="grid grid-cols-2 gap-3">
-                        <input
+                        <Input
                           type="text"
                           placeholder="Nome"
                           required
                           value={dadosEntrega.nome}
                           onChange={(e) => setDadosEntrega({ ...dadosEntrega, nome: e.target.value })}
-                          className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                          className="bg-dark-bg/50"
                         />
-                        <input
+                        <Input
                           type="text"
                           placeholder="Sobrenome"
                           required
                           value={dadosEntrega.sobrenome}
                           onChange={(e) => setDadosEntrega({ ...dadosEntrega, sobrenome: e.target.value })}
-                          className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                          className="bg-dark-bg/50"
                         />
                       </div>
 
-                      <input
+                      <Input
                         type="email"
                         placeholder="Email"
                         required
                         value={dadosEntrega.email}
                         onChange={(e) => setDadosEntrega({ ...dadosEntrega, email: e.target.value })}
-                        className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                        className="bg-dark-bg/50"
                       />
 
-                      <input
+                      <Input
                         type="tel"
                         placeholder="Telefone"
                         required
                         value={dadosEntrega.telefone}
                         onChange={(e) => setDadosEntrega({ ...dadosEntrega, telefone: e.target.value })}
-                        className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                        className="bg-dark-bg/50"
                       />
 
                       <div className="border-t border-dark-border pt-4 mt-6">
@@ -200,75 +199,75 @@ export default function CheckoutPage() {
                         </div>
 
                         <div className="space-y-4">
-                          <input
+                          <Input
                             type="text"
                             placeholder="CEP"
                             required
                             value={dadosEntrega.cep}
                             onChange={(e) => setDadosEntrega({ ...dadosEntrega, cep: e.target.value })}
-                            className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                            className="bg-dark-bg/50"
                           />
 
-                          <input
+                          <Input
                             type="text"
                             placeholder="Endereço"
                             required
                             value={dadosEntrega.endereco}
                             onChange={(e) => setDadosEntrega({ ...dadosEntrega, endereco: e.target.value })}
-                            className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                            className="bg-dark-bg/50"
                           />
 
                           <div className="grid grid-cols-2 gap-3">
-                            <input
+                            <Input
                               type="text"
                               placeholder="Número"
                               required
                               value={dadosEntrega.numero}
                               onChange={(e) => setDadosEntrega({ ...dadosEntrega, numero: e.target.value })}
-                              className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                              className="bg-dark-bg/50"
                             />
-                            <input
+                            <Input
                               type="text"
                               placeholder="Complemento"
                               value={dadosEntrega.complemento}
                               onChange={(e) => setDadosEntrega({ ...dadosEntrega, complemento: e.target.value })}
-                              className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                              className="bg-dark-bg/50"
                             />
                           </div>
 
-                          <input
+                          <Input
                             type="text"
                             placeholder="Bairro"
                             required
                             value={dadosEntrega.bairro}
                             onChange={(e) => setDadosEntrega({ ...dadosEntrega, bairro: e.target.value })}
-                            className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                            className="bg-dark-bg/50"
                           />
 
                           <div className="grid grid-cols-2 gap-3">
-                            <input
+                            <Input
                               type="text"
                               placeholder="Cidade"
                               required
                               value={dadosEntrega.cidade}
                               onChange={(e) => setDadosEntrega({ ...dadosEntrega, cidade: e.target.value })}
-                              className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                              className="bg-dark-bg/50"
                             />
-                            <input
+                            <Input
                               type="text"
                               placeholder="Estado"
                               required
                               value={dadosEntrega.estado}
                               onChange={(e) => setDadosEntrega({ ...dadosEntrega, estado: e.target.value })}
-                              className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                              className="bg-dark-bg/50"
                             />
                           </div>
                         </div>
                       </div>
 
-                      <button type="submit" className="w-full btn-primary py-3 mt-6">
+                      <Button type="submit" className="w-full mt-6">
                         Continuar para Pagamento
-                      </button>
+                      </Button>
                     </form>
                   </motion.div>
                 )}
@@ -286,54 +285,54 @@ export default function CheckoutPage() {
                     </div>
 
                     <form onSubmit={handleSubmitPagamento} className="space-y-4">
-                      <input
+                      <Input
                         type="text"
                         placeholder="Número do Cartão"
                         required
                         value={dadosPagamento.numeroCartao}
                         onChange={(e) => setDadosPagamento({ ...dadosPagamento, numeroCartao: e.target.value })}
-                        className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                        className="bg-dark-bg/50"
                       />
 
-                      <input
+                      <Input
                         type="text"
                         placeholder="Nome no Cartão"
                         required
                         value={dadosPagamento.nomeCartao}
                         onChange={(e) => setDadosPagamento({ ...dadosPagamento, nomeCartao: e.target.value })}
-                        className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                        className="bg-dark-bg/50"
                       />
 
                       <div className="grid grid-cols-2 gap-3">
-                        <input
+                        <Input
                           type="text"
                           placeholder="Validade (MM/AA)"
                           required
                           value={dadosPagamento.validade}
                           onChange={(e) => setDadosPagamento({ ...dadosPagamento, validade: e.target.value })}
-                          className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                          className="bg-dark-bg/50"
                         />
-                        <input
+                        <Input
                           type="text"
                           placeholder="CVV"
                           required
                           value={dadosPagamento.cvv}
                           onChange={(e) => setDadosPagamento({ ...dadosPagamento, cvv: e.target.value })}
-                          className="w-full bg-dark-bg/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
+                          className="bg-dark-bg/50"
                         />
                       </div>
 
                       <div className="flex gap-3 mt-6">
-                        <button
-                          type="button"
+                        <Button
+                          variant="secondary"
                           onClick={() => setEtapa('entrega')}
-                          className="flex-1 py-3 border border-dark-border rounded-sm hover:border-primary-gold transition-colors"
+                          className="flex-1"
                         >
                           Voltar
-                        </button>
-                        <button type="submit" className="flex-1 btn-primary py-3">
+                        </Button>
+                        <Button type="submit" className="flex-1">
                           Revisar Pedido
-                        </button>
+                        </Button>
                       </div>
                     </form>
                   </motion.div>
@@ -374,18 +373,19 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className="flex gap-3 mt-6">
-                        <button
+                        <Button
+                          variant="secondary"
                           onClick={() => setEtapa('pagamento')}
-                          className="flex-1 py-3 border border-dark-border rounded-sm hover:border-primary-gold transition-colors"
+                          className="flex-1"
                         >
                           Voltar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={handleFinalizarCompra}
-                          className="flex-1 btn-primary py-3"
+                          className="flex-1"
                         >
                           Finalizar Compra
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </motion.div>

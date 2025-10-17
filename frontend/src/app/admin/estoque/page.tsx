@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Search, AlertTriangle, Plus, Minus } from 'lucide-react';
 import { mockStock } from '@/data/adminData';
 import { motion } from 'framer-motion';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 /**
  * Página de Controle de Estoque
@@ -53,28 +55,25 @@ export default function AdminEstoque() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40" size={18} />
-            <input
-              type="text"
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40 pointer-events-none z-10" size={18} />
+            <Input
+              type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar produtos..."
-              className="w-full bg-dark-bg/50 border border-dark-border rounded-sm pl-10 pr-4 py-2 text-sm text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors"
+              className="pl-10 bg-dark-bg/50"
             />
           </div>
 
           {/* Toggle Estoque Baixo */}
-          <button
+          <Button
+            variant={showLowStockOnly ? 'primary' : 'secondary'}
             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-            className={`px-4 py-2 rounded-sm text-sm font-medium transition-all flex items-center gap-2 ${
-              showLowStockOnly
-                ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'
-                : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
-            }`}
+            className="whitespace-nowrap"
           >
-            <AlertTriangle size={16} />
+            <AlertTriangle size={16} className="mr-2" />
             Apenas Estoque Baixo
-          </button>
+          </Button>
         </div>
 
         {/* Contador */}
@@ -157,12 +156,12 @@ export default function AdminEstoque() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-primary-white/60 hover:text-red-500 hover:bg-red-500/10 rounded-sm transition-all">
+                        <Button variant="ghost" className="p-2 text-red-500 hover:bg-red-500/10">
                           <Minus size={16} />
-                        </button>
-                        <button className="p-2 text-primary-white/60 hover:text-green-500 hover:bg-green-500/10 rounded-sm transition-all">
+                        </Button>
+                        <Button variant="ghost" className="p-2 text-green-500 hover:bg-green-500/10">
                           <Plus size={16} />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </motion.tr>
