@@ -87,12 +87,16 @@ router.get('/api/v1', (_req, res) => {
 
 // Importar rotas
 import authRoutes from './auth.routes';
+import productRoutes from './product.routes';
+import categoryRoutes from './category.routes';
+import collectionRoutes from './collection.routes';
+import adminProductRoutes from './admin/product.routes';
 
 // Registrar rotas
 router.use('/api/v1/auth', authRoutes);
-
-// Rotas futuras
-// import productRoutes from './product.routes';
-// router.use('/api/v1/products', productRoutes);
+router.use('/api/v1/products', productRoutes);
+router.use('/api/v1/categories', categoryRoutes);
+router.use('/api/v1/collections', collectionRoutes);
+router.use('/api/v1/admin/products', adminProductRoutes);
 
 export default router;

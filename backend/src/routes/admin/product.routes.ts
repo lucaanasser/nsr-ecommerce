@@ -1,0 +1,154 @@
+import { Router } from 'express';
+import { adminProductController } from '../../controllers/admin/product.controller';
+import { authenticate } from '../../middlewares/authenticate';
+import { authorize } from '../../middlewares/authorize';
+import { validateBody, validateParams } from '../../middlewares/validate';
+import { uploadMultiple } from '../../middlewares/upload';
+import {
+  createProductSchema,
+  updateProductSchema,
+  uuidParamSchema,
+  createCategorySchema,
+  updateCategorySchema,
+  createCollectionSchema,
+  updateCollectionSchema,
+} from '../../validators/product.validator';
+
+const router = Router();
+
+// Todas as rotas requerem autenticação e role ADMIN
+router.use(authenticate as any);
+router.use(authorize('ADMIN') as any);
+
+// ========== PRODUCT ROUTES ==========
+
+/**
+ * @route   POST /api/v1/admin/products
+ * @desc    Cria novo produto
+ * @access  Private (Admin)
+ */
+router.post(
+  '/',
+  validateBody(createProductSchema),
+  adminProductController.createProduct.bind(adminProductController)
+);
+
+/**
+ * @route   PUT /api/v1/admin/products/:id
+ * @desc    Atualiza produto existente
+ * @access  Private (Admin)
+ */
+router.put(
+  '/:id',
+  validateParams(uuidParamSchema),
+  validateBody(updateProductSchema),
+  adminProductController.updateProduct.bind(adminProductController)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/products/:id
+ * @desc    Deleta produto (soft delete)
+ * @access  Private (Admin)
+ */
+router.delete(
+  '/:id',
+  validateParams(uuidParamSchema),
+  adminProductController.deleteProduct.bind(adminProductController)
+);
+
+/**
+ * @route   POST /api/v1/admin/products/:id/images
+ * @desc    Upload de múltiplas imagens para produto
+ * @access  Private (Admin)
+ */
+router.post(
+  '/:id/images',
+  validateParams(uuidParamSchema),
+  uploadMultiple,
+  adminProductController.uploadImages.bind(adminProductController)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/products/:id/images
+ * @desc    Remove uma imagem de um produto
+ * @access  Private (Admin)
+ */
+router.delete(
+  '/:id/images',
+  validateParams(uuidParamSchema),
+  adminProductController.deleteImage.bind(adminProductController)
+);
+
+// ========== CATEGORY ROUTES ==========
+
+/**
+ * @route   POST /api/v1/admin/categories
+ * @desc    Cria nova categoria
+ * @access  Private (Admin)
+ */
+router.post(
+  '/categories',
+  validateBody(createCategorySchema),
+  adminProductController.createCategory.bind(adminProductController)
+);
+
+/**
+ * @route   PUT /api/v1/admin/categories/:id
+ * @desc    Atualiza categoria existente
+ * @access  Private (Admin)
+ */
+router.put(
+  '/categories/:id',
+  validateParams(uuidParamSchema),
+  validateBody(updateCategorySchema),
+  adminProductController.updateCategory.bind(adminProductController)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/categories/:id
+ * @desc    Deleta categoria
+ * @access  Private (Admin)
+ */
+router.delete(
+  '/categories/:id',
+  validateParams(uuidParamSchema),
+  adminProductController.deleteCategory.bind(adminProductController)
+);
+
+// ========== COLLECTION ROUTES ==========
+
+/**
+ * @route   POST /api/v1/admin/collections
+ * @desc    Cria nova coleção
+ * @access  Private (Admin)
+ */
+router.post(
+  '/collections',
+  validateBody(createCollectionSchema),
+  adminProductController.createCollection.bind(adminProductController)
+);
+
+/**
+ * @route   PUT /api/v1/admin/collections/:id
+ * @desc    Atualiza coleção existente
+ * @access  Private (Admin)
+ */
+router.put(
+  '/collections/:id',
+  validateParams(uuidParamSchema),
+  validateBody(updateCollectionSchema),
+  adminProductController.updateCollection.bind(adminProductController)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/collections/:id
+ * @desc    Deleta coleção
+ * @access  Private (Admin)
+ */
+router.delete(
+  '/collections/:id',
+  validateParams(uuidParamSchema),
+  adminProductController.deleteCollection.bind(adminProductController)
+);
+
+export default router;
