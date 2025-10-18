@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
 import { authenticate } from '../middlewares/authenticate';
-import { validate } from '../middlewares/validate';
+import { validateBody } from '../middlewares/validate';
 import {
   registerSchema,
   loginSchema,
@@ -19,7 +19,7 @@ const router = Router();
  */
 router.post(
   '/register',
-  validate(registerSchema),
+  validateBody(registerSchema),
   authController.register.bind(authController)
 );
 
@@ -30,7 +30,7 @@ router.post(
  */
 router.post(
   '/login',
-  validate(loginSchema),
+  validateBody(loginSchema),
   authController.login.bind(authController)
 );
 
@@ -41,7 +41,7 @@ router.post(
  */
 router.post(
   '/refresh',
-  validate(refreshTokenSchema),
+  validateBody(refreshTokenSchema),
   authController.refresh.bind(authController)
 );
 
@@ -53,7 +53,7 @@ router.post(
 router.post(
   '/logout',
   authenticate as any,
-  validate(refreshTokenSchema),
+  validateBody(refreshTokenSchema),
   authController.logout.bind(authController) as any
 );
 
@@ -87,7 +87,7 @@ router.get(
 router.put(
   '/me',
   authenticate as any,
-  validate(updateProfileSchema),
+  validateBody(updateProfileSchema),
   authController.updateProfile.bind(authController) as any
 );
 
@@ -99,7 +99,7 @@ router.put(
 router.put(
   '/change-password',
   authenticate as any,
-  validate(changePasswordSchema),
+  validateBody(changePasswordSchema),
   authController.changePassword.bind(authController) as any
 );
 

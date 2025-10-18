@@ -26,6 +26,10 @@ export interface RegisterDTO {
   name: string;
   cpf?: string;
   phone?: string;
+  // LGPD - Consentimentos
+  privacyPolicy?: boolean;
+  terms?: boolean;
+  marketing?: boolean;
 }
 
 /**

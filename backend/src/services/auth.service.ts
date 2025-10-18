@@ -63,6 +63,19 @@ export class AuthService {
     // Hash da senha
     const hashedPassword = await hashPassword(data.password);
 
+    // Preparar dados LGPD
+    const now = new Date();
+    const lgpdData = {
+      privacyPolicyAccepted: data.privacyPolicy || false,
+      privacyPolicyAcceptedAt: data.privacyPolicy ? now : null,
+      privacyPolicyVersion: data.privacyPolicy ? '1.0' : null,
+      termsAccepted: data.terms || false,
+      termsAcceptedAt: data.terms ? now : null,
+      termsVersion: data.terms ? '1.0' : null,
+      marketingConsent: data.marketing || false,
+      marketingConsentAt: data.marketing ? now : null,
+    };
+
     // Cria usuário
     const user = await userRepository.create({
       email: data.email,
@@ -71,6 +84,7 @@ export class AuthService {
       phone: data.phone,
       cpf: data.cpf,
       role: 'CUSTOMER', // Todos começam como CUSTOMER
+      ...lgpdData,
     });
 
     logger.info('User registered', {

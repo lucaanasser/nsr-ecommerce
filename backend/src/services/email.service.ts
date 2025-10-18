@@ -349,6 +349,83 @@ export class EmailService {
   }
 
   /**
+   * Envia aviso de inatividade (LGPD)
+   */
+  async sendInactivityWarning(data: {
+    userName: string;
+    userEmail: string;
+    lastLoginDate: Date;
+  }): Promise<EmailResult> {
+    try {
+      const formattedDate = data.lastLoginDate.toLocaleDateString('pt-BR');
+      
+      const html = await this.renderTemplate({
+        subject: 'Sua conta NSR está inativa',
+        userName: data.userName,
+        frontendUrl: config.frontend.url,
+        content: `
+          <h1 style="color: #C9A55C; font-size: 28px; margin-bottom: 20px;">
+            Olá, ${data.userName}!
+          </h1>
+          
+          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+            Notamos que você não acessa sua conta na <strong>NSR E-commerce</strong> desde 
+            <strong>${formattedDate}</strong> (há aproximadamente 5 anos).
+          </p>
+          
+          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+            De acordo com nossa política de privacidade e a LGPD (Lei Geral de Proteção de Dados), 
+            contas inativas por mais de 5 anos serão <strong>anonimizadas automaticamente</strong> 
+            dentro de 30 dias.
+          </p>
+          
+          <div style="background-color: #FFF9E6; border-left: 4px solid #C9A55C; padding: 20px; margin: 30px 0;">
+            <h3 style="color: #C9A55C; margin-top: 0;">O que isso significa?</h3>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Seus dados pessoais serão removidos</li>
+              <li>Você não poderá mais acessar sua conta</li>
+              <li>Histórico de pedidos será mantido apenas para fins fiscais</li>
+            </ul>
+          </div>
+          
+          <h3 style="color: #C9A55C; margin-top: 30px;">Como manter sua conta ativa?</h3>
+          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+            Basta fazer login na sua conta dentro dos próximos 30 dias.
+          </p>
+          
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="${config.frontend.url}/login" 
+               style="background-color: #C9A55C; color: #1A1A1A; padding: 15px 40px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">
+              Fazer Login Agora
+            </a>
+          </div>
+          
+          <p style="font-size: 14px; color: #666; margin-top: 40px;">
+            Se você não deseja mais manter sua conta, não é necessário fazer nada. 
+            Sua conta será anonimizada automaticamente.
+          </p>
+          
+          <p style="font-size: 14px; color: #666; margin-top: 20px;">
+            Dúvidas? Entre em contato: <a href="mailto:privacidade@nsr.com">privacidade@nsr.com</a>
+          </p>
+        `,
+      });
+
+      return await this.sendEmail({
+        to: data.userEmail,
+        subject: '⚠️ NSR - Sua conta está inativa e será anonimizada em breve',
+        html,
+      });
+    } catch (error) {
+      logger.error('Failed to send inactivity warning email', { error, data });
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
    * Limpa o cache de templates (útil em desenvolvimento)
    */
   clearTemplateCache(): void {

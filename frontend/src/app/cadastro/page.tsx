@@ -24,6 +24,11 @@ export default function CadastroPage() {
     password: '',
     confirmPassword: '',
   });
+  const [consents, setConsents] = useState({
+    privacyPolicy: false,
+    terms: false,
+    marketing: false,
+  });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuthContext();
@@ -51,6 +56,17 @@ export default function CadastroPage() {
       return;
     }
 
+    // Validar consentimentos obrigatórios
+    if (!consents.privacyPolicy) {
+      setError('Você deve aceitar a Política de Privacidade');
+      return;
+    }
+
+    if (!consents.terms) {
+      setError('Você deve aceitar os Termos de Uso');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -58,7 +74,8 @@ export default function CadastroPage() {
         formData.name,
         formData.email,
         formData.password,
-        formData.confirmPassword
+        formData.confirmPassword,
+        consents
       );
       
       // Redirecionar para loja após cadastro bem-sucedido
@@ -150,6 +167,55 @@ export default function CadastroPage() {
                   {error}
                 </motion.div>
               )}
+
+              {/* LGPD - Consentimentos */}
+              <div className="space-y-3 pt-4 border-t border-primary-white/10">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={consents.privacyPolicy}
+                    onChange={(e) => setConsents({ ...consents, privacyPolicy: e.target.checked })}
+                    className="mt-1 w-4 h-4 accent-primary-gold"
+                    required
+                  />
+                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90">
+                    Li e aceito a{' '}
+                    <Link href="/politica-privacidade" target="_blank" className="text-primary-gold hover:underline">
+                      Política de Privacidade
+                    </Link>{' '}
+                    <span className="text-red-400">*</span>
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={consents.terms}
+                    onChange={(e) => setConsents({ ...consents, terms: e.target.checked })}
+                    className="mt-1 w-4 h-4 accent-primary-gold"
+                    required
+                  />
+                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90">
+                    Li e aceito os{' '}
+                    <Link href="/termos-uso" target="_blank" className="text-primary-gold hover:underline">
+                      Termos de Uso
+                    </Link>{' '}
+                    <span className="text-red-400">*</span>
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={consents.marketing}
+                    onChange={(e) => setConsents({ ...consents, marketing: e.target.checked })}
+                    className="mt-1 w-4 h-4 accent-primary-gold"
+                  />
+                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90">
+                    Aceito receber ofertas e novidades por email (opcional)
+                  </span>
+                </label>
+              </div>
               
               <Button
                 type="submit"

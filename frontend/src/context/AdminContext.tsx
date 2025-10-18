@@ -1,10 +1,10 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { createContext, useContext, ReactNode } from 'react';
+import { useAuthContext } from './AuthContext';
 
 /**
- * Interface do Usuário
+ * Interface do Usuário (mantida para compatibilidade)
  */
 export interface User {
   id: string;
@@ -12,12 +12,13 @@ export interface User {
   email: string;
   role: 'user' | 'admin';
   avatar?: string;
-  title?: string; // "Sócio Fundador", "Sócio", etc
-  color?: string; // Cor para identificação visual
+  title?: string;
+  color?: string;
 }
 
 /**
  * Interface do Contexto de Administração
+ * Agora é um wrapper do AuthContext para manter compatibilidade
  */
 interface AdminContextType {
   user: User | null;
@@ -27,151 +28,61 @@ interface AdminContextType {
   logout: () => void;
 }
 
-/**
- * Credenciais Mockadas
- */
-const MOCK_CREDENTIALS = {
-  user: {
-    email: 'usuario@nsr.com',
-    password: '123456',
-    data: {
-      id: '1',
-      name: 'Usuário NSR',
-      email: 'usuario@nsr.com',
-      role: 'user' as const,
-    },
-  },
-  admin1: {
-    email: 'admin@nsr.com',
-    password: 'admin123',
-    data: {
-      id: '2',
-      name: 'Luca',
-      email: 'admin@nsr.com',
-      role: 'admin' as const,
-      avatar: 'L',
-      title: 'Sócio Fundador',
-      color: '#D4AF37', // Gold
-    },
-  },
-  admin2: {
-    email: 'socio@nsr.com',
-    password: 'socio123',
-    data: {
-      id: '3',
-      name: 'Sócio NSR',
-      email: 'socio@nsr.com',
-      role: 'admin' as const,
-      avatar: 'S',
-      title: 'Sócio',
-      color: '#CD7F32', // Bronze
-    },
-  },
-};
-
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 /**
  * Provider do Contexto de Administração
+ * Agora usa o AuthContext real, mantendo interface compatível
  */
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
+  const { user: authUser, isAuthenticated, login: authLogin, logout: authLogout } = useAuthContext();
 
-  // Recupera usuário do localStorage ao montar
-  useEffect(() => {
-    const storedUser = localStorage.getItem('nsr_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        localStorage.removeItem('nsr_user');
-      }
-    }
-  }, []);
+  // Converter usuário do AuthContext para formato do AdminContext
+  const user: User | null = authUser ? {
+    id: authUser.id,
+    name: authUser.name,
+    email: authUser.email,
+    role: authUser.role === 'ADMIN' ? 'admin' : 'user',
+    avatar: authUser.name.charAt(0).toUpperCase(),
+    title: authUser.role === 'ADMIN' ? 'Administrador' : 'Cliente',
+    color: authUser.role === 'ADMIN' ? '#D4AF37' : '#CD7F32',
+  } : null;
 
   /**
-   * Função de Login Mockada
-   * Verifica credenciais e retorna true/false
+   * Função de Login (wrapper para AuthContext)
    */
   const login = (email: string, password: string): boolean => {
-    // Verifica se é usuário comum
-    if (
-      email === MOCK_CREDENTIALS.user.email &&
-      password === MOCK_CREDENTIALS.user.password
-    ) {
-      const userData = MOCK_CREDENTIALS.user.data;
-      setUser(userData);
-      localStorage.setItem('nsr_user', JSON.stringify(userData));
-      
-      // Redireciona para perfil
-      setTimeout(() => router.push('/perfil'), 100);
-      return true;
-    }
-
-    // Verifica se é admin1 (Sócio Fundador)
-    if (
-      email === MOCK_CREDENTIALS.admin1.email &&
-      password === MOCK_CREDENTIALS.admin1.password
-    ) {
-      const userData = MOCK_CREDENTIALS.admin1.data;
-      setUser(userData);
-      localStorage.setItem('nsr_user', JSON.stringify(userData));
-      
-      // Redireciona para admin
-      setTimeout(() => router.push('/admin'), 100);
-      return true;
-    }
-
-    // Verifica se é admin2 (Sócio)
-    if (
-      email === MOCK_CREDENTIALS.admin2.email &&
-      password === MOCK_CREDENTIALS.admin2.password
-    ) {
-      const userData = MOCK_CREDENTIALS.admin2.data;
-      setUser(userData);
-      localStorage.setItem('nsr_user', JSON.stringify(userData));
-      
-      // Redireciona para admin
-      setTimeout(() => router.push('/admin'), 100);
-      return true;
-    }
-
-    // Credenciais inválidas
-    return false;
+    // Chama login assíncrono mas retorna true imediatamente
+    // O redirecionamento será feito pela página de login
+    authLogin(email, password).catch(console.error);
+    return true;
   };
 
   /**
-   * Função de Logout
+   * Função de Logout (wrapper para AuthContext)
    */
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('nsr_user');
-    router.push('/');
+    authLogout();
   };
 
   const value: AdminContextType = {
     user,
     isAdmin: user?.role === 'admin',
-    isAuthenticated: !!user,
+    isAuthenticated,
     login,
     logout,
   };
 
-  return (
-    <AdminContext.Provider value={value}>
-      {children}
-    </AdminContext.Provider>
-  );
+  return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 }
 
 /**
- * Hook para usar o contexto de admin
+ * Hook para usar o contexto de administração
  */
 export function useAdmin() {
   const context = useContext(AdminContext);
   if (context === undefined) {
-    throw new Error('useAdmin deve ser usado dentro de um AdminProvider');
+    throw new Error('useAdmin must be used within an AdminProvider');
   }
   return context;
 }

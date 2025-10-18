@@ -6,6 +6,9 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword: string;
+  privacyPolicy?: boolean;
+  terms?: boolean;
+  marketing?: boolean;
 }
 
 export interface LoginData {

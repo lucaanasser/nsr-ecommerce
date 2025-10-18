@@ -102,6 +102,10 @@ export const registerSchema = z.object({
   name: nameSchema,
   phone: phoneSchema,
   cpf: cpfSchema,
+  // LGPD - Consentimentos
+  privacyPolicy: z.boolean().optional(),
+  terms: z.boolean().optional(),
+  marketing: z.boolean().optional(),
 });
 
 /**

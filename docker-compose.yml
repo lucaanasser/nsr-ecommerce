@@ -30,15 +30,11 @@ services:
       target: production
     container_name: nsr-backend
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
       PORT: 4000
       DATABASE_URL: postgresql://${POSTGRES_USER:-nsr_dev}:${POSTGRES_PASSWORD:-dev_password_change_in_prod}@database:5432/${POSTGRES_DB:-nsr_development}
     env_file:
       - ./backend/.env
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-      - /app/dist
     ports:
       - "4000:4000"
     networks:
@@ -47,7 +43,6 @@ services:
       database:
         condition: service_healthy
     restart: unless-stopped
-    command: npm run dev
 
   # Frontend - Next.js
   frontend:

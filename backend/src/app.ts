@@ -10,6 +10,7 @@ import { verifyEmailConnection } from '@config/email';
 import { swaggerSpec } from '@config/swagger';
 import { errorHandler, notFoundHandler } from '@middlewares/errorHandler';
 import routes from '@routes/index';
+import { dataRetentionScheduler } from './services/data-retention.scheduler';
 
 // Criar aplicação Express
 export const app: Application = express();
@@ -74,6 +75,10 @@ export async function startServer(): Promise<void> {
     // Verificar conexão de email (não bloqueante)
     await verifyEmailConnection();
     
+    // Iniciar scheduler de retenção de dados (LGPD)
+    dataRetentionScheduler.start();
+    logger.info('✓ Data retention scheduler started');
+    
     // Iniciar servidor
     app.listen(config.port, () => {
       logger.info(`✓ Server running on port ${config.port}`);
@@ -91,12 +96,14 @@ export async function startServer(): Promise<void> {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   logger.info('Shutting down gracefully...');
+  dataRetentionScheduler.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   logger.info('Shutting down gracefully...');
+  dataRetentionScheduler.stop();
   await prisma.$disconnect();
   process.exit(0);
 });

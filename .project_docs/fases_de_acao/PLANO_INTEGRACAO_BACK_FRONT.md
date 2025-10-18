@@ -77,3 +77,4 @@ Conectar o backend (Express/Prisma) ao frontend (Next.js), removendo gradualment
 ---
 
 > Siga cada etapa com commit e testes frequentes. Não avance para o próximo fluxo sem garantir que o anterior está estável.
+

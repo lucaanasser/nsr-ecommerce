@@ -1,40 +1,27 @@
-# Frontend Dockerfile
-FROM node:20-alpine AS base
+# Frontend Dockerfile - Simplificado
+FROM node:20-alpine
 
-# Instalação de dependências
-FROM base AS deps
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Instalar dependências
 RUN npm ci
 
-# Build da aplicação
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
+# Copiar código fonte
 COPY . .
 
+# Build da aplicação Next.js
 RUN npm run build
 
-# Imagem de produção
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
+# Expor porta
 EXPOSE 3000
 
+# Variáveis de ambiente
+ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Comando para iniciar
+CMD ["npm", "start"]

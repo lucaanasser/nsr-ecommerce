@@ -78,20 +78,55 @@ export default function Footer() {
         <div className="border-t border-dark-border pt-4 space-y-3">
           {/* Links de Suporte - Horizontal */}
           <div className="flex flex-wrap justify-center items-center gap-3 md:gap-6">
-            {['FAQ', 'Envios', 'Trocas', 'Privacidade', 'Termos'].map((item, index) => (
-              <div key={item} className="flex items-center">
-                <Link
-                  href="#"
-                  className="text-base text-primary-white/50 hover:text-primary-gold transition-colors uppercase tracking-wider"
-                  style={{ fontFamily: 'Nsr, sans-serif' }}
-                >
-                  {item}
-                </Link>
-                {index < 4 && (
-                  <span className="ml-3 md:ml-6 text-primary-white/20">•</span>
-                )}
-              </div>
-            ))}
+            <div className="flex items-center">
+              <Link
+                href="/faq"
+                className="text-base text-primary-white/50 hover:text-primary-gold transition-colors uppercase tracking-wider"
+                style={{ fontFamily: 'Nsr, sans-serif' }}
+              >
+                FAQ
+              </Link>
+              <span className="ml-3 md:ml-6 text-primary-white/20">•</span>
+            </div>
+            <div className="flex items-center">
+              <Link
+                href="/envios"
+                className="text-base text-primary-white/50 hover:text-primary-gold transition-colors uppercase tracking-wider"
+                style={{ fontFamily: 'Nsr, sans-serif' }}
+              >
+                Envios
+              </Link>
+              <span className="ml-3 md:ml-6 text-primary-white/20">•</span>
+            </div>
+            <div className="flex items-center">
+              <Link
+                href="/trocas"
+                className="text-base text-primary-white/50 hover:text-primary-gold transition-colors uppercase tracking-wider"
+                style={{ fontFamily: 'Nsr, sans-serif' }}
+              >
+                Trocas
+              </Link>
+              <span className="ml-3 md:ml-6 text-primary-white/20">•</span>
+            </div>
+            <div className="flex items-center">
+              <Link
+                href="/politica-privacidade"
+                className="text-base text-primary-white/50 hover:text-primary-gold transition-colors uppercase tracking-wider"
+                style={{ fontFamily: 'Nsr, sans-serif' }}
+              >
+                Privacidade
+              </Link>
+              <span className="ml-3 md:ml-6 text-primary-white/20">•</span>
+            </div>
+            <div className="flex items-center">
+              <Link
+                href="/termos-uso"
+                className="text-base text-primary-white/50 hover:text-primary-gold transition-colors uppercase tracking-wider"
+                style={{ fontFamily: 'Nsr, sans-serif' }}
+              >
+                Termos
+              </Link>
+            </div>
           </div>
 
           {/* Copyright */}
