@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Search, Eye, Filter } from 'lucide-react';
 import { mockOrders } from '@/data/adminData';
 import { motion } from 'framer-motion';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
 
 /**
  * Página de Gestão de Pedidos
@@ -47,13 +49,13 @@ export default function AdminPedidos() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40" size={18} />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40 z-10" size={18} />
+            <Input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por ID, cliente ou email..."
-              className="w-full bg-dark-bg/50 border border-dark-border rounded-sm pl-10 pr-4 py-2 text-sm text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors"
+              className="w-full pl-10"
             />
           </div>
 
@@ -140,9 +142,13 @@ export default function AdminPedidos() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-sm transition-all">
+                      <Button 
+                        variant="ghost"
+                        className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10"
+                        title="Ver detalhes"
+                      >
                         <Eye size={16} />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </motion.tr>

@@ -7,6 +7,8 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/ui/Container';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import { useFavorites } from '@/context/FavoritesContext';
 import { IMAGES } from '@/config/images';
 
@@ -71,56 +73,61 @@ export default function PerfilPage() {
 
             {/* Tabs */}
             <div className="flex flex-wrap gap-2 mb-8 border-b border-dark-border">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setActiveTab('pedidos')}
-                className={`px-6 py-3 text-sm uppercase tracking-wider transition-colors ${
+                className={`px-6 py-3 text-sm uppercase tracking-wider ${
                   activeTab === 'pedidos'
                     ? 'text-primary-bronze border-b-2 border-primary-bronze'
                     : 'text-primary-white/50 hover:text-primary-white'
                 }`}
               >
                 Meus Pedidos
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setActiveTab('dados')}
-                className={`px-6 py-3 text-sm uppercase tracking-wider transition-colors ${
+                className={`px-6 py-3 text-sm uppercase tracking-wider ${
                   activeTab === 'dados'
                     ? 'text-primary-bronze border-b-2 border-primary-bronze'
                     : 'text-primary-white/50 hover:text-primary-white'
                 }`}
               >
                 Dados Pessoais
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setActiveTab('enderecos')}
-                className={`px-6 py-3 text-sm uppercase tracking-wider transition-colors ${
+                className={`px-6 py-3 text-sm uppercase tracking-wider ${
                   activeTab === 'enderecos'
                     ? 'text-primary-bronze border-b-2 border-primary-bronze'
                     : 'text-primary-white/50 hover:text-primary-white'
                 }`}
               >
                 Endereços
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setActiveTab('pagamento')}
-                className={`px-6 py-3 text-sm uppercase tracking-wider transition-colors ${
+                className={`px-6 py-3 text-sm uppercase tracking-wider ${
                   activeTab === 'pagamento'
                     ? 'text-primary-bronze border-b-2 border-primary-bronze'
                     : 'text-primary-white/50 hover:text-primary-white'
                 }`}
               >
                 Pagamento
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setActiveTab('favoritos')}
-                className={`px-6 py-3 text-sm uppercase tracking-wider transition-colors ${
+                className={`px-6 py-3 text-sm uppercase tracking-wider ${
                   activeTab === 'favoritos'
                     ? 'text-primary-bronze border-b-2 border-primary-bronze'
                     : 'text-primary-white/50 hover:text-primary-white'
                 }`}
               >
                 Favoritos
-              </button>
+              </Button>
             </div>
 
             {/* Conteúdo das Tabs */}
@@ -153,9 +160,12 @@ export default function PerfilPage() {
                             </p>
                           </div>
                         </div>
-                        <button className="mt-4 text-sm text-primary-bronze hover:underline">
+                        <Button
+                          variant="ghost"
+                          className="mt-4 text-sm text-primary-bronze hover:underline p-0"
+                        >
                           Ver detalhes →
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -172,31 +182,27 @@ export default function PerfilPage() {
                   <h2 className="text-2xl font-semibold mb-6 text-primary-white">Dados Pessoais</h2>
                   <form className="space-y-4 max-w-2xl">
                     <div className="grid grid-cols-2 gap-3">
-                      <input
+                      <Input
                         type="text"
-                        className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                         placeholder="Nome"
                         defaultValue="João"
                       />
                       
-                      <input
+                      <Input
                         type="text"
-                        className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                         placeholder="Sobrenome"
                         defaultValue="Silva"
                       />
                     </div>
                     
-                    <input
+                    <Input
                       type="email"
-                      className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                       placeholder="Email"
                       defaultValue="joao@email.com"
                     />
                     
-                    <input
+                    <Input
                       type="tel"
-                      className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                       placeholder="Telefone"
                       defaultValue="+55 11 98765-4321"
                     />
@@ -211,9 +217,8 @@ export default function PerfilPage() {
                         <option value="nao-informar">Prefiro não informar</option>
                       </select>
                       
-                      <input
+                      <Input
                         type="date"
-                        className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                         defaultValue="1990-01-01"
                       />
                     </div>
@@ -221,30 +226,28 @@ export default function PerfilPage() {
                     <div className="pt-4">
                       <h3 className="text-lg font-semibold mb-4 text-primary-white">Alterar Senha</h3>
                       <div className="space-y-3">
-                        <input
+                        <Input
                           type="password"
-                          className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                           placeholder="Senha Atual"
                         />
-                        <input
+                        <Input
                           type="password"
-                          className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                           placeholder="Nova Senha"
                         />
-                        <input
+                        <Input
                           type="password"
-                          className="w-full bg-dark-card/50 border border-dark-border px-4 py-3 text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors rounded-sm"
                           placeholder="Confirmar Nova Senha"
                         />
                       </div>
                     </div>
                     
-                    <button
+                    <Button
+                      variant="primary"
                       type="submit"
-                      className="btn-primary py-3 px-8"
+                      className="py-3 px-8"
                     >
                       Salvar Alterações
-                    </button>
+                    </Button>
                   </form>
                 </motion.div>
               )}
@@ -258,9 +261,9 @@ export default function PerfilPage() {
                 >
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-semibold text-primary-white">Meus Endereços</h2>
-                    <button className="btn-primary py-2 px-6">
+                    <Button variant="primary" className="py-2 px-6">
                       + Adicionar Endereço
-                    </button>
+                    </Button>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -279,12 +282,12 @@ export default function PerfilPage() {
                         <p className="text-primary-white/70 text-sm mb-1">{endereco.cidade}</p>
                         <p className="text-primary-white/70 text-sm mb-4">CEP: {endereco.cep}</p>
                         <div className="flex gap-3">
-                          <button className="text-sm text-primary-bronze hover:underline">
+                          <Button variant="ghost" className="text-sm text-primary-bronze hover:underline p-0">
                             Editar
-                          </button>
-                          <button className="text-sm text-red-500 hover:underline">
+                          </Button>
+                          <Button variant="ghost" className="text-sm text-red-500 hover:underline p-0">
                             Remover
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -301,9 +304,9 @@ export default function PerfilPage() {
                 >
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-semibold text-primary-white">Formas de Pagamento</h2>
-                    <button className="btn-primary py-2 px-6">
+                    <Button variant="primary" className="py-2 px-6">
                       + Adicionar Cartão
-                    </button>
+                    </Button>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -321,12 +324,12 @@ export default function PerfilPage() {
                         <p className="text-primary-white font-mono text-lg mb-2">{cartao.numero}</p>
                         <p className="text-primary-white/70 text-sm mb-4">{cartao.nome}</p>
                         <div className="flex gap-3">
-                          <button className="text-sm text-primary-bronze hover:underline">
+                          <Button variant="ghost" className="text-sm text-primary-bronze hover:underline p-0">
                             Editar
-                          </button>
-                          <button className="text-sm text-red-500 hover:underline">
+                          </Button>
+                          <Button variant="ghost" className="text-sm text-red-500 hover:underline p-0">
                             Remover
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -383,12 +386,13 @@ export default function PerfilPage() {
                               >
                                 Ver Produto
                               </Link>
-                              <button
+                              <Button
+                                variant="ghost"
                                 onClick={() => removerDosFavoritos(produto.id)}
-                                className="px-3 py-2 text-xs border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white transition-colors rounded-sm"
+                                className="px-3 py-2 text-xs border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white"
                               >
                                 Remover
-                              </button>
+                              </Button>
                             </div>
                           </div>
                         </div>

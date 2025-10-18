@@ -204,10 +204,11 @@ export default function PaginaDetalhesProduto() {
               {/* Thumbnails */}
               <div className="grid grid-cols-3 gap-4">
                 {produto.images.map((image, index) => (
-                  <button
+                  <Button
                     key={index}
+                    variant="ghost"
                     onClick={() => setImagemSelecionada(index)}
-                    className={`relative aspect-square overflow-hidden rounded-sm border-2 transition-all ${
+                    className={`relative aspect-square overflow-hidden rounded-sm border-2 transition-all p-0 ${
                       imagemSelecionada === index
                         ? 'border-primary-gold'
                         : 'border-dark-border hover:border-primary-gold/50'
@@ -219,7 +220,7 @@ export default function PaginaDetalhesProduto() {
                       fill
                       className="object-cover"
                     />
-                  </button>
+                  </Button>
                 ))}
               </div>
             </motion.div>
@@ -266,10 +267,11 @@ export default function PaginaDetalhesProduto() {
                   </label>
                   <div className="flex gap-2">
                     {produto.colors.map((color) => (
-                      <button
+                      <Button
                         key={color}
+                        variant="ghost"
                         onClick={() => setCorSelecionada(color)}
-                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                        className={`w-10 h-10 rounded-full border-2 transition-all p-0 ${
                           corSelecionada === color
                             ? 'border-primary-gold scale-110'
                             : 'border-dark-border hover:border-primary-gold/50'
@@ -287,7 +289,9 @@ export default function PaginaDetalhesProduto() {
                             color === 'Terracota' ? '#E2725B' : '#6B7280'
                         }}
                         title={color}
-                      />
+                      >
+                        <span className="sr-only">{color}</span>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -299,17 +303,14 @@ export default function PaginaDetalhesProduto() {
                   </label>
                   <div className="grid grid-cols-4 gap-2">
                     {produto.sizes.map((size) => (
-                      <button
+                      <Button
                         key={size}
+                        variant={tamanhoSelecionado === size ? 'primary' : 'secondary'}
                         onClick={() => setTamanhoSelecionado(size)}
-                        className={`py-2 rounded-sm text-xs uppercase tracking-wider font-medium transition-all ${
-                          tamanhoSelecionado === size
-                            ? 'bg-primary-gold text-primary-black'
-                            : 'border border-dark-border text-primary-white/70 hover:border-primary-gold'
-                        }`}
+                        className="py-2 text-xs uppercase tracking-wider font-medium"
                       >
                         {size}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -320,19 +321,21 @@ export default function PaginaDetalhesProduto() {
                     Quantidade
                   </label>
                   <div className="flex items-center gap-3">
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
-                      className="w-8 h-8 border border-dark-border rounded-sm hover:border-primary-gold transition-colors text-sm"
+                      className="w-8 h-8 border border-dark-border rounded-sm hover:border-primary-gold text-sm p-0"
                     >
                       -
-                    </button>
+                    </Button>
                     <span className="text-base font-medium w-10 text-center">{quantidade}</span>
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => setQuantidade(quantidade + 1)}
-                      className="w-8 h-8 border border-dark-border rounded-sm hover:border-primary-gold transition-colors text-sm"
+                      className="w-8 h-8 border border-dark-border rounded-sm hover:border-primary-gold text-sm p-0"
                     >
                       +
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -355,9 +358,10 @@ export default function PaginaDetalhesProduto() {
                   </Button>
                   
                   <div className="grid grid-cols-2 gap-2">
-                    <button 
+                    <Button
+                      variant="ghost"
                       onClick={() => produto && adicionarAosFavoritos(produto)}
-                      className={`flex items-center justify-center gap-2 py-2.5 border rounded-sm transition-colors ${
+                      className={`flex items-center justify-center gap-2 py-2.5 border rounded-sm ${
                         estaFavoritado 
                           ? 'border-primary-gold bg-primary-gold/10 text-primary-gold' 
                           : 'border-dark-border hover:border-primary-gold'
@@ -365,11 +369,14 @@ export default function PaginaDetalhesProduto() {
                     >
                       <Heart size={16} fill={estaFavoritado ? 'currentColor' : 'none'} />
                       <span className="text-xs">{estaFavoritado ? 'Favoritado' : 'Favoritar'}</span>
-                    </button>
-                    <button className="flex items-center justify-center gap-2 py-2.5 border border-dark-border rounded-sm hover:border-primary-gold transition-colors">
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center justify-center gap-2 py-2.5 border border-dark-border rounded-sm hover:border-primary-gold"
+                    >
                       <Share2 size={16} />
                       <span className="text-xs">Compartilhar</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -15,6 +15,8 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   className?: string;
+  style?: React.CSSProperties;
+  title?: string;
 }
 
 export default function Button({
@@ -24,6 +26,8 @@ export default function Button({
   type = 'button',
   disabled = false,
   className = '',
+  style,
+  title,
 }: ButtonProps) {
   const baseStyles = 'px-8 py-3 rounded-sm font-medium transition-all duration-300 uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed';
   
@@ -41,6 +45,8 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
       className={`${baseStyles} ${variants[variant]} ${className}`}
+      style={style}
+      title={title}
     >
       {children}
     </motion.button>

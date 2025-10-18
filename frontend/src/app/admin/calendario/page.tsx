@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { calendarEvents, CalendarEvent, getUserById, getUpcomingEvents } from '@/data/collaborationData';
 import { useAdmin } from '@/context/AdminContext';
+import Button from '@/components/ui/Button';
 
 /**
  * Página de Calendário

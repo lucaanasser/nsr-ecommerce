@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Button from '@/components/ui/Button';
 import { VIDEOS, VIDEO_POSTERS } from '@/config/videos';
 
 /**
@@ -62,12 +63,13 @@ export default function SobrePage() {
             <div className="absolute inset-0 bg-amber-900/10" />
             
             {/* Botão Play/Pause Minimalista */}
-            <button
+            <Button
+              variant="ghost"
               onClick={alternarReproducao}
-              className="absolute top-6 left-6 z-10
-                         text-primary-gold transition-all duration-300
-                         hover:scale-110 hover:opacity-80 focus:outline-none"
-              aria-label={estaReproduzindo ? 'Pausar vídeo' : 'Reproduzir vídeo'}
+              className="absolute top-6 left-6 z-10 p-0
+                         text-primary-gold
+                         hover:scale-110 hover:opacity-80"
+              title={estaReproduzindo ? 'Pausar vídeo' : 'Reproduzir vídeo'}
             >
               {estaReproduzindo ? (
                 // Ícone de Pause
@@ -90,7 +92,7 @@ export default function SobrePage() {
                   <path d="M8 5v14l11-7z" />
                 </svg>
               )}
-            </button>
+            </Button>
           </motion.div>
 
           {/* Coluna de Texto */}

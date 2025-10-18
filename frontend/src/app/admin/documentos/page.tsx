@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { documents, Document, getUserById } from '@/data/collaborationData';
 import { useAdmin } from '@/context/AdminContext';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 /**
  * Página de Gestão de Documentos
@@ -96,10 +98,10 @@ export default function DocumentosPage() {
             Gerencie e compartilhe arquivos da empresa
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary-gold text-dark-bg rounded-sm font-medium hover:bg-primary-bronze transition-colors">
+        <Button variant="primary" className="flex items-center gap-2 px-4 py-2">
           <Upload size={20} />
           Fazer Upload
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
@@ -142,13 +144,13 @@ export default function DocumentosPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Busca */}
           <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40" />
-            <input
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40 z-10" />
+            <Input
               type="text"
               placeholder="Buscar documentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-dark-bg border border-dark-border rounded-sm pl-10 pr-3 py-2 text-primary-white focus:outline-none focus:border-primary-gold"
+              className="w-full pl-10"
             />
           </div>
 
@@ -248,15 +250,15 @@ export default function DocumentosPage() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button className="p-2 text-primary-white/60 hover:text-primary-gold hover:bg-dark-bg rounded transition-colors">
+                        <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-primary-gold hover:bg-dark-bg" title="Visualizar">
                           <Eye size={16} />
-                        </button>
-                        <button className="p-2 text-primary-white/60 hover:text-green-400 hover:bg-dark-bg rounded transition-colors">
+                        </Button>
+                        <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-green-400 hover:bg-dark-bg" title="Baixar">
                           <Download size={16} />
-                        </button>
-                        <button className="p-2 text-primary-white/60 hover:text-red-400 hover:bg-dark-bg rounded transition-colors">
+                        </Button>
+                        <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-red-400 hover:bg-dark-bg" title="Excluir">
                           <Trash2 size={16} />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -282,10 +284,11 @@ export default function DocumentosPage() {
             const folderDocs = allDocuments.filter((doc) => doc.folder === folder);
             const folderSize = folderDocs.reduce((acc, doc) => acc + doc.size, 0);
             return (
-              <button
+              <Button
                 key={folder}
+                variant="ghost"
                 onClick={() => setSelectedFolder(folder)}
-                className={`p-4 rounded-sm border transition-all text-left ${
+                className={`p-4 rounded-sm border text-left ${
                   selectedFolder === folder
                     ? 'bg-primary-gold/10 border-primary-gold'
                     : 'bg-dark-bg border-dark-border hover:border-primary-gold/50'
@@ -296,7 +299,7 @@ export default function DocumentosPage() {
                 <p className="text-xs text-primary-white/40 mt-1">
                   {folderDocs.length} arquivo{folderDocs.length !== 1 ? 's' : ''} · {formatSize(folderSize)}
                 </p>
-              </button>
+              </Button>
             );
           })}
         </div>
