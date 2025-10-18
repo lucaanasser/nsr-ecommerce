@@ -133,20 +133,32 @@ export async function createTestCollection(data: {
  */
 export async function createTestProduct(data: {
   name: string;
-  categoryId: string;
+  categoryId?: string;
   price?: number;
+  stock?: number;
   slug?: string;
   description?: string;
   isFeatured?: boolean;
+  isActive?: boolean;
 }) {
+  // Se categoryId não fornecido, criar uma categoria temporária
+  let categoryId = data.categoryId;
+  if (!categoryId) {
+    const category = await createTestCategory({
+      name: `Cat-${Date.now()}`,
+    });
+    categoryId = category.id;
+  }
+
   return prisma.product.create({
     data: {
       name: data.name,
-      slug: data.slug || data.name.toLowerCase().replace(/\s+/g, '-'),
+      slug: data.slug || data.name.toLowerCase().replace(/\s+/g, '-') + `-${Date.now()}`,
       description: data.description || `Descrição de ${data.name}`,
       price: data.price || 99.99,
-      categoryId: data.categoryId,
-      isActive: true,
+      stock: data.stock !== undefined ? data.stock : 100,
+      categoryId,
+      isActive: data.isActive !== undefined ? data.isActive : true,
       isFeatured: data.isFeatured ?? false,
       gender: 'UNISEX',
       images: ['https://via.placeholder.com/600x800'],

@@ -91,6 +91,7 @@ import productRoutes from './product.routes';
 import categoryRoutes from './category.routes';
 import collectionRoutes from './collection.routes';
 import adminProductRoutes from './admin/product.routes';
+import cartRoutes from './cart.routes';
 
 // Registrar rotas
 router.use('/api/v1/auth', authRoutes);
@@ -98,5 +99,6 @@ router.use('/api/v1/products', productRoutes);
 router.use('/api/v1/categories', categoryRoutes);
 router.use('/api/v1/collections', collectionRoutes);
 router.use('/api/v1/admin/products', adminProductRoutes);
+router.use('/api/v1/cart', cartRoutes);
 
 export default router;

@@ -1,5 +1,4 @@
-import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../types/auth.types';
+import { Request, Response, NextFunction } from 'express';
 import { extractTokenFromHeader, verifyAccessToken } from '../utils/jwt';
 import { logger } from '../config/logger';
 
@@ -11,7 +10,7 @@ import { logger } from '../config/logger';
  * @throws UnauthorizedError se token inválido ou ausente
  */
 export async function authenticate(
-  req: AuthenticatedRequest,
+  req: Request,
   _res: Response,
   next: NextFunction
 ): Promise<void> {
@@ -60,7 +59,7 @@ export async function authenticate(
  * Útil para rotas que funcionam com ou sem autenticação
  */
 export async function optionalAuthenticate(
-  req: AuthenticatedRequest,
+  req: Request,
   _res: Response,
   next: NextFunction
 ): Promise<void> {
