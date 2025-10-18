@@ -85,10 +85,14 @@ router.get('/api/v1', (_req, res) => {
   });
 });
 
-// Importar rotas quando forem criadas
-// import authRoutes from './auth.routes';
+// Importar rotas
+import authRoutes from './auth.routes';
+
+// Registrar rotas
+router.use('/api/v1/auth', authRoutes);
+
+// Rotas futuras
 // import productRoutes from './product.routes';
-// router.use('/api/v1/auth', authRoutes);
 // router.use('/api/v1/products', productRoutes);
 
 export default router;

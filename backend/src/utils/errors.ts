@@ -53,8 +53,11 @@ export class ConflictError extends AppError {
 
 // 422 - Unprocessable Entity (validation errors)
 export class ValidationError extends AppError {
-  constructor(message = 'Validation failed') {
+  public readonly details?: any;
+
+  constructor(message = 'Validation failed', details?: any) {
     super(message, 422);
+    this.details = details;
   }
 }
 
