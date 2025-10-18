@@ -10,12 +10,12 @@ Este documento resume toda a estrutura e lógica do backend do projeto NSR, faci
 - **Validação:** Zod (middlewares e validators)
 - **Autenticação:** JWT + bcrypt, middlewares de autenticação/autorização
 - **Upload:** Cloudinary + Multer
-- **Email:** Nodemailer (preparado)
+- **Email:** Nodemailer + Handlebars
 
 ## Status do Projeto
-- **Fases Concluídas:** 0, 1, 2, 2B, 3, 4, 5, 6
+- **Fases Concluídas:** 0, 1, 2, 2B, 3, 4, 5, 6, 7
 - **Endpoints Funcionais:** 24 endpoints
-- **Tempo Total:** ~15h45min de desenvolvimento
+- **Tempo Total:** ~17h15min de desenvolvimento
 - **Compilação:** ✅ 0 erros TypeScript
 
 ## Principais Arquivos
@@ -31,6 +31,7 @@ Este documento resume toda a estrutura e lógica do backend do projeto NSR, faci
 - `database.ts` - Prisma client singleton
 - `logger.ts` - Winston logger configurado
 - `swagger.ts` - Documentação automática da API
+- `email.ts` - Transporter do Nodemailer, verificação de conexão
 
 ### **controllers/**
 - `auth.controller.ts` - 8 endpoints de autenticação
@@ -78,6 +79,7 @@ Este documento resume toda a estrutura e lógica do backend do projeto NSR, faci
 - `shipping.service.ts` - Cálculo de frete por tabela
 - `coupon.service.ts` - Validação e aplicação de cupons
 - `cloudinary.service.ts` - Upload e gestão de imagens
+- `email.service.ts` - Envio de emails transacionais (4 tipos)
 
 ### **types/**
 - `auth.types.ts` - AuthUser, LoginResponse, RegisterDTO, etc
@@ -86,6 +88,7 @@ Este documento resume toda a estrutura e lógica do backend do projeto NSR, faci
 - `order.types.ts` - CreateOrderDTO, OrderResponse, etc
 - `shipping.types.ts` - ShippingCalculation, ShippingOption, etc
 - `coupon.types.ts` - CouponValidation, CouponApplication, etc
+- `email.types.ts` - EmailOptions, WelcomeEmailData, OrderConfirmationEmailData, etc
 - `express.d.ts` - Extensão do Express.Request com user
 
 ### **utils/**
@@ -99,6 +102,9 @@ Este documento resume toda a estrutura e lógica do backend do projeto NSR, faci
 - `cart.validator.ts` - Schemas de adição/atualização de itens
 - `order.validator.ts` - Schemas de criação e cancelamento de pedidos
 - `shipping.validator.ts` - Schema de cálculo de frete
+
+### **templates/**
+- `base.hbs` - Template HTML único para todos os emails (Handlebars)
 
 ### **tests/** (em desenvolvimento)
 - `setup.ts` - Configuração global de testes
@@ -273,14 +279,7 @@ GET    /api/v1                        # Informações da API
 
 ## Próximas Fases
 
-### Fase 7 - Email & Notifications (2-3h)
-- Envio de emails (Nodemailer)
-- Templates HTML (Handlebars)
-- Confirmação de pedido
-- Atualização de status
-- Reset de senha
-
-### Fase 8 - Admin Features (3-4h)
+### Fase 8 - Admin Features (3-4h) - PRÓXIMA
 - Dashboard de vendas
 - Gestão de pedidos
 - Gestão de usuários
@@ -297,6 +296,29 @@ GET    /api/v1                        # Informações da API
 - Monitoramento
 - Backups automáticos
 
+## Email System
+
+### Implementado (Fase 7)
+- ✅ Nodemailer + Handlebars
+- ✅ Template HTML único reutilizável
+- ✅ 4 tipos de emails transacionais
+- ✅ Sistema não-bloqueante
+- ✅ Cache de templates
+- ✅ Formatação automática (moeda, data)
+- ✅ Design responsivo
+
+### Tipos de Emails
+1. **Boas-vindas** - Enviado no registro
+2. **Confirmação de pedido** - Com tabela de produtos e totais
+3. **Atualização de status** - Com tracking code
+4. **Redefinição de senha** - Com link e token
+
+### Configuração
+- Gmail SMTP (App Password)
+- Templates Handlebars com CSS inline
+- Blocos condicionais para reutilização
+- Logging completo de envios
+
 ## Observações
 - Estrutura modular, fácil manutenção e expansão
 - Pronto para integração com frontend
@@ -305,6 +327,7 @@ GET    /api/v1                        # Informações da API
 - Transações atômicas para operações críticas
 - Logging estruturado (Winston)
 - Path aliases configurados (@config, @services, etc)
+- Sistema de emails transacionais completo
 
 ---
 

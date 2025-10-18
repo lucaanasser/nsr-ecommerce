@@ -2,6 +2,8 @@ import { prisma } from '@config/database';
 import { CreateOrderDTO } from '../types/order.types';
 import { BadRequestError } from '@utils/errors';
 import { CouponService } from './coupon.service';
+import { emailService } from './email.service';
+import { logger } from '@config/logger';
 
 export class OrderService {
   private couponService = new CouponService();
@@ -174,6 +176,44 @@ export class OrderService {
           }
         }
       });
+
+      // 14. Enviar email de confirmação (não bloqueia se falhar)
+      emailService
+        .sendOrderConfirmation({
+          userName: user.name,
+          userEmail: user.email,
+          orderNumber: order.orderNumber,
+          orderDate: order.createdAt,
+          items: order.items.map(item => ({
+            productName: item.productName,
+            size: item.size || undefined,
+            color: item.color || undefined,
+            quantity: item.quantity,
+            price: Number(item.unitPrice),
+          })),
+          subtotal: Number(order.subtotal),
+          shippingCost: Number(order.shippingCost),
+          discount: Number(order.discount),
+          total: Number(order.total),
+          shippingAddress: {
+            receiverName: address.receiverName,
+            receiverPhone: address.receiverPhone,
+            street: address.street,
+            number: address.number,
+            complement: address.complement || undefined,
+            neighborhood: address.neighborhood,
+            city: address.city,
+            state: address.state,
+            zipCode: address.zipCode,
+          },
+          paymentMethod: data.paymentMethod,
+        })
+        .catch((error) => {
+          logger.error('Failed to send order confirmation email', {
+            orderId: order.id,
+            error,
+          });
+        });
 
       return order;
     });

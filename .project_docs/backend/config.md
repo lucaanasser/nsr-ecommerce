@@ -5,6 +5,7 @@
 - **env.ts**: Carrega variáveis de ambiente, validações.
 - **logger.ts**: Logger customizado, integração com Morgan.
 - **swagger.ts**: Configuração da documentação Swagger.
+- **email.ts**: Transporter do Nodemailer, verificação de conexão SMTP.
 
 ---
 Consulte este arquivo para referência rápida das configurações do backend.

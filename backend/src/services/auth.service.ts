@@ -20,6 +20,7 @@ import {
 } from '../utils/errors';
 import { prisma } from '../config/database';
 import { logger } from '../config/logger';
+import { emailService } from './email.service';
 
 /**
  * Auth Service
@@ -76,6 +77,19 @@ export class AuthService {
       userId: user.id,
       email: user.email,
     });
+
+    // Enviar email de boas-vindas (não bloqueia o registro se falhar)
+    emailService
+      .sendWelcomeEmail({
+        userName: user.name,
+        userEmail: user.email,
+      })
+      .catch((error) => {
+        logger.error('Failed to send welcome email', {
+          userId: user.id,
+          error,
+        });
+      });
 
     // Retorna usuário sem senha
     return this.sanitizeUser(user);

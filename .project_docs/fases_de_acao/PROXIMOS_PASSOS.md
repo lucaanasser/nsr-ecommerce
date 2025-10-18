@@ -1,35 +1,15 @@
 # 🎯 PRÓXIMOS PASSOS - NSR E-commerce
 
-> **Fases Concluídas:** 0, 1, 2, 2B, 3, 4, 5, 6  
-> **Próxima Fase:** 7 - Email & Notifications
+> **Fases Concluídas:** 0, 1, 2, 2B, 3, 4, 5, 6 
+> **Próxima Fase:** 8 - Admin Features
 
 ---
 
 ## 📧 FASE 7 - EMAIL & NOTIFICATIONS (2-3h)
 
-### 7.1 - Email Service (1h)
-
-**Arquivo:** `backend/src/services/email.service.ts`
-
-Métodos:
-- `sendWelcomeEmail(user: User)`
-- `sendOrderConfirmation(order: Order)`
-- `sendOrderStatusUpdate(order: Order)`
-- `sendPasswordReset(user: User, token: string)`
-
-### 7.2 - Templates (1h)
-
-**Pasta:** `backend/src/templates/`
-
-Templates HTML (Handlebars):
-- `welcome.hbs` - Email de boas-vindas
-- `order-confirmation.hbs` - Confirmação de pedido
-- `order-update.hbs` - Atualização de status
-- `password-reset.hbs` - Reset de senha
-
 ### 7.3 - Queue (1h)
 
-**Opcional:** Implementar fila para emails (Bull + Redis)
+Implementar fila para emails (Bull + Redis)
 
 Benefícios:
 - Não bloquear requisição HTTP
@@ -143,41 +123,42 @@ Endpoints:
 ✅ Fase 4 - Products API:      3-4h       ▓▓▓▓▓▓▓▓▓▓
 ✅ Fase 5 - Cart API:          2-3h       ▓▓▓▓▓▓▓▓▓▓
 ✅ Fase 6 - Checkout/Orders:   4-5h       ▓▓▓▓▓▓▓▓▓▓
-   Fase 7 - Email:             2-3h       ▓▓▓░░░░░░░
+✅ Fase 7 - Email:             2-3h       ▓▓▓▓▓▓▓▓▓▓
    Fase 8 - Admin:             3-4h       ▓▓▓▓░░░░░░
    Fase 9 - Testes:            3-4h       ▓▓▓▓░░░░░░
    Fase 10 - Deploy:           4-6h       ▓▓▓▓▓▓░░░░
 
 TOTAL: ~25-35 horas de desenvolvimento
-COMPLETO: ~15h45min (63%)
+COMPLETO: ~17h15min (69%)
 ```
 
 ---
 
-## ✅ CHECKLIST - FASE 7
+## ✅ CHECKLIST - FASE 8
 
-### Email & Notifications
+### Admin Features
 
-- [ ] Criar `email.service.ts` com Nodemailer
-- [ ] Criar templates HTML (Handlebars)
-- [ ] Implementar `sendWelcomeEmail()`
-- [ ] Implementar `sendOrderConfirmation()`
-- [ ] Implementar `sendOrderStatusUpdate()`
-- [ ] Implementar `sendPasswordReset()`
-- [ ] (Opcional) Configurar fila com Bull + Redis
-- [ ] Testar envio de emails
-- [ ] Documentar configuração SMTP
+- [ ] Criar `admin.service.ts` com métodos de administração
+- [ ] Criar `admin.controller.ts` com endpoints admin
+- [ ] Implementar `GET /api/v1/admin/orders` (listar todos os pedidos)
+- [ ] Implementar `PUT /api/v1/admin/orders/:id/status` (atualizar status)
+- [ ] Implementar `GET /api/v1/admin/users` (listar usuários)
+- [ ] Implementar `PUT /api/v1/admin/users/:id/role` (alterar role)
+- [ ] Implementar `GET /api/v1/admin/stats` (estatísticas/dashboard)
+- [ ] Criar validators para rotas admin
+- [ ] Testar todos os endpoints admin
+- [ ] Documentar API admin no Swagger
 
-**Tempo estimado:** 2-3 horas  
-**Dependências:** Fase 3 (Auth) e Fase 6 (Orders)
+**Tempo estimado:** 3-4 horas  
+**Dependências:** Fase 3 (Auth - middleware de admin), Fase 6 (Orders)
 
 ---
 
 ## 🎯 RECOMENDAÇÃO
 
-**Próxima etapa:** Fase 7 - Email & Notifications
+**Próxima etapa:** Fase 8 - Admin Features
 
-É importante para UX (confirmação de pedido) e pode ser feito em paralelo com o frontend.
+Implementar painel administrativo com gestão de pedidos, usuários e estatísticas.
 
 **Ordem sugerida:**
 1. ✅ Repositories
@@ -185,11 +166,11 @@ COMPLETO: ~15h45min (63%)
 3. ✅ Products API
 4. ✅ Cart API
 5. ✅ Checkout & Orders
-6. 📧 Email (próximo)
-7. 👨‍💼 Admin
+6. ✅ Email (concluído)
+7. 👨‍💼 Admin (próximo)
 8. 🧪 Testes
 9. 🚀 Deploy
 
 ---
 
-**Pronto para implementar notificações por email?** 📧 🚀
+**Pronto para implementar funcionalidades administrativas?** 👨‍� 🚀

@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import { config, validateConfig } from '@config/env';
 import { logger, morganStream } from '@config/logger';
 import { prisma } from '@config/database';
+import { verifyEmailConnection } from '@config/email';
 import { swaggerSpec } from '@config/swagger';
 import { errorHandler, notFoundHandler } from '@middlewares/errorHandler';
 import routes from '@routes/index';
@@ -69,6 +70,9 @@ export async function startServer(): Promise<void> {
     // Conectar ao banco
     await prisma.$connect();
     logger.info('✓ Database connected');
+    
+    // Verificar conexão de email (não bloqueante)
+    await verifyEmailConnection();
     
     // Iniciar servidor
     app.listen(config.port, () => {
