@@ -1,14 +1,15 @@
 # Resumo das Rotas do Backend
 
 ## routes/
-- **index.ts**: Router principal, integra todas as rotas e health check.
-- **auth.routes.ts**: Rotas públicas e privadas de autenticação.
-- **product.routes.ts**: Rotas públicas de produtos (GET com filtros e paginação).
-- **category.routes.ts**: Rotas públicas de categorias (GET).
-- **collection.routes.ts**: Rotas públicas de coleções (GET).
+- **index.ts**: Healthcheck e registro de todas as rotas.
+- **auth.routes.ts**: Rotas de autenticação.
+- **product.routes.ts**: Rotas públicas de produtos.
+- **category.routes.ts**: Rotas de categorias.
+- **collection.routes.ts**: Rotas de coleções.
+- **cart.routes.ts**: Rotas de carrinho de compras (todas requerem autenticação).
 
 ## routes/admin/
-- **product.routes.ts**: Rotas admin protegidas para CRUD de produtos, categorias, coleções e upload de imagens.
+- **product.routes.ts**: Rotas administrativas de produtos (CRUD, upload de imagens).
 
 ---
 Consulte este arquivo para referência rápida das rotas existentes.

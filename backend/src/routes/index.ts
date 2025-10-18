@@ -80,6 +80,7 @@ router.get('/api/v1', (_req, res) => {
       products: '/api/v1/products',
       cart: '/api/v1/cart',
       orders: '/api/v1/orders',
+      shipping: '/api/v1/shipping',
       admin: '/api/v1/admin',
     },
   });
@@ -92,6 +93,8 @@ import categoryRoutes from './category.routes';
 import collectionRoutes from './collection.routes';
 import adminProductRoutes from './admin/product.routes';
 import cartRoutes from './cart.routes';
+import orderRoutes from './order.routes';
+import shippingRoutes from './shipping.routes';
 
 // Registrar rotas
 router.use('/api/v1/auth', authRoutes);
@@ -100,5 +103,7 @@ router.use('/api/v1/categories', categoryRoutes);
 router.use('/api/v1/collections', collectionRoutes);
 router.use('/api/v1/admin/products', adminProductRoutes);
 router.use('/api/v1/cart', cartRoutes);
+router.use('/api/v1/orders', orderRoutes);
+router.use('/api/v1/shipping', shippingRoutes);
 
 export default router;

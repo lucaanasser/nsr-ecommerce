@@ -1,0 +1,65 @@
+import { Request, Response } from 'express';
+import { OrderService } from '@services/order.service';
+
+const orderService = new OrderService();
+
+export const createOrder = async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const order = await orderService.createOrder(userId, req.body);
+  
+  res.status(201).json({
+    success: true,
+    data: order
+  });
+};
+
+export const getOrders = async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const orders = await orderService.getOrders(userId);
+  
+  res.json({
+    success: true,
+    data: orders
+  });
+};
+
+export const getOrderById = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const orderId = req.params['id'];
+  
+  if (!orderId) {
+    res.status(400).json({
+      success: false,
+      message: 'ID do pedido é obrigatório'
+    });
+    return;
+  }
+  
+  const order = await orderService.getOrderById(orderId, userId);
+  
+  res.json({
+    success: true,
+    data: order
+  });
+};
+
+export const cancelOrder = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const { reason } = req.body;
+  const orderId = req.params['id'];
+  
+  if (!orderId) {
+    res.status(400).json({
+      success: false,
+      message: 'ID do pedido é obrigatório'
+    });
+    return;
+  }
+  
+  await orderService.cancelOrder(userId, orderId, reason);
+  
+  res.json({
+    success: true,
+    message: 'Pedido cancelado com sucesso'
+  });
+};
