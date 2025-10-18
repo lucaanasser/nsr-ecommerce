@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Search, Eye, Mail, Phone } from 'lucide-react';
 import { mockCustomers } from '@/data/adminData';
 import { motion } from 'framer-motion';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 /**
  * Página de Gestão de Usuários/Clientes
@@ -61,48 +63,51 @@ export default function AdminUsuarios() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40" size={18} />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40 z-10" size={18} />
+            <Input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nome, email ou telefone..."
-              className="w-full bg-dark-bg/50 border border-dark-border rounded-sm pl-10 pr-4 py-2 text-sm text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors"
+              className="w-full pl-10"
             />
           </div>
 
           {/* Filtro de Status */}
           <div className="flex gap-2">
-            <button
+            <Button
+              variant={statusFilter === 'todos' ? 'primary' : 'ghost'}
               onClick={() => setStatusFilter('todos')}
-              className={`px-4 py-2 rounded-sm text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm ${
                 statusFilter === 'todos'
-                  ? 'bg-primary-gold text-dark-bg'
+                  ? ''
                   : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
               }`}
             >
               Todos
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => setStatusFilter('active')}
-              className={`px-4 py-2 rounded-sm text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm ${
                 statusFilter === 'active'
                   ? 'bg-green-500 text-white'
                   : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
               }`}
             >
               Ativos
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => setStatusFilter('inactive')}
-              className={`px-4 py-2 rounded-sm text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm ${
                 statusFilter === 'inactive'
                   ? 'bg-primary-white/20 text-white'
                   : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
               }`}
             >
               Inativos
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -189,9 +194,13 @@ export default function AdminUsuarios() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-sm transition-all">
+                      <Button 
+                        variant="ghost"
+                        className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10"
+                        title="Ver detalhes"
+                      >
                         <Eye size={16} />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </motion.tr>

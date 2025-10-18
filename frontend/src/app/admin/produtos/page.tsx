@@ -5,6 +5,8 @@ import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { products } from '@/data/products';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 /**
  * Página de Gestão de Produtos
@@ -30,10 +32,10 @@ export default function AdminProdutos() {
           <h1 className="text-3xl font-bold text-primary-white mb-2">Produtos</h1>
           <p className="text-primary-white/60">Gerencie o catálogo de produtos</p>
         </div>
-        <button className="btn-primary flex items-center gap-2 px-4 py-2">
+        <Button variant="primary" className="flex items-center gap-2 px-4 py-2">
           <Plus size={20} />
           Novo Produto
-        </button>
+        </Button>
       </div>
 
       {/* Filtros e Busca */}
@@ -41,48 +43,39 @@ export default function AdminProdutos() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40" size={18} />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40 z-10" size={18} />
+            <Input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar produtos..."
-              className="w-full bg-dark-bg/50 border border-dark-border rounded-sm pl-10 pr-4 py-2 text-sm text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors"
+              className="w-full pl-10"
             />
           </div>
 
           {/* Filtro de Categoria */}
           <div className="flex gap-2">
-            <button
+            <Button
+              variant={categoryFilter === 'todos' ? 'primary' : 'ghost'}
               onClick={() => setCategoryFilter('todos')}
-              className={`px-4 py-2 rounded-sm text-sm font-medium transition-all ${
-                categoryFilter === 'todos'
-                  ? 'bg-primary-gold text-dark-bg'
-                  : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
-              }`}
+              className={`px-4 py-2 text-sm ${categoryFilter === 'todos' ? '' : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'}`}
             >
               Todos
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={categoryFilter === 'masculino' ? 'primary' : 'ghost'}
               onClick={() => setCategoryFilter('masculino')}
-              className={`px-4 py-2 rounded-sm text-sm font-medium transition-all ${
-                categoryFilter === 'masculino'
-                  ? 'bg-primary-gold text-dark-bg'
-                  : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
-              }`}
+              className={`px-4 py-2 text-sm ${categoryFilter === 'masculino' ? '' : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'}`}
             >
               Masculino
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={categoryFilter === 'feminino' ? 'primary' : 'ghost'}
               onClick={() => setCategoryFilter('feminino')}
-              className={`px-4 py-2 rounded-sm text-sm font-medium transition-all ${
-                categoryFilter === 'feminino'
-                  ? 'bg-primary-gold text-dark-bg'
-                  : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'
-              }`}
+              className={`px-4 py-2 text-sm ${categoryFilter === 'feminino' ? '' : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'}`}
             >
               Feminino
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -163,15 +156,15 @@ export default function AdminProdutos() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-sm transition-all">
+                      <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10" title="Ver">
                         <Eye size={16} />
-                      </button>
-                      <button className="p-2 text-primary-white/60 hover:text-primary-gold hover:bg-primary-gold/10 rounded-sm transition-all">
+                      </Button>
+                      <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-primary-gold hover:bg-primary-gold/10" title="Editar">
                         <Edit size={16} />
-                      </button>
-                      <button className="p-2 text-primary-white/60 hover:text-red-500 hover:bg-red-500/10 rounded-sm transition-all">
+                      </Button>
+                      <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-red-500 hover:bg-red-500/10" title="Excluir">
                         <Trash2 size={16} />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </motion.tr>

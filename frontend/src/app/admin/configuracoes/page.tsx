@@ -2,6 +2,8 @@
 
 import { Save, Settings as SettingsIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 /**
  * Página de Configurações
@@ -193,10 +195,10 @@ export default function AdminConfiguracoes() {
 
       {/* Botão Salvar */}
       <div className="flex justify-end">
-        <button className="btn-primary flex items-center gap-2 px-6 py-3">
+        <Button variant="primary" className="flex items-center gap-2 px-6 py-3">
           <Save size={18} />
           Salvar Configurações
-        </button>
+        </Button>
       </div>
     </div>
   );

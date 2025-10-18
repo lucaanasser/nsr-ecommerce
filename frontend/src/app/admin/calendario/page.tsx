@@ -101,10 +101,10 @@ export default function CalendarioPage() {
             Eventos, reuniões e prazos da empresa
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary-gold text-dark-bg rounded-sm font-medium hover:bg-primary-bronze transition-colors">
+        <Button variant="primary" className="flex items-center gap-2 px-4 py-2">
           <Plus size={20} />
           Novo Evento
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -113,23 +113,25 @@ export default function CalendarioPage() {
           <div className="bg-dark-card rounded-sm border border-dark-border overflow-hidden">
             {/* Header do Calendário */}
             <div className="p-4 border-b border-dark-border flex items-center justify-between bg-dark-bg">
-              <button
+              <Button
+                variant="ghost"
                 onClick={prevMonth}
-                className="p-2 hover:bg-dark-card rounded-sm transition-colors text-primary-white/60 hover:text-primary-gold"
+                className="p-2 hover:bg-dark-card text-primary-white/60 hover:text-primary-gold"
               >
                 <ChevronLeft size={20} />
-              </button>
+              </Button>
               
               <h2 className="text-lg font-bold text-primary-white">
                 {currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
               </h2>
               
-              <button
+              <Button
+                variant="ghost"
                 onClick={nextMonth}
-                className="p-2 hover:bg-dark-card rounded-sm transition-colors text-primary-white/60 hover:text-primary-gold"
+                className="p-2 hover:bg-dark-card text-primary-white/60 hover:text-primary-gold"
               >
                 <ChevronRight size={20} />
-              </button>
+              </Button>
             </div>
 
             {/* Dias da Semana */}
@@ -169,14 +171,15 @@ export default function CalendarioPage() {
                         </div>
                         <div className="space-y-1">
                           {dayEvents.slice(0, 2).map((event) => (
-                            <button
+                            <Button
                               key={event.id}
+                              variant="ghost"
                               onClick={() => setSelectedEvent(event)}
-                              className="w-full text-left p-1 rounded-sm text-xs truncate transition-all hover:scale-105"
+                              className="w-full text-left p-1 rounded-sm text-xs truncate hover:scale-105"
                               style={{ backgroundColor: `${event.color}20`, color: event.color }}
                             >
                               {getTypeIcon(event.type)} {event.title}
-                            </button>
+                            </Button>
                           ))}
                           {dayEvents.length > 2 && (
                             <div className="text-xs text-primary-white/40 pl-1">
@@ -203,10 +206,11 @@ export default function CalendarioPage() {
                 const participants = event.participants.map(getUserById).filter(Boolean);
                 
                 return (
-                  <button
+                  <Button
                     key={event.id}
+                    variant="ghost"
                     onClick={() => setSelectedEvent(event)}
-                    className="w-full text-left p-3 bg-dark-bg rounded-sm border border-dark-border hover:border-primary-gold/50 transition-all group"
+                    className="w-full text-left p-3 bg-dark-bg rounded-sm border border-dark-border hover:border-primary-gold/50 group"
                   >
                     <div className="flex items-start gap-2 mb-2">
                       <span className="text-lg">{getTypeIcon(event.type)}</span>
@@ -245,7 +249,7 @@ export default function CalendarioPage() {
                         ))}
                       </div>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -265,12 +269,13 @@ export default function CalendarioPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-primary-white">{selectedEvent.title}</h2>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setSelectedEvent(null)}
-                className="text-primary-white/60 hover:text-primary-white transition-colors"
+                className="text-primary-white/60 hover:text-primary-white p-0"
               >
                 ✕
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4">

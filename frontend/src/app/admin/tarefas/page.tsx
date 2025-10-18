@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, User, Calendar, Flag, Tag as TagIcon, Clock } from 'lucide-react';
 import { tasks, Task, getUserById, getTaskStats } from '@/data/collaborationData';
 import { useAdmin } from '@/context/AdminContext';
+import Button from '@/components/ui/Button';
 
 /**
  * Página de Gestão de Tarefas
@@ -180,10 +181,10 @@ export default function TarefasPage() {
             Kanban board colaborativo para organização do trabalho
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary-gold text-dark-bg rounded-sm font-medium hover:bg-primary-bronze transition-colors">
+        <Button variant="primary" className="flex items-center gap-2 px-4 py-2">
           <Plus size={20} />
           Nova Tarefa
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
