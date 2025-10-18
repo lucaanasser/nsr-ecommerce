@@ -4,53 +4,60 @@ import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { User, Lock } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { useAdmin } from '@/context/AdminContext';
+import { useAuthContext } from '@/context/AuthContext';
+import { getErrorMessage } from '@/services';
 import { IMAGES } from '@/config/images';
 
 /**
  * Página Login
  * 
- * Página de login - detecção automática de admin/usuário
+ * Página de login - integrada com backend real
  */
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAdmin();
+  const { login, user } = useAuthContext();
+  const router = useRouter();
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simula delay de autenticação
-    setTimeout(() => {
-      const success = login(email, password);
+    try {
+      await login(email, password);
       
-      if (!success) {
-        setError('Email ou senha inválidos');
-        setIsLoading(false);
-      }
-      // Se sucesso, o redirect é feito pelo AdminContext
-    }, 500);
+      // Redirecionar baseado no role do usuário
+      // O usuário será atualizado no próximo render
+      setTimeout(() => {
+        const currentUser = user;
+        if (currentUser?.role === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/loja');
+        }
+      }, 100);
+    } catch (err) {
+      setError(getErrorMessage(err));
+      setIsLoading(false);
+    }
   };
 
-  // Preenche credenciais de exemplo para testes
-  const fillCredentials = (type: 'user' | 'admin1' | 'admin2') => {
+  // Preenche credenciais de exemplo para testes (se houver no banco)
+  const fillCredentials = (type: 'user' | 'admin') => {
     if (type === 'user') {
-      setEmail('usuario@nsr.com');
-      setPassword('123456');
-    } else if (type === 'admin1') {
+      setEmail('customer@nsr.com');
+      setPassword('password123');
+    } else {
       setEmail('admin@nsr.com');
       setPassword('admin123');
-    } else {
-      setEmail('socio@nsr.com');
-      setPassword('socio123');
     }
     setError('');
   };
@@ -130,29 +137,22 @@ export default function LoginPage() {
             {/* Credenciais de teste - apenas para desenvolvimento */}
             <div className="mt-8 pt-6 border-t border-dark-border">
               <p className="text-xs text-primary-white/40 text-center mb-3">
-                Credenciais para teste:
+                Credenciais para teste (se existirem no banco):
               </p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="ghost"
                   onClick={() => fillCredentials('user')}
                   className="text-xs py-2 px-3"
                 >
-                  <User size={12} className="mr-1" /> Usuário
+                  <User size={12} className="mr-1" /> Cliente
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => fillCredentials('admin1')}
+                  onClick={() => fillCredentials('admin')}
                   className="text-xs py-2 px-3"
                 >
-                  <Lock size={12} className="mr-1" /> Sócio 1
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => fillCredentials('admin2')}
-                  className="text-xs py-2 px-3"
-                >
-                  <Lock size={12} className="mr-1" /> Sócio 2
+                  <Lock size={12} className="mr-1" /> Admin
                 </Button>
               </div>
             </div>
