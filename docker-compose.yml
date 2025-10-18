@@ -1,55 +1,73 @@
 version: '3.8'
 
 services:
+  # Database - PostgreSQL 16
+  database:
+    image: postgres:16-alpine
+    container_name: nsr-database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nsr_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_change_in_prod}
+      POSTGRES_DB: ${POSTGRES_DB:-nsr_development}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - nsr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nsr_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend - Express + TypeScript
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: nsr-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nsr_dev}:${POSTGRES_PASSWORD:-dev_password_change_in_prod}@database:5432/${POSTGRES_DB:-nsr_development}
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - "4000:4000"
+    networks:
+      - nsr-network
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    command: npm run dev
+
   # Frontend - Next.js
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: nsr-frontend
-    ports:
-      - "3000:3000"
     environment:
-      - NODE_ENV=production
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+    ports:
+      - "3000:3000"
     networks:
       - nsr-network
-    restart: unless-stopped
     depends_on:
       - backend
-
-  # Backend - Placeholder (a ser implementado)
-  backend:
-    image: node:20-alpine
-    container_name: nsr-backend
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-    ports:
-      - "4000:4000"
-    networks:
-      - nsr-network
-    command: sh -c "echo 'Backend placeholder - aguardando implementação' && tail -f /dev/null"
-    restart: unless-stopped
-
-  # Database - Placeholder (a ser implementado)
-  database:
-    image: postgres:16-alpine
-    container_name: nsr-database
-    environment:
-      - POSTGRES_USER=nsr
-      - POSTGRES_PASSWORD=nsr_password
-      - POSTGRES_DB=nsr_db
-    volumes:
-      - ./database/data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    networks:
-      - nsr-network
     restart: unless-stopped
 
 networks:
@@ -57,4 +75,6 @@ networks:
     driver: bridge
 
 volumes:
-  database-data:
+  postgres_data:
+    driver: local
+

@@ -1,17 +1,55 @@
-# Backend Placeholder
-# Aguardando implementação futura
+# Backend NSR E-commerce
 
-Este diretório está reservado para o backend da aplicação NSR.
+Backend REST API para o e-commerce NSR, construído com Node.js, Express, TypeScript e PostgreSQL.
 
-## Tecnologias Sugeridas
-- Node.js + Express/NestJS
-- TypeScript
-- JWT Authentication
-- Prisma ORM
-- PostgreSQL
+## 🚀 Stack Tecnológico
 
-## Endpoints Planejados
-- `/api/products` - CRUD de produtos
-- `/api/auth` - Autenticação
-- `/api/cart` - Carrinho
-- `/api/orders` - Pedidos
+- **Runtime:** Node.js 20 LTS
+- **Framework:** Express.js
+- **Linguagem:** TypeScript (strict mode)
+- **ORM:** Prisma
+- **Database:** PostgreSQL 16
+- **Autenticação:** JWT + bcrypt
+- **Upload:** Cloudinary
+- **Email:** Nodemailer
+- **Validação:** Zod
+- **Docs:** Swagger/OpenAPI
+- **Logs:** Winston + Morgan
+
+## 🔧 Setup Rápido
+
+```bash
+# 1. Instalar dependências
+cd backend
+npm install
+
+# 2. Configurar .env
+cp .env.example .env
+# Edite .env com suas credenciais
+
+# 3. Subir PostgreSQL
+npm run docker:dev
+
+# 4. Configurar Prisma
+npm run prisma:generate
+npm run prisma:migrate
+
+# 5. Iniciar servidor
+npm run dev
+```
+
+Acesse: http://localhost:4000/health
+
+## 📜 Scripts
+
+- `npm run dev` - Desenvolvimento com hot-reload
+- `npm run build` - Compilar TypeScript
+- `npm start` - Executar produção
+- `npm run prisma:studio` - GUI do banco
+- `npm test` - Executar testes
+
+Ver documentação completa em `.project_docs/backend/`
+
+---
+
+**Status:** ✅ Fase 0 completa - Arquitetura pronta!

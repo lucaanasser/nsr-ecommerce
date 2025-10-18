@@ -1,0 +1,423 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================================
+// ENUMS
+// ================================
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING        // Aguardando pagamento
+  PAID           // Pago
+  PROCESSING     // Em processamento
+  SHIPPED        // Enviado
+  DELIVERED      // Entregue
+  CANCELLED      // Cancelado
+  REFUNDED       // Reembolsado
+}
+
+enum PaymentStatus {
+  PENDING        // Aguardando pagamento
+  PROCESSING     // Processando
+  APPROVED       // Aprovado
+  DECLINED       // Recusado
+  REFUNDED       // Reembolsado
+  CANCELLED      // Cancelado
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  UNISEX
+}
+
+// ================================
+// MODELS
+// ================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(CUSTOMER)
+  
+  // Informações adicionais
+  phone     String?
+  cpf       String?  @unique
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin DateTime?
+  
+  // Relações
+  addresses Address[]
+  orders    Order[]
+  cart      Cart?
+  reviews   Review[]
+  
+  // Tokens de refresh JWT
+  refreshTokens RefreshToken[]
+  
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@map("refresh_tokens")
+}
+
+model Address {
+  id         String  @id @default(uuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Endereço
+  street     String
+  number     String
+  complement String?
+  neighborhood String
+  city       String
+  state      String
+  zipCode    String
+  
+  // Dados de contato
+  receiverName String
+  receiverPhone String
+  
+  // Flags
+  isDefault  Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relações
+  orders Order[]
+  
+  @@map("addresses")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  
+  // Ordenação
+  order       Int       @default(0)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relações
+  products    Product[]
+  
+  @@map("categories")
+}
+
+model Collection {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  
+  // Datas da coleção
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relações
+  products    Product[]
+  
+  @@map("collections")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  
+  // Preço
+  price       Decimal  @db.Decimal(10, 2)
+  comparePrice Decimal? @db.Decimal(10, 2) // Preço "De:"
+  
+  // Estoque
+  stock       Int      @default(0)
+  sku         String?  @unique
+  
+  // Categorização
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+  
+  gender      Gender   @default(UNISEX)
+  
+  // Imagens (URLs do Cloudinary)
+  images      String[]
+  
+  // Dimensões para cálculo de frete
+  weight      Decimal?  @db.Decimal(10, 3) // Peso em kg
+  length      Decimal?  @db.Decimal(10, 2) // Comprimento em cm
+  width       Decimal?  @db.Decimal(10, 2) // Largura em cm
+  height      Decimal?  @db.Decimal(10, 2) // Altura em cm
+  
+  // Informações adicionais
+  material    String?   // Material do produto
+  careInstructions String? // Instruções de cuidado
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Flags
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relações
+  variants    ProductVariant[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+  
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  // Variação (ex: tamanho P, cor Preto)
+  size      String?
+  color     String?
+  colorHex  String? // Código hexadecimal da cor
+  
+  // Estoque específico da variante
+  stock     Int     @default(0)
+  sku       String? @unique
+  
+  // Preço diferenciado (opcional)
+  priceAdjustment Decimal? @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([productId, size, color])
+  @@map("product_variants")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  // Relações
+  items     CartItem[]
+  
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  // Variação selecionada
+  size      String?
+  color     String?
+  
+  quantity  Int      @default(1)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([cartId, productId, size, color])
+  @@map("cart_items")
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  orderNumber   String      @unique // Número do pedido (ex: NSR-2025-0001)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  
+  // Endereço de entrega (snapshot)
+  addressId     String
+  address       Address     @relation(fields: [addressId], references: [id])
+  
+  // Dados do cliente (snapshot para histórico)
+  customerName  String
+  customerEmail String
+  customerPhone String
+  
+  // Status
+  status        OrderStatus @default(PENDING)
+  
+  // Valores
+  subtotal      Decimal     @db.Decimal(10, 2)
+  shippingCost  Decimal     @db.Decimal(10, 2)
+  discount      Decimal     @default(0) @db.Decimal(10, 2)
+  total         Decimal     @db.Decimal(10, 2)
+  
+  // Pagamento
+  paymentStatus  PaymentStatus @default(PENDING)
+  paymentMethod  String?       // "credit_card", "pix", "boleto"
+  paymentId      String?       // ID do gateway de pagamento
+  paidAt         DateTime?
+  
+  // Envio
+  shippingMethod String?       // Nome do método de envio
+  trackingCode   String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  estimatedDelivery DateTime?  // Prazo estimado
+  
+  // Cupom de desconto
+  couponCode    String?
+  
+  // Cancelamento
+  cancelledAt   DateTime?
+  cancelReason  String?
+  
+  // Observações do cliente
+  notes         String?
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relações
+  items         OrderItem[]
+  
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  
+  // Snapshot do produto no momento da compra
+  productName  String
+  productImage String?
+  size         String?
+  color        String?
+  
+  quantity     Int
+  unitPrice    Decimal @db.Decimal(10, 2)
+  totalPrice   Decimal @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now())
+  
+  @@map("order_items")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  rating    Int      // 1 a 5
+  comment   String?
+  
+  // Moderação
+  isApproved Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, productId])
+  @@map("reviews")
+}
+
+model ShippingMethod {
+  id          String   @id @default(uuid())
+  name        String   @unique // "PAC", "SEDEX", "Entrega Expressa"
+  description String?
+  
+  // Cálculo de frete
+  baseCost    Decimal  @db.Decimal(10, 2) // Custo base
+  perKgCost   Decimal  @db.Decimal(10, 2) // Custo por kg adicional
+  freeAbove   Decimal? @db.Decimal(10, 2) // Frete grátis acima de X reais
+  
+  // Prazo de entrega
+  minDays     Int      // Prazo mínimo em dias
+  maxDays     Int      // Prazo máximo em dias
+  
+  // Flags
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("shipping_methods")
+}
+
+model Coupon {
+  id          String   @id @default(uuid())
+  code        String   @unique // Código do cupom (ex: "BLACKFRIDAY")
+  description String?
+  
+  // Tipo de desconto
+  discountType String  // "percentage" ou "fixed"
+  discountValue Decimal @db.Decimal(10, 2) // 10 (%) ou 50.00 (R$)
+  
+  // Regras
+  minPurchase  Decimal? @db.Decimal(10, 2) // Compra mínima
+  maxDiscount  Decimal? @db.Decimal(10, 2) // Desconto máximo (para %)
+  usageLimit   Int?     // Limite de usos total
+  usageCount   Int      @default(0) // Contador de usos
+  
+  // Validade
+  startDate   DateTime
+  endDate     DateTime
+  
+  // Flags
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("coupons")
+}
