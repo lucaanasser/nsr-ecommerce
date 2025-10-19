@@ -21,6 +21,8 @@ export default function CadastroPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    birthDate: '',
     password: '',
     confirmPassword: '',
   });
@@ -78,8 +80,8 @@ export default function CadastroPage() {
         consents
       );
       
-      // Redirecionar para loja após cadastro bem-sucedido
-      router.push('/loja');
+      // Após cadastro bem-sucedido, redirecionar para perfil
+      router.push('/perfil');
     } catch (err) {
       setError(getErrorMessage(err));
       setIsLoading(false);
@@ -115,46 +117,79 @@ export default function CadastroPage() {
             </h1>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Nome completo"
-                required
-                className="bg-dark-card/50 backdrop-blur-sm"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Nome completo"
+                  required
+                  className="bg-dark-card/50 backdrop-blur-sm"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+              </div>
               
-              <Input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                required
-                className="bg-dark-card/50 backdrop-blur-sm"
-              />
-              
+              <div className="relative">
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  required
+                  className="bg-dark-card/50 backdrop-blur-sm"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  type="password"
-                  name="password"
-                  value={formData.password}
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Senha (mín. 6 caracteres)"
-                  required
+                  placeholder="Telefone (opcional)"
                   className="bg-dark-card/50 backdrop-blur-sm"
                 />
                 
                 <Input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
+                  type="date"
+                  name="birthDate"
+                  value={formData.birthDate}
                   onChange={handleChange}
-                  placeholder="Confirmar Senha"
+                  placeholder="Data de Nascimento"
                   required
                   className="bg-dark-card/50 backdrop-blur-sm"
                 />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <Input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Senha (mín. 6 caracteres)"
+                    required
+                    className="bg-dark-card/50 backdrop-blur-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+                </div>
+                
+                <div className="relative">
+                  <Input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirmar Senha"
+                    required
+                    className="bg-dark-card/50 backdrop-blur-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+                </div>
               </div>
 
               {/* Mensagem de erro */}
@@ -173,46 +208,37 @@ export default function CadastroPage() {
                 <label className="flex items-start gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
-                    checked={consents.privacyPolicy}
-                    onChange={(e) => setConsents({ ...consents, privacyPolicy: e.target.checked })}
+                    checked={consents.privacyPolicy && consents.terms}
+                    onChange={(e) => setConsents({ 
+                      ...consents, 
+                      privacyPolicy: e.target.checked,
+                      terms: e.target.checked 
+                    })}
                     className="mt-1 w-4 h-4 accent-primary-gold"
                     required
                   />
-                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90">
+                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90 transition-colors">
                     Li e aceito a{' '}
-                    <Link href="/politica-privacidade" target="_blank" className="text-primary-gold hover:underline">
+                    <Link href="/politica-privacidade" target="_blank" className="text-primary-gold hover:underline font-medium">
                       Política de Privacidade
-                    </Link>{' '}
-                    <span className="text-red-400">*</span>
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={consents.terms}
-                    onChange={(e) => setConsents({ ...consents, terms: e.target.checked })}
-                    className="mt-1 w-4 h-4 accent-primary-gold"
-                    required
-                  />
-                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90">
-                    Li e aceito os{' '}
-                    <Link href="/termos-uso" target="_blank" className="text-primary-gold hover:underline">
+                    </Link>
+                    {' '}e os{' '}
+                    <Link href="/termos-uso" target="_blank" className="text-primary-gold hover:underline font-medium">
                       Termos de Uso
-                    </Link>{' '}
-                    <span className="text-red-400">*</span>
+                    </Link>
+                    {' '}<span className="text-primary-bronze">*</span>
                   </span>
                 </label>
 
-                <label className="flex items-start gap-3 cursor-pointer group">
+                <label className="flex items-start gap-3 cursor-pointer group bg-primary-gold/5 hover:bg-primary-gold/10 -mx-2 px-2 py-2 rounded transition-colors">
                   <input
                     type="checkbox"
                     checked={consents.marketing}
                     onChange={(e) => setConsents({ ...consents, marketing: e.target.checked })}
                     className="mt-1 w-4 h-4 accent-primary-gold"
                   />
-                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90">
-                    Aceito receber ofertas e novidades por email (opcional)
+                  <span className="text-xs text-primary-white/70 group-hover:text-primary-white/90 transition-colors">
+                    Quero receber ofertas exclusivas e novidades por email
                   </span>
                 </label>
               </div>

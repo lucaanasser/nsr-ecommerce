@@ -103,4 +103,15 @@ router.put(
   authController.changePassword.bind(authController) as any
 );
 
+/**
+ * @route   DELETE /api/v1/auth/account
+ * @desc    Deleta conta do usuário permanentemente (LGPD)
+ * @access  Private
+ */
+router.delete(
+  '/account',
+  authenticate as any,
+  authController.deleteAccount.bind(authController) as any
+);
+
 export default router;

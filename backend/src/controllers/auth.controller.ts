@@ -17,13 +17,15 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const user = await authService.register(req.body);
+    // Cria usuário e autentica automaticamente após cadastro
+    await authService.register(req.body);
+    const loginResult = await authService.login(req.body.email, req.body.password);
 
-      res.status(201).json({
-        success: true,
-        message: 'Usuário registrado com sucesso',
-        data: { user },
-      });
+        res.status(201).json({
+          success: true,
+          message: 'Usuário registrado e autenticado com sucesso',
+          data: loginResult,
+        });
     } catch (error) {
       next(error);
     }
@@ -186,6 +188,34 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Senha alterada com sucesso. Por favor, faça login novamente.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * DELETE /api/v1/auth/account
+   * Deleta conta do usuário permanentemente
+   * Requer autenticação e senha
+   */
+  async deleteAccount(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { password } = req.body;
+      
+      if (!password) {
+        return next(new Error('Senha é obrigatória para confirmar exclusão'));
+      }
+
+      await authService.deleteAccount(req.user.userId, password);
+
+      res.status(200).json({
+        success: true,
+        message: 'Conta deletada com sucesso. Todos os seus dados foram removidos.',
       });
     } catch (error) {
       next(error);

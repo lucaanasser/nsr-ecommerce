@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
+import { useAuthContext } from '@/context/AuthContext';
 import ShoppingBasketIcon from '@/components/icons/ShoppingBasketIcon';
 import UserIcon from '@/components/icons/UserIcon';
 
@@ -16,6 +17,7 @@ import UserIcon from '@/components/icons/UserIcon';
  * e ícones de ações (busca, carrinho, perfil).
  */
 export default function Header({ hideLogo = false }: { hideLogo?: boolean }) {
+  const { isAuthenticated } = useAuthContext();
   const [menuEstaAberto, setMenuEstaAberto] = useState(false);
   const [lojaEstaAberta, setLojaEstaAberta] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
@@ -199,7 +201,7 @@ export default function Header({ hideLogo = false }: { hideLogo?: boolean }) {
               </AnimatePresence>
             </div>
             <Link
-              href="/login"
+              href={isAuthenticated ? "/perfil" : "/login"}
               className="hidden lg:block p-2 text-arabic-bronze hover:text-arabic-bronze/80 transition-colors"
               aria-label="Perfil"
             >

@@ -23,7 +23,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, user } = useAuthContext();
+  const { login } = useAuthContext();
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -34,16 +34,20 @@ export default function LoginPage() {
     try {
       await login(email, password);
       
-      // Redirecionar baseado no role do usuário
-      // O usuário será atualizado no próximo render
-      setTimeout(() => {
-        const currentUser = user;
-        if (currentUser?.role === 'ADMIN') {
+      // Após login bem-sucedido, buscar o usuário do localStorage
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        // Redirecionar baseado no role do usuário
+        if (user.role === 'ADMIN') {
           router.push('/admin');
         } else {
-          router.push('/loja');
+          router.push('/perfil');
         }
-      }, 100);
+      } else {
+        // Fallback caso não encontre o usuário
+        router.push('/perfil');
+      }
     } catch (err) {
       setError(getErrorMessage(err));
       setIsLoading(false);

@@ -131,6 +131,20 @@ export const authService = {
     await api.put('/auth/change-password', data);
   },
 
+  // Deletar conta permanentemente
+  async deleteAccount(password: string): Promise<void> {
+    await api.delete('/auth/account', {
+      data: { password }
+    });
+    
+    // Limpar dados locais
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+    }
+  },
+
   // Verificar se usuário está autenticado
   isAuthenticated(): boolean {
     if (typeof window !== 'undefined') {

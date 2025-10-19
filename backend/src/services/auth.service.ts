@@ -356,6 +356,101 @@ export class AuthService {
   }
 
   /**
+   * Deleta conta do usuário permanentemente
+   * Remove TODOS os dados relacionados ao usuário (LGPD)
+   * @param userId - ID do usuário
+   * @param password - Senha para confirmar exclusão
+   */
+  async deleteAccount(userId: string, password: string): Promise<void> {
+    // Busca usuário com senha
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundError('Usuário não encontrado');
+    }
+
+    // Valida senha
+    const isPasswordValid = await comparePassword(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedError('Senha incorreta');
+    }
+
+    logger.info('Starting account deletion', { 
+      userId, 
+      email: user.email 
+    });
+
+    try {
+      // Deleta dados em cascata (seguindo ordem de dependências)
+      
+      // 1. Orders (não tem CASCADE, precisa deletar manualmente)
+      // Primeiro busca todos os pedidos
+      const orders = await prisma.order.findMany({
+        where: { userId },
+        select: { id: true }
+      });
+      
+      // Deleta OrderItems de cada pedido
+      for (const order of orders) {
+        await prisma.orderItem.deleteMany({
+          where: { orderId: order.id }
+        });
+      }
+      
+      // Agora deleta os Orders
+      await prisma.order.deleteMany({
+        where: { userId }
+      });
+
+      // 2-6. Os demais têm CASCADE configurado no schema, mas vamos deletar explicitamente
+      // para garantir e ter controle do processo
+      
+      // Cart e CartItems (CASCADE)
+      await prisma.cart.deleteMany({
+        where: { userId }
+      });
+
+      // Reviews (CASCADE)
+      await prisma.review.deleteMany({
+        where: { userId }
+      });
+
+      // Addresses (CASCADE)
+      await prisma.address.deleteMany({
+        where: { userId }
+      });
+
+      // RefreshTokens (CASCADE)
+      await prisma.refreshToken.deleteMany({
+        where: { userId }
+      });
+
+      // AuditLogs (SetNull configurado, mas vamos deletar)
+      await prisma.auditLog.deleteMany({
+        where: { userId }
+      });
+
+      // 7. Finalmente, deleta o usuário
+      await userRepository.delete(userId);
+
+      logger.info('Account deleted successfully', {
+        userId,
+        email: user.email,
+        deletedOrders: orders.length,
+      });
+    } catch (error) {
+      logger.error('Error deleting account', {
+        userId,
+        email: user.email,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw new Error('Erro ao deletar conta. Por favor, tente novamente.');
+    }
+  }
+
+  /**
    * Remove dados sensíveis do usuário
    * @param user - Usuário com todos os campos
    * @returns Usuário sem dados sensíveis
