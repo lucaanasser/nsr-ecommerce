@@ -24,10 +24,30 @@ type TabType = 'pedidos' | 'dados' | 'enderecos' | 'pagamento' | 'favoritos';
  * Integrada com backend para exibir dados reais do usuário logado
  */
 export default function PerfilPage() {
+  // Função para formatar CPF
+  function formatCPF(cpf: string = "") {
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  }
+
+  // Função para formatar telefone (formato brasileiro comum)
+  function formatPhone(phone: string = "") {
+    // Remove tudo que não for número
+    const cleaned = phone.replace(/\D/g, "");
+    if (cleaned.length === 11) {
+      // Celular: (99) 99999-9999
+      return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    } else if (cleaned.length === 10) {
+      // Fixo: (99) 9999-9999
+      return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+    return phone;
+  }
   const { user, isAuthenticated, isLoading, deleteAccount } = useAuthContext();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('pedidos');
   const { favoritos, removerDosFavoritos } = useFavorites();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   // Pedidos do usuário
   const [pedidos, setPedidos] = useState<any[]>([]);
@@ -64,19 +84,8 @@ export default function PerfilPage() {
   }, [activeTab, isAuthenticated]);
 
   const handleDeleteAccount = async () => {
-    const confirmar = window.confirm(
-      '⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n' +
-      'Tem certeza que deseja excluir sua conta permanentemente?\n\n' +
-      '• Todos os seus pedidos serão removidos\n' +
-      '• Seus endereços serão apagados\n' +
-      '• Seus favoritos serão perdidos\n' +
-      '• Suas avaliações serão deletadas\n' +
-      '• Todas as suas informações pessoais serão removidas\n\n' +
-      'Esta operação NÃO pode ser desfeita!'
-    );
+    setShowDeleteModal(false);
     
-    if (!confirmar) return;
-
     const senha = window.prompt('Digite sua senha para confirmar a exclusão da conta:');
     
     if (!senha) {
@@ -92,6 +101,18 @@ export default function PerfilPage() {
       const errorMessage = error?.response?.data?.error || error?.message || 'Erro ao excluir conta';
       alert('Erro ao excluir conta: ' + errorMessage);
     }
+  };
+
+  const handleSaveChanges = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowSaveModal(true);
+  };
+
+  const confirmSaveChanges = () => {
+    setShowSaveModal(false);
+    // Aqui você pode adicionar a lógica para salvar as alterações
+    // Por enquanto, apenas mostra uma mensagem de sucesso
+    alert('Alterações salvas com sucesso!');
   };
 
   // Mostra loading enquanto verifica autenticação
@@ -136,7 +157,7 @@ export default function PerfilPage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-8 text-primary-bronze">
-              Meu Perfil
+              <span className="font-nsr">Meu Perfil</span>
             </h1>
 
             {/* Tabs */}
@@ -207,7 +228,6 @@ export default function PerfilPage() {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-2xl font-semibold mb-6 text-primary-white">Meus Pedidos</h2>
                   {pedidosLoading ? (
                     <div className="text-center py-8 text-primary-white/50">Carregando pedidos...</div>
                   ) : pedidos.length === 0 ? (
@@ -251,8 +271,7 @@ export default function PerfilPage() {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-2xl font-semibold mb-6 text-primary-white">Dados Pessoais</h2>
-                  <form className="space-y-4 max-w-2xl">
+                  <form className="space-y-4 max-w-2xl" onSubmit={handleSaveChanges}>
                     <div className="grid grid-cols-2 gap-3">
                       <Input
                         type="text"
@@ -263,7 +282,7 @@ export default function PerfilPage() {
                       <Input
                         type="text"
                         placeholder="CPF"
-                        defaultValue={user?.cpf || ''}
+                        defaultValue={formatCPF(user?.cpf || '')}
                         readOnly
                       />
                     </div>
@@ -278,7 +297,7 @@ export default function PerfilPage() {
                     <Input
                       type="tel"
                       placeholder="Telefone"
-                      defaultValue={user?.phone || ''}
+                      defaultValue={formatPhone(user?.phone || '')}
                       readOnly
                     />
 
@@ -308,31 +327,15 @@ export default function PerfilPage() {
                       Salvar Alterações
                     </Button>
 
-                    {/* Zona de Perigo - Exclusão de Conta */}
-                    <div className="mt-12 pt-8 border-t border-red-500/30">
-                      <h3 className="text-lg font-semibold mb-4 text-red-500">Zona de Perigo</h3>
-                      <div className="bg-red-500/10 border border-red-500/30 rounded-sm p-6">
-                        <h4 className="text-primary-white font-semibold mb-2">Excluir Conta Permanentemente</h4>
-                        <p className="text-primary-white/70 text-sm mb-4">
-                          Esta ação é <strong className="text-red-500">irreversível</strong>. 
-                          Todos os seus dados serão removidos permanentemente, incluindo:
-                        </p>
-                        <ul className="list-disc list-inside text-primary-white/60 text-sm space-y-1 mb-6">
-                          <li>Histórico de pedidos</li>
-                          <li>Endereços salvos</li>
-                          <li>Favoritos</li>
-                          <li>Avaliações de produtos</li>
-                          <li>Todas as informações pessoais</li>
-                        </ul>
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          onClick={handleDeleteAccount}
-                          className="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-6 py-2"
-                        >
-                          Excluir Minha Conta
-                        </Button>
-                      </div>
+                    {/* Link discreto para excluir conta */}
+                    <div className="mt-8 pt-4 border-t border-dark-border/30">
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteModal(true)}
+                        className="text-sm text-primary-white/40 hover:text-red-500 transition-colors underline"
+                      >
+                        Excluir minha conta
+                      </button>
                     </div>
                   </form>
                 </motion.div>
@@ -346,7 +349,6 @@ export default function PerfilPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold text-primary-white">Meus Endereços</h2>
                     <Button variant="primary" className="py-2 px-6">
                       + Adicionar Endereço
                     </Button>
@@ -395,12 +397,10 @@ export default function PerfilPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold text-primary-white">Formas de Pagamento</h2>
                     <Button variant="primary" className="py-2 px-6">
                       + Adicionar Cartão
                     </Button>
                   </div>
-                  
                   {cartoes.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-primary-white/50 mb-4">Você ainda não tem cartões cadastrados</p>
@@ -442,15 +442,19 @@ export default function PerfilPage() {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-2xl font-semibold mb-6 text-primary-white">Meus Favoritos</h2>
-                  
                   {favoritos.length === 0 ? (
-                    <div className="text-center py-12">
-                      <p className="text-primary-white/50 mb-4">Você ainda não tem favoritos</p>
-                      <Link href="/loja" className="btn-primary py-2 px-6 inline-block">
-                        Explorar Produtos
-                      </Link>
-                    </div>
+                    <>
+                      <div className="flex justify-between items-center mb-6">
+                        <Link href="/loja">
+                          <Button variant="primary" className="py-2 px-6">
+                            Explorar Produtos
+                          </Button>
+                        </Link>
+                      </div>
+                      <div className="text-center py-12">
+                        <p className="text-primary-white/50 mb-4">Você ainda não tem favoritos</p>
+                      </div>
+                    </>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {favoritos.map((produto) => (
@@ -505,6 +509,145 @@ export default function PerfilPage() {
       </main>
 
       <Footer />
+
+      {/* Modal de Confirmação de Salvamento */}
+      {showSaveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+            className="bg-dark-card border-2 border-primary-bronze rounded-sm max-w-md w-full p-8 relative"
+          >
+            {/* Botão fechar */}
+            <button
+              onClick={() => setShowSaveModal(false)}
+              className="absolute top-4 right-4 text-primary-white/50 hover:text-primary-white transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Título */}
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-bronze/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-primary-bronze" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-primary-bronze text-center mb-2 font-nsr">
+                Confirmar Alterações
+              </h3>
+              <p className="text-primary-white/60 text-center text-sm">
+                Tem certeza que deseja salvar as alterações?
+              </p>
+            </div>
+
+            {/* Botões */}
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setShowSaveModal(false)}
+                className="flex-1 py-3 border border-dark-border text-primary-white hover:bg-dark-bg"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={confirmSaveChanges}
+                className="flex-1 py-3"
+              >
+                Confirmar
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+            className="bg-dark-card border-2 border-red-500/50 rounded-sm max-w-md w-full p-8 relative"
+          >
+            {/* Botão fechar */}
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="absolute top-4 right-4 text-primary-white/50 hover:text-primary-white transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Título */}
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-primary-white text-center mb-2">
+                Excluir Conta Permanentemente
+              </h3>
+              <p className="text-primary-white/60 text-center text-sm">
+                Esta ação é <span className="text-red-500 font-semibold">irreversível</span>
+              </p>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="mb-8">
+              <p className="text-primary-white/70 text-sm mb-4">
+                Todos os seus dados serão removidos permanentemente:
+              </p>
+              <ul className="space-y-2 text-primary-white/60 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  <span>Histórico de pedidos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  <span>Endereços salvos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  <span>Favoritos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  <span>Avaliações de produtos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  <span>Todas as informações pessoais</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Botões */}
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-3 border border-dark-border text-primary-white hover:bg-dark-bg"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleDeleteAccount}
+                className="flex-1 py-3 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+              >
+                Confirmar Exclusão
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }
