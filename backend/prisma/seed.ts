@@ -1,7 +1,18 @@
 /**
  * Script de seed para popular o banco de dados com dados iniciais.
  * Cria categorias, coleções, métodos de frete, cupons, usuários, endereços, produtos e reviews.
- * Útil para desenvolvimento, testes e ambiente de homologação.
+ * Út  const admin = await prisma.user.upsert({
+    where: { email: 'admin@nsr.com' },
+    update: {},
+    create: {
+      email: 'admin@nsr.com',
+      password: adminPassword,
+      firstName: 'Administrador',
+      lastName: 'NSR',
+      role: 'ADMIN',
+      phone: '11999999999',
+    },
+  });envolvimento, testes e ambiente de homologação.
  */
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
@@ -178,19 +189,21 @@ async function main() {
     create: {
       email: 'admin@nsr.com',
       password: adminPassword,
-      name: 'Administrador NSR',
+      firstName: 'Administrador',
+      lastName: 'NSR',
       role: 'ADMIN',
       phone: '11999999999',
     },
   });
 
   const customer = await prisma.user.upsert({
-    where: { email: 'customer@nsr.com' },
+    where: { email: 'cliente@example.com' },
     update: {},
     create: {
-      email: 'customer@nsr.com',
+      email: 'cliente@example.com',
       password: customerPassword,
-      name: 'João Silva',
+      firstName: 'João',
+      lastName: 'Silva',
       role: 'CUSTOMER',
       phone: '11988888888',
       cpf: '12345678900',

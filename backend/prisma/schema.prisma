@@ -52,7 +52,8 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
-  name      String
+  firstName String
+  lastName  String
   role      UserRole @default(CUSTOMER)
   
   // Informações adicionais

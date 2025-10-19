@@ -24,7 +24,8 @@ export class UserRepository extends BaseRepository<User> {
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         phone: true,
         cpf: true,
@@ -158,7 +159,8 @@ export class UserRepository extends BaseRepository<User> {
 
     if (options?.search) {
       where.OR = [
-        { name: { contains: options.search, mode: 'insensitive' } },
+        { firstName: { contains: options.search, mode: 'insensitive' } },
+        { lastName: { contains: options.search, mode: 'insensitive' } },
         { email: { contains: options.search, mode: 'insensitive' } },
       ];
     }
@@ -173,7 +175,8 @@ export class UserRepository extends BaseRepository<User> {
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         phone: true,
         cpf: true,

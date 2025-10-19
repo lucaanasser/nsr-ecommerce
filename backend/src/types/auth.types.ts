@@ -27,9 +27,10 @@ export interface AuthenticatedRequest extends Request {
 export interface RegisterDTO {
   email: string;
   password: string;
-  name: string;
-  cpf?: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
+  cpf?: string;
   // LGPD - Consentimentos
   privacyPolicy?: boolean;
   terms?: boolean;
@@ -55,7 +56,8 @@ export interface RefreshTokenDTO {
  * DTO para atualização de perfil
  */
 export interface UpdateProfileDTO {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
   cpf?: string;
 }
@@ -75,11 +77,13 @@ export interface LoginResponse {
   user: {
     id: string;
     email: string;
-    name: string;
-    role: UserRole;
-    phone: string | null;
-    cpf: string | null;
+    firstName: string;
+    lastName: string;
+    role: string;
+    phone?: string;
+    cpf?: string;
     createdAt: Date;
+    lastLogin?: Date;
   };
   accessToken: string;
   refreshToken: string;
@@ -105,13 +109,14 @@ export { JWTPayload } from '../utils/jwt';
 export interface UserResponse {
   id: string;
   email: string;
-  name: string;
-  role: UserRole;
-  phone: string | null;
-  cpf: string | null;
+  firstName: string;
+  lastName: string;
+  role: string;
+  phone?: string;
+  cpf?: string;
   createdAt: Date;
   updatedAt: Date;
-  lastLogin: Date | null;
+  lastLogin?: Date;
 }
 
 /**

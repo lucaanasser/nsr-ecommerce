@@ -19,7 +19,8 @@ import { IMAGES } from '@/config/images';
  */
 export default function CadastroPage() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     birthDate: '',
@@ -73,7 +74,8 @@ export default function CadastroPage() {
 
     try {
       await register(
-        formData.name,
+        formData.firstName,
+        formData.lastName,
         formData.email,
         formData.password,
         formData.confirmPassword,
@@ -117,17 +119,32 @@ export default function CadastroPage() {
             </h1>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <Input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Nome completo"
-                  required
-                  className="bg-dark-card/50 backdrop-blur-sm"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="Nome"
+                    required
+                    className="bg-dark-card/50 backdrop-blur-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+                </div>
+                
+                <div className="relative">
+                  <Input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Sobrenome"
+                    required
+                    className="bg-dark-card/50 backdrop-blur-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+                </div>
               </div>
               
               <div className="relative">

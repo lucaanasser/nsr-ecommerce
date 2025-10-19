@@ -40,7 +40,7 @@ export class AuthService {
     // Valida força da senha
     const passwordValidation = validatePasswordStrength(data.password, {
       email: data.email,
-      name: data.name,
+      name: `${data.firstName} ${data.lastName}`,
     });
 
     if (!passwordValidation.isValid) {
@@ -84,7 +84,8 @@ export class AuthService {
     const user = await userRepository.create({
       email: data.email,
       password: hashedPassword,
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
       phone: data.phone,
       cpf: data.cpf,
       role: 'CUSTOMER', // Todos começam como CUSTOMER
@@ -99,7 +100,7 @@ export class AuthService {
     // Enviar email de boas-vindas (não bloqueia o registro se falhar)
     emailService
       .sendWelcomeEmail({
-        userName: user.name,
+        userName: user.firstName,
         userEmail: user.email,
       })
       .catch((error) => {
@@ -337,7 +338,7 @@ export class AuthService {
     // Valida força da nova senha
     const passwordValidation = validatePasswordStrength(newPassword, {
       email: user.email,
-      name: user.name,
+      name: `${user.firstName} ${user.lastName}`,
     });
 
     if (!passwordValidation.isValid) {
@@ -463,7 +464,8 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
       phone: user.phone,
       cpf: user.cpf,

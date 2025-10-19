@@ -30,7 +30,8 @@ export async function createTestUser(
     data: {
       email: userData.email || `test-${role.toLowerCase()}-${timestamp}@test.com`,
       password: hashedPassword,
-      name: userData.name || `Test ${role} User`,
+      firstName: `Test ${role}`,
+      lastName: 'User',
       role,
       cpf: userData.cpf || generateCPF(),
       phone: userData.phone || '11999999999',
@@ -66,9 +67,7 @@ export async function createTestUser(
  * @returns Usuário admin com tokens
  */
 export async function createTestAdmin(): Promise<TestUser> {
-  return createTestUser('ADMIN', {
-    name: 'Admin User',
-  });
+  return createTestUser('ADMIN', {});
 }
 
 /**
@@ -76,9 +75,7 @@ export async function createTestAdmin(): Promise<TestUser> {
  * @returns Usuário customer com tokens
  */
 export async function createTestCustomer(): Promise<TestUser> {
-  return createTestUser('CUSTOMER', {
-    name: 'Customer User',
-  });
+  return createTestUser('CUSTOMER', {});
 }
 
 /**

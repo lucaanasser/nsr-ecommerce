@@ -30,14 +30,24 @@ const passwordSchema = z
   .regex(/\d/, 'A senha deve conter pelo menos um número');
 
 /**
- * Valida nome
+ * Valida primeiro nome
  */
-const nameSchema = z
+const firstNameSchema = z
   .string()
   .min(2, 'Nome deve ter no mínimo 2 caracteres')
-  .max(100, 'Nome deve ter no máximo 100 caracteres')
+  .max(50, 'Nome deve ter no máximo 50 caracteres')
   .trim()
   .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, 'Nome contém caracteres inválidos');
+
+/**
+ * Valida sobrenome
+ */
+const lastNameSchema = z
+  .string()
+  .min(2, 'Sobrenome deve ter no mínimo 2 caracteres')
+  .max(50, 'Sobrenome deve ter no máximo 50 caracteres')
+  .trim()
+  .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, 'Sobrenome contém caracteres inválidos');
 
 /**
  * Valida telefone brasileiro
@@ -103,7 +113,8 @@ const cpfSchema = z
 export const registerSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
-  name: nameSchema,
+  firstName: firstNameSchema,
+  lastName: lastNameSchema,
   phone: phoneSchema,
   cpf: cpfSchema,
   // LGPD - Consentimentos
@@ -131,7 +142,8 @@ export const refreshTokenSchema = z.object({
  * Schema de validação para atualização de perfil
  */
 export const updateProfileSchema = z.object({
-  name: nameSchema.optional(),
+  firstName: firstNameSchema.optional(),
+  lastName: lastNameSchema.optional(),
   phone: phoneSchema,
   cpf: cpfSchema,
 });

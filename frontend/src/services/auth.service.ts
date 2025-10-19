@@ -2,7 +2,8 @@ import api, { ApiResponse } from './api';
 
 // Tipos de autenticação
 export interface RegisterData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -18,7 +19,8 @@ export interface LoginData {
 
 export interface AuthUser {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: 'CUSTOMER' | 'ADMIN';
   phone?: string;
@@ -34,7 +36,8 @@ export interface AuthResponse {
 }
 
 export interface UpdateProfileData {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   phone?: string;
   cpf?: string;

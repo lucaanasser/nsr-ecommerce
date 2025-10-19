@@ -276,16 +276,23 @@ export default function PerfilPage() {
                       <Input
                         type="text"
                         placeholder="Nome"
-                        defaultValue={user?.name || ''}
+                        defaultValue={user?.firstName || ''}
                         readOnly
                       />
                       <Input
                         type="text"
-                        placeholder="CPF"
-                        defaultValue={formatCPF(user?.cpf || '')}
+                        placeholder="Sobrenome"
+                        defaultValue={user?.lastName || ''}
                         readOnly
                       />
                     </div>
+                    
+                    <Input
+                      type="text"
+                      placeholder="CPF"
+                      defaultValue={formatCPF(user?.cpf || '')}
+                      readOnly
+                    />
                     
                     <Input
                       type="email"

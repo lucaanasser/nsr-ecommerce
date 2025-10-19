@@ -40,10 +40,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   // Converter usuário do AuthContext para formato do AdminContext
   const user: User | null = authUser ? {
     id: authUser.id,
-    name: authUser.name,
+    name: `${authUser.firstName} ${authUser.lastName}`,
     email: authUser.email,
     role: authUser.role === 'ADMIN' ? 'admin' : 'user',
-    avatar: authUser.name.charAt(0).toUpperCase(),
+    avatar: authUser.firstName.charAt(0).toUpperCase(),
     title: authUser.role === 'ADMIN' ? 'Administrador' : 'Cliente',
     color: authUser.role === 'ADMIN' ? '#D4AF37' : '#CD7F32',
   } : null;
