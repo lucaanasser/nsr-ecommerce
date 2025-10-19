@@ -361,7 +361,7 @@ async function main() {
   console.log(`   - 2 users (1 admin, 1 customer)`);
   console.log(`   - 1 address`);
   console.log(`   - ${products.length} products`);
-  console.log(`   - ${products.reduce((acc, p) => acc + (p.variants?.length || 0), 0)} product variants`);
+  console.log(`   - 14 product variants`);
   console.log(`   - 1 review\n`);
   
   console.log('👤 Test credentials:');
