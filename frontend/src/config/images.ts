@@ -3,15 +3,16 @@
  * Cloud Name: dvhvhgrvj
  */
 
-const CLOUDINARY_CLOUD = 'dvhvhgrvj';
-const CLOUDINARY_FOLDER = 'nsr';
 
-/**
- * Helper para gerar URL de imagem do Cloudinary com otimizações
- */
-const cloudinaryImage = (publicId: string, transformations = 'f_auto,q_auto') => {
-  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${transformations}/${CLOUDINARY_FOLDER}/${publicId}`;
-};
+// Cloudinary profissional
+const CLOUDINARY_CLOUD = 'dcdbwwvtk';
+
+// Helpers para cada grupo de imagens
+const cloudinaryImageBG = (publicId: string, transformations = 'f_auto,q_auto') =>
+  `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${transformations}/images_nsr_ecommerce/images_backgroud/${publicId}`;
+
+const cloudinaryImageMock = (publicId: string, transformations = 'f_auto,q_auto') =>
+  `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${transformations}/images_nsr_ecommerce/mock_clothes/${publicId}`;
 
 /**
  * URLs das imagens com otimização automática
@@ -20,53 +21,57 @@ const cloudinaryImage = (publicId: string, transformations = 'f_auto,q_auto') =>
  */
 export const IMAGES = {
   // Backgrounds
-  backgroundLogin: cloudinaryImage('background_login'),
-  backgroundCarrinho: cloudinaryImage('background_carrinho'),
-  backgroundPattern: cloudinaryImage('background_pattern'),
-  
+  backgroundLogin: cloudinaryImageBG('background_login.png'),
+  backgroundCarrinho: cloudinaryImageBG('background_carrinho.png'),
+  backgroundPattern: cloudinaryImageBG('background_pattern.png'),
+
   // Patterns
-  pattern1: cloudinaryImage('pattern1'),
-  
+  pattern1: cloudinaryImageBG('pattern1.png'),
+
   // Profile
-  profile: cloudinaryImage('profile'),
-  nasser: cloudinaryImage('nasser'),
-  
+  profile: cloudinaryImageBG('profile.png'),
+  nasser: cloudinaryImageBG('nasser.jpg'),
+
   // Roupas - Produto 1
-  roupa1Frente: cloudinaryImage('roupa1_frente'),
-  roupa1Tras: cloudinaryImage('roupa1_tras'),
-  
+  roupa1Frente: cloudinaryImageMock('roupa1_frente.png'),
+  roupa1Tras: cloudinaryImageMock('roupa1_tras.png'),
+
   // Roupas - Produto 2
-  roupa2Frente: cloudinaryImage('roupa2_frente'),
-  roupa2Tras: cloudinaryImage('roupa2_tras'),
-  
+  roupa2Frente: cloudinaryImageMock('roupa2_frente.png'),
+  roupa2Tras: cloudinaryImageMock('roupa2_tras.png'),
+
   // Roupas - Produto 3
-  roupa3Frente: cloudinaryImage('roupa3_frente'),
-  roupa3Tras: cloudinaryImage('roupa3_tras'),
-  
+  roupa3Frente: cloudinaryImageMock('roupa3_frente.png'),
+  roupa3Tras: cloudinaryImageMock('roupa3_tras.png'),
+
   // Roupas - Produto 4
-  roupa4Frente: cloudinaryImage('roupa4_frente'),
-  roupa4Tras: cloudinaryImage('roupa4_tras'),
+  roupa4Frente: cloudinaryImageMock('roupa4_frente.png'),
+  roupa4Tras: cloudinaryImageMock('roupa4_tras.png'),
 } as const;
 
 /**
  * URLs com tamanhos específicos para otimização
  */
-export const getOptimizedImage = (publicId: string, width?: number, height?: number) => {
+// Helpers para imagens otimizadas
+export const getOptimizedImageBG = (publicId: string, width?: number, height?: number) => {
   let transformations = 'f_auto,q_auto';
-  
-  if (width) {
-    transformations += `,w_${width}`;
-  }
-  if (height) {
-    transformations += `,h_${height}`;
-  }
-  
-  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${transformations}/${CLOUDINARY_FOLDER}/${publicId}`;
+  if (width) transformations += `,w_${width}`;
+  if (height) transformations += `,h_${height}`;
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${transformations}/images_nsr_ecommerce/images_backgroud/${publicId}`;
+};
+export const getOptimizedImageMock = (publicId: string, width?: number, height?: number) => {
+  let transformations = 'f_auto,q_auto';
+  if (width) transformations += `,w_${width}`;
+  if (height) transformations += `,h_${height}`;
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${transformations}/images_nsr_ecommerce/mock_clothes/${publicId}`;
 };
 
 /**
  * URL direta do Cloudinary (sem otimizações)
  */
-export const getDirectImage = (publicId: string) => {
-  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/${CLOUDINARY_FOLDER}/${publicId}`;
+export const getDirectImageBG = (publicId: string) => {
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/images_nsr_ecommerce/images_backgroud/${publicId}`;
+};
+export const getDirectImageMock = (publicId: string) => {
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload/images_nsr_ecommerce/mock_clothes/${publicId}`;
 };

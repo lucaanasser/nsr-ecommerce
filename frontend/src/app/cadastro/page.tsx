@@ -91,7 +91,7 @@ export default function CadastroPage() {
     <>
       <Header />
       
-      <main className="h-screen w-full flex items-center justify-center relative overflow-hidden">
+  <main className="h-screen w-full flex items-center justify-center relative overflow-hidden">
         {/* Imagem de fundo */}
         <div className="fixed inset-0 z-0">
           <Image
@@ -112,7 +112,7 @@ export default function CadastroPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center text-primary-bronze overflow-visible">
+            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center text-primary-bronze overflow-visible font-nsr">
               Cadastro
             </h1>
             
@@ -230,7 +230,7 @@ export default function CadastroPage() {
                   </span>
                 </label>
 
-                <label className="flex items-start gap-3 cursor-pointer group bg-primary-gold/5 hover:bg-primary-gold/10 -mx-2 px-2 py-2 rounded transition-colors">
+                <label className="flex items-start gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={consents.marketing}

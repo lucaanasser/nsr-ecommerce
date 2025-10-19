@@ -91,7 +91,7 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center text-primary-bronze overflow-visible">
+            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center text-primary-bronze overflow-visible font-nsr">
               Login
             </h1>
             
@@ -141,7 +141,7 @@ export default function LoginPage() {
             {/* Credenciais de teste - apenas para desenvolvimento */}
             <div className="mt-8 pt-6 border-t border-dark-border">
               <p className="text-xs text-primary-white/40 text-center mb-3">
-                Credenciais para teste (se existirem no banco):
+                Credenciais para teste:
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Button

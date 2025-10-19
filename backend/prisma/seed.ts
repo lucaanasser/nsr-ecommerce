@@ -169,14 +169,15 @@ async function main() {
   // ================================
   console.log('👤 Creating users...');
   
-  const hashedPassword = await bcrypt.hash('senha123', 10);
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const customerPassword = await bcrypt.hash('password123', 10);
   
   const admin = await prisma.user.upsert({
     where: { email: 'admin@nsr.com' },
     update: {},
     create: {
       email: 'admin@nsr.com',
-      password: hashedPassword,
+      password: adminPassword,
       name: 'Administrador NSR',
       role: 'ADMIN',
       phone: '11999999999',
@@ -184,11 +185,11 @@ async function main() {
   });
 
   const customer = await prisma.user.upsert({
-    where: { email: 'cliente@example.com' },
+    where: { email: 'customer@nsr.com' },
     update: {},
     create: {
-      email: 'cliente@example.com',
-      password: hashedPassword,
+      email: 'customer@nsr.com',
+      password: customerPassword,
       name: 'João Silva',
       role: 'CUSTOMER',
       phone: '11988888888',
@@ -365,8 +366,8 @@ async function main() {
   console.log(`   - 1 review\n`);
   
   console.log('👤 Test credentials:');
-  console.log('   Admin: admin@nsr.com / senha123');
-  console.log('   Customer: cliente@example.com / senha123\n');
+  console.log('   Admin: admin@nsr.com / admin123');
+  console.log('   Customer: customer@nsr.com / password123\n');
 }
 
 main()
