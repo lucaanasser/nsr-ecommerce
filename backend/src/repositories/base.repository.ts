@@ -1,4 +1,8 @@
 /**
+ * Interface e classe base para repositórios do sistema.
+ * Define métodos CRUD genéricos e implementação padrão usando Prisma.
+ */
+/**
  * Base Repository Interface
  * Define métodos CRUD comuns para todos os repositories
  */

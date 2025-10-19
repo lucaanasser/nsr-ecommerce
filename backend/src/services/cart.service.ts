@@ -1,3 +1,7 @@
+/**
+ * Service responsável por toda a lógica de negócio do carrinho de compras.
+ * Implementa operações de busca, adição, atualização e remoção de itens do carrinho.
+ */
 import { 
   AddItemDTO, 
   CartResponse, 
@@ -11,7 +15,7 @@ import {
   NotFoundError, 
   BadRequestError,
 } from '@utils/errors';
-import { logger } from '@config/logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Cart Service

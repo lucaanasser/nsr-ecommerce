@@ -1,3 +1,7 @@
+/**
+ * Repositório responsável por todas as operações de banco de dados relacionadas a pedidos.
+ * Implementa métodos customizados para busca, listagem e detalhes de pedidos.
+ */
 import { Prisma, OrderStatus, PaymentStatus } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { prisma } from '../config/database';

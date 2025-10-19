@@ -1,3 +1,7 @@
+/**
+ * Rotas responsáveis por operações de pedidos do usuário autenticado.
+ * Inclui endpoints para criar, listar, buscar e cancelar pedidos.
+ */
 import { Router } from 'express';
 import * as orderController from '@controllers/order.controller';
 import { authenticate } from '@middlewares/authenticate';

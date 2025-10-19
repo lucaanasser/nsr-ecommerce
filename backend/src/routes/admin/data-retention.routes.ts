@@ -1,3 +1,8 @@
+/**
+ * Rotas administrativas para políticas de retenção e limpeza de dados (LGPD).
+ * Permite geração de relatórios, execução manual e status do scheduler de limpeza.
+ * Acesso restrito a usuários ADMIN.
+ */
 import { Router } from 'express';
 import { authenticate } from '../../middlewares/authenticate';
 import { authorize } from '../../middlewares/authorize';

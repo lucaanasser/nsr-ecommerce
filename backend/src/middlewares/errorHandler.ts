@@ -1,7 +1,12 @@
+/**
+ * Middleware global de tratamento de erros.
+ * Centraliza logging, formatação e resposta de erros para a API.
+ * Deve ser o último middleware registrado na aplicação.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from '@utils/errors';
-import { logger } from '@config/logger';
+import { logger } from '@config/logger.colored';
 import { config } from '@config/env';
 
 /**
@@ -27,9 +32,8 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
-  // Log do erro
-  logger.error('Error occurred:', {
-    error: err.message,
+  // Log do erro padronizado
+  logger.error(`${err.message}`, {
     stack: err.stack,
     path: req.path,
     method: req.method,

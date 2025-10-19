@@ -1,3 +1,7 @@
+/**
+ * Tipos e interfaces para produtos, categorias, coleções, filtros e paginação.
+ * Inclui DTOs, respostas, variantes e estrutura de filtros.
+ */
 import { Gender } from '@prisma/client';
 
 // ================================

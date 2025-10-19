@@ -1,3 +1,7 @@
+/**
+ * Controller responsável por manipular endpoints do carrinho de compras.
+ * Implementa handlers para operações de CRUD no carrinho do usuário autenticado.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { cartService } from '@services/cart.service';
 import { AddItemDTO, UpdateItemDTO } from '../types/cart.types';

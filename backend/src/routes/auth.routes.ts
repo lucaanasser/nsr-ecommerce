@@ -1,3 +1,7 @@
+/**
+ * Rotas responsáveis por autenticação, sessão e perfil de usuários.
+ * Define endpoints para registro, login, refresh, logout, perfil, senha e LGPD.
+ */
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
 import { authenticate } from '../middlewares/authenticate';

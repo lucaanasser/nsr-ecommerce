@@ -1,5 +1,9 @@
+/**
+ * Service responsável por políticas de retenção e limpeza de dados sensíveis (LGPD).
+ * Implementa regras para exclusão, anonimização e notificação de dados antigos.
+ */
 import { prisma } from '../config/database';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 import { emailService } from './email.service';
 
 /**

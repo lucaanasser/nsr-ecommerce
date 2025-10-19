@@ -1,6 +1,10 @@
+/**
+ * Configuração do serviço de email usando Nodemailer.
+ * Define transporter, verificação de conexão e opções padrão de envio.
+ */
 import nodemailer from 'nodemailer';
 import { config } from './env';
-import { logger } from './logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Configuração do transporter de email usando Nodemailer

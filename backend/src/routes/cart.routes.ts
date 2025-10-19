@@ -1,3 +1,7 @@
+/**
+ * Rotas responsáveis por operações do carrinho de compras do usuário autenticado.
+ * Inclui endpoints para adicionar, atualizar, remover e listar itens do carrinho.
+ */
 import { Router } from 'express';
 import { authenticate } from '@middlewares/authenticate';
 import { validateBody } from '@middlewares/validate';

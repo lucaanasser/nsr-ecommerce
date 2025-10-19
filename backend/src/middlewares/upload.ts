@@ -1,3 +1,7 @@
+/**
+ * Middleware responsável por upload e validação de arquivos de imagem usando Multer.
+ * Suporta upload em memória para integração com serviços externos como Cloudinary.
+ */
 import multer from 'multer';
 import { Request } from 'express';
 import { BadRequestError } from '../utils/errors';

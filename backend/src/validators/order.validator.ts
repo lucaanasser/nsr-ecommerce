@@ -1,3 +1,7 @@
+/**
+ * Schemas de validação (Zod) para criação e cancelamento de pedidos.
+ * Garante integridade dos dados enviados para endpoints de pedidos.
+ */
 import { z } from 'zod';
 
 export const createOrderSchema = z.object({

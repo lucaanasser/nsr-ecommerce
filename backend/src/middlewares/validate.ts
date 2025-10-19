@@ -1,3 +1,7 @@
+/**
+ * Middleware responsável por validação de body, params e query usando Zod.
+ * Centraliza validação de dados de entrada para rotas da API.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
 import { ValidationError } from '@utils/errors';

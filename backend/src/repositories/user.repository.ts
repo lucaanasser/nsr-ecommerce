@@ -1,3 +1,7 @@
+/**
+ * Repositório responsável por todas as operações de banco de dados relacionadas a usuários.
+ * Implementa métodos customizados para busca, autenticação e atualização de usuários.
+ */
 import { Prisma } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { prisma } from '../config/database';

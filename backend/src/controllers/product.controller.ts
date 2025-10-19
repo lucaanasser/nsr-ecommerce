@@ -1,3 +1,7 @@
+/**
+ * Controller responsável por manipular requisições HTTP relacionadas a produtos, categorias e coleções.
+ * Implementa endpoints públicos para listagem, busca e detalhes de produtos.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { productService } from '../services/product.service';
 import { categoryService } from '../services/category.service';

@@ -1,3 +1,7 @@
+/**
+ * Controller responsável por manipular endpoints de cálculo e métodos de frete.
+ * Implementa handlers para cálculo de frete e listagem de métodos disponíveis.
+ */
 import { Request, Response } from 'express';
 import { ShippingService } from '@services/shipping.service';
 

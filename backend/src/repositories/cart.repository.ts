@@ -1,3 +1,7 @@
+/**
+ * Repositório responsável por todas as operações de banco de dados relacionadas ao carrinho de compras.
+ * Implementa métodos customizados além do CRUD padrão.
+ */
 import { Prisma } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { prisma } from '../config/database';

@@ -1,6 +1,10 @@
+/**
+ * Agendador de tarefas para políticas de retenção e limpeza de dados (LGPD).
+ * Executa limpezas automáticas e permite execução manual/admin de rotinas de retenção.
+ */
 import * as cron from 'node-cron';
 import { dataRetentionService } from '../services/data-retention.service';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Agendador de tarefas LGPD

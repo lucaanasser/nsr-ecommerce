@@ -1,3 +1,6 @@
+/**
+ * Tipos e interfaces para cálculo, opções e entrada de frete.
+ */
 export interface ShippingCalculation {
   methods: ShippingOption[];
 }

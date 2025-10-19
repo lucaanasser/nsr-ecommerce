@@ -1,3 +1,7 @@
+/**
+ * Controller responsável por manipular requisições HTTP de autenticação e sessão de usuários.
+ * Implementa endpoints de registro, login, refresh, logout e perfil.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/auth.service';
 import { AuthenticatedRequest } from '../types/auth.types';

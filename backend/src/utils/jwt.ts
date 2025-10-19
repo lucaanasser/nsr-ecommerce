@@ -1,3 +1,7 @@
+/**
+ * Utilitários para geração, verificação e manipulação de JWT (access/refresh) na autenticação da API.
+ * Inclui helpers para extração, validação, renovação e decodificação de tokens.
+ */
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
 import { UnauthorizedError } from './errors';

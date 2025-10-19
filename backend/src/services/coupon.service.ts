@@ -1,3 +1,7 @@
+/**
+ * Service responsável por validação e aplicação de cupons de desconto.
+ * Implementa regras de negócio para uso de cupons no checkout.
+ */
 import { prisma } from '@config/database';
 import { BadRequestError } from '@utils/errors';
 import { CouponValidation, CouponApplication } from '../types/coupon.types';

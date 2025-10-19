@@ -1,3 +1,7 @@
+/**
+ * Service responsável por toda a lógica de negócio de produtos.
+ * Implementa busca, filtros, paginação, criação, atualização e formatação de produtos.
+ */
 import { Prisma } from '@prisma/client';
 import { productRepository } from '../repositories/product.repository';
 import {
@@ -9,7 +13,7 @@ import {
   ProductResponse,
 } from '../types/product.types';
 import { NotFoundError, ValidationError } from '../utils/errors';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 
 class ProductService {
   /**

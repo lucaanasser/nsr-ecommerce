@@ -1,3 +1,7 @@
+/**
+ * Schemas de validação (Zod) para produtos, variantes, categorias e coleções.
+ * Inclui validação de filtros, paginação e parâmetros de rota.
+ */
 import { z } from 'zod';
 
 /**

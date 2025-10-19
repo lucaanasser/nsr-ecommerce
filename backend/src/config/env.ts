@@ -1,3 +1,7 @@
+/**
+ * Carrega e valida variáveis de ambiente (.env) para configuração do backend.
+ * Centraliza todas as opções de configuração sensíveis e utilitários de validação.
+ */
 import dotenv from 'dotenv';
 
 // Carregar variáveis de ambiente

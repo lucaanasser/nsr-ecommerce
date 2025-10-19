@@ -1,3 +1,7 @@
+/**
+ * Rotas administrativas para gerenciamento de produtos, categorias e coleções.
+ * Inclui endpoints de CRUD, upload de imagens e exige autenticação ADMIN.
+ */
 import { Router } from 'express';
 import { adminProductController } from '../../controllers/admin/product.controller';
 import { authenticate } from '../../middlewares/authenticate';

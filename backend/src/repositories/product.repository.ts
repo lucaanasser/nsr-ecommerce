@@ -1,3 +1,7 @@
+/**
+ * Repositório responsável por todas as operações de banco de dados relacionadas a produtos.
+ * Implementa métodos customizados para busca, filtros, variantes e reviews.
+ */
 import { Prisma } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { prisma } from '../config/database';

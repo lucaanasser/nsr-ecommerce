@@ -1,6 +1,10 @@
+/**
+ * Middleware responsável por autenticar requisições usando JWT.
+ * Injeta dados do usuário autenticado em req.user e suporta modo obrigatório e opcional.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { extractTokenFromHeader, verifyAccessToken } from '../utils/jwt';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Middleware de autenticação

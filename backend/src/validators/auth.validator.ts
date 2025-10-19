@@ -1,3 +1,7 @@
+/**
+ * Schemas de validação (Zod) para autenticação e cadastro de usuários.
+ * Inclui validação de email, senha, nome, telefone e CPF.
+ */
 import { z } from 'zod';
 
 /**

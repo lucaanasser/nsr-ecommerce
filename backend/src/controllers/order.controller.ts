@@ -1,3 +1,7 @@
+/**
+ * Controller responsável por manipular endpoints de pedidos do usuário.
+ * Implementa handlers para criação, listagem, busca e cancelamento de pedidos.
+ */
 import { Request, Response } from 'express';
 import { OrderService } from '@services/order.service';
 

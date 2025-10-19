@@ -1,3 +1,7 @@
+/**
+ * Configuração do singleton do Prisma Client para acesso ao banco de dados.
+ * Garante uma única instância durante o ciclo de vida da aplicação e faz shutdown gracioso.
+ */
 import { PrismaClient } from '@prisma/client';
 import { config } from './env';
 

@@ -1,4 +1,8 @@
 /**
+ * Tipos e interfaces para operações, respostas e validações do carrinho de compras.
+ * Inclui DTOs, respostas, validação e estrutura dos itens do carrinho.
+ */
+/**
  * Cart Types
  * Tipos e interfaces para o carrinho de compras
  */

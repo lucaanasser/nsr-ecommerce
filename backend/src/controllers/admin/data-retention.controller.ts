@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { dataRetentionService } from '../../services/data-retention.service';
 import { dataRetentionScheduler } from '../../services/data-retention.scheduler';
-import { logger } from '../../config/logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Controller Admin - LGPD Data Retention

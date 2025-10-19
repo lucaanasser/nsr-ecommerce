@@ -1,3 +1,8 @@
+/**
+ * Script de seed para popular o banco de dados com dados iniciais.
+ * Cria categorias, coleções, métodos de frete, cupons, usuários, endereços, produtos e reviews.
+ * Útil para desenvolvimento, testes e ambiente de homologação.
+ */
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 

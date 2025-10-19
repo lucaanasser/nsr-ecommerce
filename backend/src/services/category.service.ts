@@ -1,3 +1,7 @@
+/**
+ * Service responsável por toda a lógica de negócio de categorias de produtos.
+ * Implementa operações de busca, criação e atualização de categorias.
+ */
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
 import {
@@ -6,7 +10,7 @@ import {
   CategoryResponse,
 } from '../types/product.types';
 import { NotFoundError, ValidationError } from '../utils/errors';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 
 class CategoryService {
   /**

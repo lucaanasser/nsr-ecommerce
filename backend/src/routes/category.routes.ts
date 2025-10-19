@@ -1,3 +1,7 @@
+/**
+ * Rotas responsáveis por listagem e busca de categorias de produtos.
+ * Define endpoints públicos para categorias.
+ */
 import { Router } from 'express';
 import { productController } from '../controllers/product.controller';
 import { validateParams } from '../middlewares/validate';

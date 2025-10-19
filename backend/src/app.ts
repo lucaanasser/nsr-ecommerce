@@ -1,10 +1,16 @@
+/**
+ * Arquivo principal de configuração e inicialização da aplicação Express.
+ * Responsável por registrar middlewares globais, rotas, documentação Swagger,
+ * tratamento de erros, conexão com banco de dados, email e inicialização do servidor.
+ * Também inicia o scheduler de retenção de dados (LGPD) e faz shutdown gracioso.
+ */
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 import { config, validateConfig } from '@config/env';
-import { logger, morganStream } from '@config/logger';
+import { logger, morganStream } from '@config/logger.colored';
 import { prisma } from '@config/database';
 import { verifyEmailConnection } from '@config/email';
 import { swaggerSpec } from '@config/swagger';

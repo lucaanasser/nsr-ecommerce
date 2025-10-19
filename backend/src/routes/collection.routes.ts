@@ -1,3 +1,7 @@
+/**
+ * Rotas responsáveis por listagem e busca de coleções de produtos.
+ * Define endpoints públicos para coleções.
+ */
 import { Router } from 'express';
 import { productController } from '../controllers/product.controller';
 import { validateParams } from '../middlewares/validate';

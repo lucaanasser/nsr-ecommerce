@@ -1,8 +1,12 @@
+/**
+ * Middleware responsável por autorização baseada em roles de usuário.
+ * Permite restringir acesso a rotas por perfil e validar acesso a recursos próprios.
+ */
 import { Response, NextFunction } from 'express';
 import { UserRole } from '@prisma/client';
 import { AuthenticatedRequest } from '../types/auth.types';
 import { ForbiddenError } from '../utils/errors';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Middleware de autorização por role

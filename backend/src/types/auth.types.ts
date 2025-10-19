@@ -1,3 +1,7 @@
+/**
+ * Tipos e interfaces para autenticação, sessão e usuários no sistema.
+ * Inclui DTOs, payloads de JWT, respostas e extensão do Request.
+ */
 import { Request } from 'express';
 import { UserRole } from '@prisma/client';
 

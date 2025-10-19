@@ -1,3 +1,7 @@
+/**
+ * Configuração da documentação Swagger/OpenAPI para a API REST do NSR E-commerce.
+ * Define informações, endpoints, schemas e autenticação para uso no Swagger UI.
+ */
 import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from './env';
 

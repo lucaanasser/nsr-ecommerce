@@ -1,4 +1,8 @@
 /**
+ * Utilitários para proteção de dados pessoais e adequação à LGPD.
+ * Inclui funções de mascaramento, sanitização e validação de dados sensíveis.
+ */
+/**
  * Utilitários para proteção de dados pessoais (LGPD)
  */
 

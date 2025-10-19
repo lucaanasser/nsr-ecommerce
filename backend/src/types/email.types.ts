@@ -1,4 +1,7 @@
 /**
+ * Tipos e interfaces para envio, template e dados de emails transacionais do sistema.
+ */
+/**
  * Tipos para o serviço de email
  */
 

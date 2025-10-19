@@ -1,3 +1,7 @@
+/**
+ * Rotas responsáveis por listagem, busca e detalhes de produtos.
+ * Define endpoints públicos para produtos, incluindo filtros e destaques.
+ */
 import { Router } from 'express';
 import { productController } from '../controllers/product.controller';
 import { validateQuery, validateParams } from '../middlewares/validate';

@@ -1,3 +1,6 @@
+/**
+ * Tipos e interfaces para validação e aplicação de cupons de desconto.
+ */
 export interface CouponValidation {
   isValid: boolean;
   coupon?: {

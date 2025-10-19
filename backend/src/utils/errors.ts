@@ -22,6 +22,10 @@ export class BadRequestError extends AppError {
     super(message, 400);
   }
 }
+/**
+ * Define classes de erro customizadas para diferentes cenários da aplicação.
+ * Facilita tratamento, logging e resposta padronizada de erros na API.
+ */
 
 // 401 - Unauthorized
 export class UnauthorizedError extends AppError {

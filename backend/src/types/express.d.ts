@@ -1,4 +1,7 @@
 /**
+ * Extensão global do Request do Express para incluir dados do usuário autenticado.
+ */
+/**
  * Global Type Declarations
  * Extends Express Request interface to include user property
  */

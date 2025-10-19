@@ -1,3 +1,7 @@
+/**
+ * Utilitários para hash, comparação, validação de força e geração de senhas seguras.
+ * Inclui funções para entropia, crack time e tokens aleatórios.
+ */
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 

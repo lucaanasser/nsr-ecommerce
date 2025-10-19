@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '@config/database';
-import { logger } from '@config/logger';
+import { logger } from '@config/logger.colored';
 import { config } from '@config/env';
 
 const router = Router();

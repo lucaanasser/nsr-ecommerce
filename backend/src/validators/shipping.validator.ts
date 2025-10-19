@@ -1,3 +1,7 @@
+/**
+ * Schema de validação (Zod) para cálculo de frete.
+ * Garante integridade dos dados enviados para endpoints de frete.
+ */
 import { z } from 'zod';
 
 export const calculateShippingSchema = z.object({

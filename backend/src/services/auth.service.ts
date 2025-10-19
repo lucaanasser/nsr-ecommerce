@@ -1,3 +1,7 @@
+/**
+ * Service responsável por toda a lógica de negócio relacionada à autenticação de usuários.
+ * Implementa registro, login, refresh, logout, atualização de perfil e LGPD.
+ */
 import { userRepository } from '../repositories/user.repository';
 import { 
   RegisterDTO, 
@@ -19,7 +23,7 @@ import {
   ValidationError 
 } from '../utils/errors';
 import { prisma } from '../config/database';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 import { emailService } from './email.service';
 
 /**

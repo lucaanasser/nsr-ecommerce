@@ -1,7 +1,11 @@
+/**
+ * Service responsável por upload, deleção e gerenciamento de imagens no Cloudinary.
+ * Centraliza integração com o serviço externo de armazenamento de imagens.
+ */
 import { v2 as cloudinary } from 'cloudinary';
 import { config } from '../config/env';
 import { InternalServerError } from '../utils/errors';
-import { logger } from '../config/logger';
+import { logger } from '@config/logger.colored';
 
 /**
  * Cloudinary Service

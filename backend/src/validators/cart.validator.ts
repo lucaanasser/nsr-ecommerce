@@ -1,3 +1,7 @@
+/**
+ * Schemas de validação (Zod) para operações do carrinho de compras.
+ * Inclui validação para adicionar, atualizar e identificar itens no carrinho.
+ */
 import { z } from 'zod';
 
 /**

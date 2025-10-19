@@ -1,3 +1,7 @@
+/**
+ * Service responsável por cálculo de frete e listagem de métodos de envio disponíveis.
+ * Implementa regras de negócio para cálculo de custo e prazo de entrega.
+ */
 import { prisma } from '@config/database';
 import { CalculateShippingInput, ShippingCalculation } from '../types/shipping.types';
 

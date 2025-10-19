@@ -1,9 +1,13 @@
+/**
+ * Service responsável por toda a lógica de negócio de pedidos.
+ * Implementa criação, validação, cálculo de totais, uso de cupom e envio de email de confirmação.
+ */
 import { prisma } from '@config/database';
 import { CreateOrderDTO } from '../types/order.types';
 import { BadRequestError } from '@utils/errors';
 import { CouponService } from './coupon.service';
 import { emailService } from './email.service';
-import { logger } from '@config/logger';
+import { logger } from '@config/logger.colored';
 
 export class OrderService {
   private couponService = new CouponService();

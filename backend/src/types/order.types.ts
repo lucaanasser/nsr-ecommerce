@@ -1,3 +1,7 @@
+/**
+ * Tipos e interfaces para criação, resposta e itens de pedidos.
+ * Inclui DTOs, respostas e estrutura dos itens do pedido.
+ */
 export interface CreateOrderDTO {
   addressId: string;
   items: OrderItemInput[];

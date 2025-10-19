@@ -1,9 +1,13 @@
+/**
+ * Service responsável por envio de emails transacionais usando templates Handlebars.
+ * Centraliza lógica de renderização, envio e formatação de emails do sistema.
+ */
 import handlebars from 'handlebars';
 import path from 'path';
 import fs from 'fs/promises';
 import { emailTransporter, emailDefaults } from '@config/email';
 import { config } from '@config/env';
-import { logger } from '@config/logger';
+import { logger } from '@config/logger.colored';
 import {
   EmailOptions,
   EmailResult,
