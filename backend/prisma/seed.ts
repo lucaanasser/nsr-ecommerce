@@ -221,6 +221,7 @@ async function main() {
   await prisma.address.create({
     data: {
       userId: customer.id,
+      label: 'Casa',
       street: 'Rua das Flores',
       number: '123',
       complement: 'Apto 45',

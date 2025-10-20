@@ -113,6 +113,9 @@ model Address {
   userId     String
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  // Identificação
+  label      String  // Ex: "Casa", "Trabalho", "Casa dos pais"
+  
   // Endereço
   street     String
   number     String
