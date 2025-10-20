@@ -193,20 +193,22 @@ async function main() {
       lastName: 'NSR',
       role: 'ADMIN',
       phone: '11999999999',
+      birthDate: new Date('1990-01-01'),
     },
   });
 
   const customer = await prisma.user.upsert({
-    where: { email: 'cliente@example.com' },
+    where: { email: 'customer@nsr.com' },
     update: {},
     create: {
-      email: 'cliente@example.com',
+      email: 'customer@nsr.com',
       password: customerPassword,
       firstName: 'João',
       lastName: 'Silva',
       role: 'CUSTOMER',
       phone: '11988888888',
       cpf: '12345678900',
+      birthDate: new Date('1995-05-15'),
     },
   });
 

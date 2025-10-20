@@ -7,6 +7,7 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword: string;
+  birthDate: string; // ISO format from backend
   privacyPolicy?: boolean;
   terms?: boolean;
   marketing?: boolean;

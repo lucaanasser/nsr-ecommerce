@@ -29,8 +29,9 @@ export interface RegisterDTO {
   password: string;
   firstName: string;
   lastName: string;
-  phone?: string;
   cpf?: string;
+  phone?: string;
+  birthDate: Date;
   // LGPD - Consentimentos
   privacyPolicy?: boolean;
   terms?: boolean;
@@ -56,10 +57,12 @@ export interface RefreshTokenDTO {
  * DTO para atualização de perfil
  */
 export interface UpdateProfileDTO {
+  email?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
   cpf?: string;
+  birthDate?: Date;
 }
 
 /**
@@ -79,11 +82,11 @@ export interface LoginResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
-    phone?: string;
-    cpf?: string;
+    role: UserRole;
+    phone: string | null;
+    cpf: string | null;
+    birthDate: Date;
     createdAt: Date;
-    lastLogin?: Date;
   };
   accessToken: string;
   refreshToken: string;
@@ -111,12 +114,13 @@ export interface UserResponse {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
-  phone?: string;
-  cpf?: string;
+  role: UserRole;
+  phone: string | null;
+  cpf: string | null;
+  birthDate: Date;
   createdAt: Date;
   updatedAt: Date;
-  lastLogin?: Date;
+  lastLogin: Date | null;
 }
 
 /**

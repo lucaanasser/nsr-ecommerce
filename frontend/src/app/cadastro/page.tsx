@@ -12,6 +12,53 @@ import { useAuthContext } from '@/context/AuthContext';
 import { getErrorMessage } from '@/services';
 import { IMAGES } from '@/config/images';
 
+// Utility functions for date conversion
+const formatDateToBR = (isoDate: string): string => {
+  if (!isoDate) return '';
+  const [year, month, day] = isoDate.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+const formatDateToISO = (brDate: string): string => {
+  if (!brDate) return '';
+  const cleaned = brDate.replace(/\D/g, '');
+  if (cleaned.length !== 8) return '';
+  
+  const day = cleaned.substring(0, 2);
+  const month = cleaned.substring(2, 4);
+  const year = cleaned.substring(4, 8);
+  
+  return `${year}-${month}-${day}`;
+};
+
+const validateAge = (isoDate: string): { valid: boolean; message?: string } => {
+  if (!isoDate) return { valid: false, message: 'Data de nascimento é obrigatória' };
+  
+  const birthDate = new Date(isoDate);
+  const today = new Date();
+  
+  if (isNaN(birthDate.getTime())) {
+    return { valid: false, message: 'Data inválida' };
+  }
+  
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  if (age < 13) {
+    return { valid: false, message: 'Você deve ter pelo menos 13 anos' };
+  }
+  
+  if (age > 120) {
+    return { valid: false, message: 'Data de nascimento inválida' };
+  }
+  
+  return { valid: true };
+};
+
 /**
  * Página Cadastro
  * 
@@ -38,9 +85,32 @@ export default function CadastroPage() {
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Special handling for birthDate to format as dd/MM/yyyy
+    if (name === 'birthDate') {
+      // Remove all non-digit characters
+      const cleaned = value.replace(/\D/g, '');
+      
+      // Apply mask: dd/MM/yyyy
+      let formatted = cleaned;
+      if (cleaned.length >= 2) {
+        formatted = cleaned.substring(0, 2) + '/' + cleaned.substring(2);
+      }
+      if (cleaned.length >= 4) {
+        formatted = cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4) + '/' + cleaned.substring(4, 8);
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        birthDate: formatted
+      }));
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
   };
 
@@ -56,6 +126,14 @@ export default function CadastroPage() {
 
     if (formData.password.length < 6) {
       setError('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    // Validar data de nascimento
+    const isoDate = formatDateToISO(formData.birthDate);
+    const ageValidation = validateAge(isoDate);
+    if (!ageValidation.valid) {
+      setError(ageValidation.message || 'Data de nascimento inválida');
       return;
     }
 
@@ -79,6 +157,7 @@ export default function CadastroPage() {
         formData.email,
         formData.password,
         formData.confirmPassword,
+        isoDate, // Send ISO format to backend
         consents
       );
       
@@ -170,15 +249,19 @@ export default function CadastroPage() {
                   className="bg-dark-card/50 backdrop-blur-sm"
                 />
                 
-                <Input
-                  type="date"
-                  name="birthDate"
-                  value={formData.birthDate}
-                  onChange={handleChange}
-                  placeholder="Data de Nascimento"
-                  required
-                  className="bg-dark-card/50 backdrop-blur-sm"
-                />
+                <div className="relative">
+                  <Input
+                    type="text"
+                    name="birthDate"
+                    value={formData.birthDate}
+                    onChange={handleChange}
+                    placeholder="dd/MM/aaaa"
+                    maxLength={10}
+                    required
+                    className="bg-dark-card/50 backdrop-blur-sm"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-3">

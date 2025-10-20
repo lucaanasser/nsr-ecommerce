@@ -121,7 +121,14 @@ export interface PasswordResetEmailData {
   userName: string;
   userEmail: string;
   resetToken: string;
-  expiresIn: string; // Ex: "1 hora"
+  resetUrl: string;
+}
+
+export interface ProfileUpdateEmailData {
+  userName: string;
+  userEmail: string;
+  updatedFields: string[]; // Lista de campos alterados
+  updateDate: Date;
 }
 
 // ================================

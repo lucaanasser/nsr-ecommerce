@@ -78,7 +78,8 @@ export class OrderRepository extends BaseRepository<Order> {
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             phone: true,
           },
@@ -103,7 +104,8 @@ export class OrderRepository extends BaseRepository<Order> {
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             phone: true,
           },
@@ -275,7 +277,8 @@ export class OrderRepository extends BaseRepository<Order> {
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           },
         },
@@ -356,7 +359,8 @@ export class OrderRepository extends BaseRepository<Order> {
           select: {
             id: true,
             email: true,
-            name: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },

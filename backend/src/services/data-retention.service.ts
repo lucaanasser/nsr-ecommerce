@@ -220,7 +220,7 @@ export class DataRetentionService {
         try {
           // Enviar email de aviso
           await emailService.sendInactivityWarning({
-            userName: user.name,
+            userName: `${user.firstName} ${user.lastName}`,
             userEmail: user.email,
             lastLoginDate: user.lastLogin || user.createdAt,
           });
@@ -301,7 +301,8 @@ export class DataRetentionService {
           where: { id: userId },
           data: {
             email: `deleted_${userId}@anonymized.local`,
-            name: 'Usuário Deletado',
+            firstName: 'Usuário',
+            lastName: 'Deletado',
             phone: null,
             cpf: null,
             anonymizedAt: now,

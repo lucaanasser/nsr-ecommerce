@@ -108,6 +108,28 @@ const cpfSchema = z
   .optional();
 
 /**
+ * Valida data de nascimento
+ * - Deve ser uma data válida
+ * - Pessoa deve ter pelo menos 13 anos
+ * - Pessoa deve ter no máximo 120 anos
+ */
+const birthDateSchema = z
+  .string()
+  .refine((date) => {
+    const birthDate = new Date(date);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+    
+    // Ajusta a idade se o aniversário ainda não ocorreu este ano
+    const actualAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age;
+    
+    return actualAge >= 13 && actualAge <= 120;
+  }, 'Você deve ter pelo menos 13 anos para se cadastrar')
+  .transform((date) => new Date(date));
+
+/**
  * Schema de validação para registro de usuário
  */
 export const registerSchema = z.object({
@@ -117,6 +139,7 @@ export const registerSchema = z.object({
   lastName: lastNameSchema,
   phone: phoneSchema,
   cpf: cpfSchema,
+  birthDate: birthDateSchema,
   // LGPD - Consentimentos
   privacyPolicy: z.boolean().optional(),
   terms: z.boolean().optional(),
@@ -142,10 +165,12 @@ export const refreshTokenSchema = z.object({
  * Schema de validação para atualização de perfil
  */
 export const updateProfileSchema = z.object({
+  email: emailSchema.optional(),
   firstName: firstNameSchema.optional(),
   lastName: lastNameSchema.optional(),
   phone: phoneSchema,
   cpf: cpfSchema,
+  birthDate: birthDateSchema.optional(),
 });
 
 /**

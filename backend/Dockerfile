@@ -39,6 +39,13 @@ RUN npm ci --only=production && \
 # Copiar código compilado do stage anterior
 COPY --from=builder /app/dist ./dist
 
+# Copiar templates de email
+COPY --from=builder /app/src/templates ./dist/templates
+
+# Copiar script de entrypoint
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 # Criar usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
@@ -57,4 +64,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:4000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Comando de inicialização
-CMD ["node", "dist/server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

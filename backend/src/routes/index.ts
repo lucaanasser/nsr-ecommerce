@@ -96,6 +96,7 @@ import adminDataRetentionRoutes from './admin/data-retention.routes';
 import cartRoutes from './cart.routes';
 import orderRoutes from './order.routes';
 import shippingRoutes from './shipping.routes';
+import testEmailRoutes from './test-email.routes';
 
 // Registrar rotas
 router.use('/api/v1/auth', authRoutes);
@@ -107,5 +108,6 @@ router.use('/api/v1/admin/data-retention', adminDataRetentionRoutes);
 router.use('/api/v1/cart', cartRoutes);
 router.use('/api/v1/orders', orderRoutes);
 router.use('/api/v1/shipping', shippingRoutes);
+router.use('/api/v1/test-email', testEmailRoutes); // TEMPORÁRIO - REMOVER EM PRODUÇÃO
 
 export default router;

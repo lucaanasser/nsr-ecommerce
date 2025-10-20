@@ -15,6 +15,7 @@ import {
   OrderConfirmationEmailData,
   OrderStatusUpdateEmailData,
   PasswordResetEmailData,
+  ProfileUpdateEmailData,
   BaseTemplateData,
   OrderDetails,
   OrderItem,
@@ -145,17 +146,10 @@ export class EmailService {
    */
   async sendWelcomeEmail(data: WelcomeEmailData): Promise<EmailResult> {
     try {
-      const content = `
-        <p>Seja muito bem-vindo(a) à <strong>NSR</strong>! 🎉</p>
-        <p>Estamos muito felizes em ter você conosco. Sua conta foi criada com sucesso e agora você pode aproveitar tudo que temos a oferecer.</p>
-        <p><strong>O que você pode fazer agora:</strong></p>
-        <ul style="margin: 15px 0; padding-left: 20px;">
-          <li style="margin: 8px 0;">Explorar nossos produtos exclusivos de streetwear</li>
-          <li style="margin: 8px 0;">Salvar seus produtos favoritos</li>
-          <li style="margin: 8px 0;">Receber ofertas e lançamentos exclusivos</li>
-          <li style="margin: 8px 0;">Acompanhar seus pedidos em tempo real</li>
-        </ul>
-      `;
+        const content = `
+          <h1 style="text-align:center;font-size:2rem;margin-bottom:18px;">Bem-vindo à NSR!</h1>
+          <p style="text-align:center;font-size:1.1rem;margin-bottom:18px;">Sua conta foi criada com sucesso.<br>Agora você pode acessar sua área exclusiva, acompanhar pedidos e receber novidades.</p>
+        `;
 
       const templateData: BaseTemplateData = {
         subject: 'Bem-vindo à NSR! 🎉',
@@ -163,7 +157,7 @@ export class EmailService {
         content,
         buttonText: 'Explorar Produtos',
         buttonUrl: `${config.frontend.url}/produtos`,
-        additionalInfo: '<p>Se tiver alguma dúvida, nossa equipe está à disposição para ajudar.</p>',
+        additionalInfo: '',
         frontendUrl: config.frontend.url,
       };
 
@@ -326,7 +320,7 @@ export class EmailService {
         buttonUrl: resetUrl,
         additionalInfo: `
           <p style="color: #d9534f; font-weight: 600;">
-            ⚠️ Este link expira em ${data.expiresIn}.
+            Este link expira em 1 hora.
           </p>
           <p style="font-size: 13px; color: #666;">
             Se o botão não funcionar, copie e cole este link no seu navegador:<br>
@@ -373,7 +367,7 @@ export class EmailService {
           </h1>
           
           <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-            Notamos que você não acessa sua conta na <strong>NSR E-commerce</strong> desde 
+            Notamos que você não acessa sua conta na <strong>NSR</strong> desde 
             <strong>${formattedDate}</strong> (há aproximadamente 5 anos).
           </p>
           
@@ -417,11 +411,51 @@ export class EmailService {
 
       return await this.sendEmail({
         to: data.userEmail,
-        subject: '⚠️ NSR - Sua conta está inativa e será anonimizada em breve',
+        subject: 'NSR - Sua conta está inativa e será anonimizada em breve',
         html,
       });
     } catch (error) {
       logger.error('Failed to send inactivity warning email', { error, data });
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Envia email de notificação de alteração de perfil
+   */
+  async sendProfileUpdateNotification(data: ProfileUpdateEmailData): Promise<EmailResult> {
+    try {
+      const formattedDate = this.formatDateTime(data.updateDate);
+
+      const content = `
+          <p>Seus dados cadastrais foram <strong>atualizados com sucesso</strong> em ${formattedDate}.</p>
+          <div style="background: #FFF3CD; border-left: 4px solid #FFC107; padding: 12px; margin: 18px 0; border-radius: 4px; text-align:center; font-size:14px; color:#856404;">
+            Não reconhece esta alteração? <strong>Altere sua senha e entre em contato conosco.</strong>
+          </div>
+      `;
+
+      const templateData: BaseTemplateData = {
+        subject: 'Seus dados foram atualizados - NSR',
+        userName: data.userName,
+        content,
+        buttonText: 'Acessar Meu Perfil',
+        buttonUrl: `${config.frontend.url}/perfil`,
+        additionalInfo: ``,
+        frontendUrl: config.frontend.url,
+      };
+
+      const html = await this.renderTemplate(templateData);
+
+      return await this.sendEmail({
+        to: data.userEmail,
+        subject: templateData.subject,
+        html,
+      });
+    } catch (error) {
+      logger.error('Failed to send profile update notification email', { error, data });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

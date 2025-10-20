@@ -99,7 +99,7 @@ export class OrderService {
           addressId: data.addressId,
           
           // Snapshots
-          customerName: user.name,
+          customerName: `${user.firstName} ${user.lastName}`,
           customerEmail: user.email,
           customerPhone: user.phone || '',
 
@@ -184,7 +184,7 @@ export class OrderService {
       // 14. Enviar email de confirmação (não bloqueia se falhar)
       emailService
         .sendOrderConfirmation({
-          userName: user.name,
+          userName: `${user.firstName} ${user.lastName}`,
           userEmail: user.email,
           orderNumber: order.orderNumber,
           orderDate: order.createdAt,

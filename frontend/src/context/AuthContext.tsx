@@ -15,6 +15,7 @@ interface AuthContextType {
     email: string,
     password: string,
     confirmPassword: string,
+    birthDate: string, // ISO format (yyyy-MM-dd)
     consents?: {
       privacyPolicy: boolean;
       terms: boolean;
@@ -74,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     confirmPassword: string,
+    birthDate: string, // ISO format (yyyy-MM-dd)
     consents?: {
       privacyPolicy: boolean;
       terms: boolean;
@@ -87,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
         confirmPassword,
+        birthDate,
         ...consents,
       });
       setUser(response.user);

@@ -54,11 +54,11 @@ model User {
   password  String
   firstName String
   lastName  String
+  birthDate DateTime
   role      UserRole @default(CUSTOMER)
-  
-  // Informações adicionais
   phone     String?
   cpf       String?  @unique
+  
   
   // LGPD - Consentimentos
   privacyPolicyAccepted    Boolean   @default(false)

@@ -42,13 +42,23 @@ const colorizeLevel = (level: string, message: string) => {
   }
 };
 
-const logFormat = printf(({ level, message, timestamp, stack }) => {
+const logFormat = printf(({ level, message, timestamp, stack, ...metadata }) => {
   const prefix = emojiLevel(level);
   const coloredMsg = colorizeLevel(level, String(message));
-  if (level === 'error' && stack) {
-    return `${chalk.gray(`[${timestamp}]`)} ${prefix}: ${coloredMsg}\n${chalk.gray(stack)}`;
+  
+  // Remover campos internos do Winston
+  const { level: _, message: __, timestamp: ___, ...cleanMetadata } = metadata as any;
+  const hasMetadata = Object.keys(cleanMetadata).length > 0;
+  
+  let metadataStr = '';
+  if (hasMetadata) {
+    metadataStr = '\n' + chalk.gray(JSON.stringify(cleanMetadata, null, 2));
   }
-  return `${chalk.gray(`[${timestamp}]`)} ${prefix}: ${coloredMsg}`;
+  
+  if (level === 'error' && stack) {
+    return `${chalk.gray(`[${timestamp}]`)} ${prefix}: ${coloredMsg}${metadataStr}\n${chalk.gray(stack)}`;
+  }
+  return `${chalk.gray(`[${timestamp}]`)} ${prefix}: ${coloredMsg}${metadataStr}`;
 });
 
 export const logger = winston.createLogger({

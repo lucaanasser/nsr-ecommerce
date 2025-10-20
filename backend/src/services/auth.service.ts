@@ -88,6 +88,7 @@ export class AuthService {
       lastName: data.lastName,
       phone: data.phone,
       cpf: data.cpf,
+      birthDate: data.birthDate,
       role: 'CUSTOMER', // Todos começam como CUSTOMER
       ...lgpdData,
     });
@@ -98,15 +99,39 @@ export class AuthService {
     });
 
     // Enviar email de boas-vindas (não bloqueia o registro se falhar)
+    logger.info('Attempting to send welcome email', {
+      userName: user.firstName,
+      userEmail: user.email,
+    });
+    
     emailService
       .sendWelcomeEmail({
         userName: user.firstName,
         userEmail: user.email,
       })
+      .then((result) => {
+        if (result.success) {
+          logger.info('Welcome email sent successfully', {
+            userId: user.id,
+            email: user.email,
+            messageId: result.messageId,
+          });
+        } else {
+          logger.error('Failed to send welcome email', {
+            userId: user.id,
+            email: user.email,
+            error: result.error,
+            fullResult: JSON.stringify(result),
+          });
+        }
+      })
       .catch((error) => {
-        logger.error('Failed to send welcome email', {
+        logger.error('Failed to send welcome email - exception caught', {
           userId: user.id,
-          error,
+          error: error.message || error,
+          errorName: error.name,
+          stack: error.stack,
+          fullError: JSON.stringify(error, Object.getOwnPropertyNames(error)),
         });
       });
 
@@ -289,6 +314,14 @@ export class AuthService {
     userId: string,
     data: UpdateProfileDTO
   ): Promise<UserResponse> {
+    // Se email foi fornecido, verifica se já existe
+    if (data.email) {
+      const existingUser = await userRepository.findByEmail(data.email);
+      if (existingUser && existingUser.id !== userId) {
+        throw new ConflictError('Email já cadastrado por outro usuário');
+      }
+    }
+
     // Se CPF foi fornecido, verifica se já existe
     if (data.cpf) {
       const existingUser = await userRepository.findByCpf(data.cpf);
@@ -304,6 +337,42 @@ export class AuthService {
       userId: user.id,
       updatedFields: Object.keys(data),
     });
+
+    // Envia email de notificação de alteração (não bloqueia se falhar)
+    logger.info('Attempting to send profile update notification', {
+      userName: `${user.firstName} ${user.lastName}`,
+      userEmail: user.email,
+      updatedFields: Object.keys(data),
+    });
+    
+    emailService
+      .sendProfileUpdateNotification({
+        userName: `${user.firstName} ${user.lastName}`,
+        userEmail: user.email,
+        updatedFields: Object.keys(data),
+        updateDate: new Date(),
+      })
+      .then((result) => {
+        if (result.success) {
+          logger.info('Profile update notification sent successfully', {
+            userId: user.id,
+            email: user.email,
+            messageId: result.messageId,
+          });
+        } else {
+          logger.error('Failed to send profile update notification email', {
+            userId: user.id,
+            error: result.error,
+          });
+        }
+      })
+      .catch((error) => {
+        logger.error('Failed to send profile update notification email - exception caught', {
+          userId: user.id,
+          error: error.message || error,
+          stack: error.stack,
+        });
+      });
 
     return this.sanitizeUser(user);
   }
@@ -469,6 +538,7 @@ export class AuthService {
       role: user.role,
       phone: user.phone,
       cpf: user.cpf,
+      birthDate: user.birthDate,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       lastLogin: user.lastLogin,

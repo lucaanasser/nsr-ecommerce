@@ -15,7 +15,7 @@ services:
       - nsr-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nsr_dev}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nsr_dev} -d ${POSTGRES_DB:-nsr_development}"]
       interval: 10s
       timeout: 5s
       retries: 5

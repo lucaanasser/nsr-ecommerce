@@ -86,7 +86,8 @@ export class ProductRepository extends BaseRepository<Product> {
             user: {
               select: {
                 id: true,
-                name: true,
+                firstName: true,
+                lastName: true,
               },
             },
           },
