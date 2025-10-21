@@ -11,22 +11,24 @@ import Footer from '@/components/layout/Footer';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 
-// Componentes de Checkout
-import CheckoutSteps from '@/components/checkout/CheckoutSteps';
-import CheckoutSummary from '@/components/checkout/CheckoutSummary';
+// Componentes de Checkout (locais)
+import CheckoutSteps from './components/CheckoutSteps';
+import CheckoutSummary from './components/CheckoutSummary';
 import {
   CompradorStep,
   DestinatarioStep,
   PagamentoStep,
   ConfirmacaoStep,
-} from '@/components/checkout/steps';
-import AddressTitleModal from '@/components/checkout/modals/AddressTitleModal';
+} from './components/steps';
+import AddressTitleModal from './components/modals/AddressTitleModal';
 
-// Hooks
+// Hooks customizados (locais)
+import { useCheckoutData } from './hooks/useCheckoutData';
+import { useSavedAddresses } from './hooks/useSavedAddresses';
+
+// Hooks globais
 import { useCart } from '@/context/CartContext';
 import { useAuthContext } from '@/context/AuthContext';
-import { useCheckoutData } from '@/hooks/checkout/useCheckoutData';
-import { useSavedAddresses } from '@/hooks/checkout/useSavedAddresses';
 
 // Services
 import { addressService } from '@/services';
