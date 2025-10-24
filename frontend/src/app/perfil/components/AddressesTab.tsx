@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
 import AddressFormModal from '@/components/address/AddressFormModal';
 import { Address } from '@/services/address.service';
+import { getErrorMessage } from '@/services';
 
 interface AddressesTabProps {
   enderecos: Address[];
@@ -59,7 +60,7 @@ export default function AddressesTab({
     try {
       await onDeleteAddress(addressId);
     } catch (error: any) {
-      alert('Erro ao remover endereço: ' + (error?.response?.data?.error || error?.message));
+      alert('Erro ao remover endereço: ' + getErrorMessage(error));
     }
   };
 
@@ -67,7 +68,7 @@ export default function AddressesTab({
     try {
       await onSetDefaultAddress(addressId);
     } catch (error: any) {
-      alert('Erro ao definir endereço padrão: ' + (error?.response?.data?.error || error?.message));
+      alert('Erro ao definir endereço padrão: ' + getErrorMessage(error));
     }
   };
 

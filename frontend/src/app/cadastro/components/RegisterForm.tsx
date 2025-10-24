@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
 
 interface RegisterFormProps {
   formData: {
@@ -143,6 +144,12 @@ export default function RegisterForm({
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-bronze text-sm">*</span>
         </div>
+
+        {/* Indicador de força da senha */}
+        <PasswordStrengthIndicator
+          password={formData.password}
+          confirmPassword={formData.confirmPassword}
+        />
 
         {/* Consentimentos */}
         <div className="space-y-3 pt-2">

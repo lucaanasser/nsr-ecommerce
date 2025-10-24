@@ -15,8 +15,8 @@ import Button from '@/components/ui/Button';
 import CheckoutSteps from './components/CheckoutSteps';
 import CheckoutSummary from './components/CheckoutSummary';
 import {
-  CompradorStep,
-  DestinatarioStep,
+  DadosStep,
+  EntregaStep,
   PagamentoStep,
   ConfirmacaoStep,
 } from './components/steps';
@@ -32,7 +32,7 @@ import { useAuthContext } from '@/context/AuthContext';
 
 // Services
 import { addressService } from '@/services';
-import type { SavedAddress } from '@/services';
+import type { SavedAddress, AuthUser } from '@/services';
 
 /**
  * Página de Checkout - REFATORADA
@@ -41,7 +41,7 @@ import type { SavedAddress } from '@/services';
 export default function CheckoutPage() {
   const router = useRouter();
   const { itensCarrinho, obterTotalCarrinho, limparCarrinho } = useCart();
-  const { user, isAuthenticated, register } = useAuthContext();
+  const { user, isAuthenticated, register, refreshUser } = useAuthContext();
   
   // Hooks customizados para gerenciar estados
   const checkoutData = useCheckoutData();
@@ -51,100 +51,82 @@ export default function CheckoutPage() {
   // EFFECTS
   // ========================================
 
-  // Verificar dados do comprador ao carregar
+  // Verificar se pode pular etapa de dados automaticamente
   useEffect(() => {
-    if (user) {
-      verificarDadosComprador();
+    if (user && checkoutData.etapa === 'comprador') {
+      const hasCpf = user.cpf && user.cpf.trim() !== '';
+      const hasPhone = user.phone && user.phone.trim() !== '';
+      
+      // Se tem todos os dados, pula direto para entrega
+      if (hasCpf && hasPhone) {
+        console.log('[Checkout] ✅ Usuário com dados completos, pulando para entrega');
+        checkoutData.setEtapa('destinatario');
+      }
     }
-  }, [user]);
+  }, [user, checkoutData.etapa]);
 
   // ========================================
-  // FUNÇÕES - COMPRADOR
+  // HANDLERS - DADOS DO COMPRADOR (Refatorado)
   // ========================================
 
-  const verificarDadosComprador = () => {
-    if (!user) return;
-
-    const faltando: string[] = [];
-    
-    // Preenche dados existentes
-    checkoutData.setDadosComprador({
-      nome: user.firstName,
-      sobrenome: user.lastName,
-      email: user.email,
-      telefone: user.phone || '',
-      cpf: user.cpf || '',
-    });
-
-    // Verifica o que está faltando
-    if (!user.phone) faltando.push('telefone');
-    if (!user.cpf) faltando.push('cpf');
-
-    checkoutData.setDadosCompradorFaltando(faltando);
-
-    // Se não falta nada, pula direto para destinatário
-    if (faltando.length === 0) {
-      checkoutData.setEtapa('destinatario');
+  /**
+   * Handler para login bem-sucedido no checkout
+   * Atualiza contexto sem reload e mantém checkout
+   */
+  const handleLoginSuccess = async (loggedUser: AuthUser) => {
+    try {
+      console.log('🔄 Atualizando contexto após login...');
+      // Atualizar contexto de autenticação SEM reload
+      await refreshUser();
+      console.log('✅ Contexto atualizado, DadosStep detectará o novo estado');
+      // O DadosStep detectará automaticamente o novo estado
+    } catch (error) {
+      console.error('❌ Erro ao atualizar usuário:', error);
     }
   };
 
-  const handleSubmitComprador = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Se não está logado, deve criar conta (OBRIGATÓRIO)
-    if (!user) {
-      if (checkoutData.senha !== checkoutData.confirmarSenha) {
-        alert('As senhas não coincidem');
-        return;
-      }
-
-      if (!checkoutData.aceitouTermos) {
-        alert('Você deve aceitar os termos de uso e política de privacidade');
-        return;
-      }
-
-      try {
-        // Criar conta com todos os dados necessários
-        await register(
-          checkoutData.dadosComprador.nome,
-          checkoutData.dadosComprador.sobrenome,
-          checkoutData.dadosComprador.email,
-          checkoutData.senha,
-          checkoutData.confirmarSenha,
-          checkoutData.dataNascimento,
-          {
-            privacyPolicy: true,
-            terms: checkoutData.aceitouTermos,
-            marketing: false,
-          }
-        );
-        
-        // Nota: CPF e telefone precisarão ser atualizados após o registro
-        // TODO: Implementar atualização de perfil com esses dados adicionais
-        
-      } catch (error) {
-        console.error('Erro ao criar conta:', error);
-        alert('Erro ao criar conta. Tente novamente.');
-        return;
-      }
+  /**
+   * Handler para cadastro bem-sucedido no checkout
+   * Usuário já está logado automaticamente após cadastro
+   */
+  const handleRegisterSuccess = async (registeredUser: AuthUser) => {
+    try {
+      console.log('🔄 Atualizando contexto após cadastro...');
+      // Atualizar contexto de autenticação SEM reload
+      await refreshUser();
+      console.log('✅ Contexto atualizado, DadosStep detectará o novo estado');
+      // O DadosStep detectará automaticamente o novo estado
+    } catch (error) {
+      console.error('❌ Erro ao atualizar usuário:', error);
     }
+  };
 
-    // Se está logado e precisa salvar dados faltantes
-    if (user && checkoutData.dadosCompradorFaltando.length > 0 && checkoutData.salvarDadosComprador) {
-      try {
-        // TODO: Criar endpoint para atualizar dados do usuário (phone, cpf)
-        console.log('Salvando dados do comprador no perfil...');
-      } catch (error) {
-        console.error('Erro ao salvar dados:', error);
-      }
+  /**
+   * Handler para completar dados faltantes (CPF/telefone)
+   * Dados já foram salvos no perfil se usuário marcou checkbox
+   */
+  const handleCompleteData = async (updatedUser: AuthUser) => {
+    try {
+      console.log('🔄 Atualizando contexto e avançando para entrega...');
+      // Atualizar contexto com novos dados SEM reload
+      await refreshUser();
+      console.log('✅ Dados atualizados, avançando para destinatário');
+      // Avançar para próxima etapa
+      checkoutData.setEtapa('destinatario');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar usuário:', error);
     }
+  };
 
-    // Avança para próxima etapa
+  /**
+   * Handler para continuar quando dados estão completos
+   */
+  const handleContinueDados = () => {
     checkoutData.setEtapa('destinatario');
   };
 
   // ========================================
-  // FUNÇÕES - DESTINATÁRIO
+  // FUNÇÕES - ENTREGA
   // ========================================
 
   const usarDadosComprador = () => {
@@ -310,30 +292,20 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Formulários das Etapas */}
               <div className="lg:col-span-2">
-                {/* Etapa 1: Comprador */}
+                {/* Etapa 1: Dados */}
                 {checkoutData.etapa === 'comprador' && (
-                  <CompradorStep
+                  <DadosStep
                     user={user}
-                    dadosComprador={checkoutData.dadosComprador}
-                    setDadosComprador={checkoutData.setDadosComprador}
-                    dadosCompradorFaltando={checkoutData.dadosCompradorFaltando}
-                    senha={checkoutData.senha}
-                    setSenha={checkoutData.setSenha}
-                    confirmarSenha={checkoutData.confirmarSenha}
-                    setConfirmarSenha={checkoutData.setConfirmarSenha}
-                    dataNascimento={checkoutData.dataNascimento}
-                    setDataNascimento={checkoutData.setDataNascimento}
-                    aceitouTermos={checkoutData.aceitouTermos}
-                    setAceitouTermos={checkoutData.setAceitouTermos}
-                    salvarDadosComprador={checkoutData.salvarDadosComprador}
-                    setSalvarDadosComprador={checkoutData.setSalvarDadosComprador}
-                    onSubmit={handleSubmitComprador}
+                    onLoginSuccess={handleLoginSuccess}
+                    onRegisterSuccess={handleRegisterSuccess}
+                    onCompleteData={handleCompleteData}
+                    onContinue={handleContinueDados}
                   />
                 )}
 
-                {/* Etapa 2: Destinatário */}
+                {/* Etapa 2: Entrega */}
                 {checkoutData.etapa === 'destinatario' && (
-                  <DestinatarioStep
+                  <EntregaStep
                     isAuthenticated={isAuthenticated}
                     dadosDestinatario={checkoutData.dadosDestinatario}
                     setDadosDestinatario={checkoutData.setDadosDestinatario}

@@ -5,7 +5,7 @@ export { cartService } from './cart.service';
 export { orderService } from './order.service';
 export { shippingService } from './shipping.service';
 export { addressService } from './address.service';
-export { api, getErrorMessage } from './api';
+export { api, getErrorMessage, formatValidationErrors } from './api';
 
 // Exportar tipos comuns
 export type {

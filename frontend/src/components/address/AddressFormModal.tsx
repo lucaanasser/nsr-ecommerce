@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Address } from '@/services/address.service';
+import { getErrorMessage } from '@/services';
 
 interface AddressFormModalProps {
   isOpen: boolean;
@@ -122,7 +123,7 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
       await onSave(formData);
       onClose();
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Erro ao salvar endereço');
+      setError(getErrorMessage(err));
     } finally {
       setIsSaving(false);
     }

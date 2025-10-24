@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { addressService, Address } from '@/services/address.service';
+import { getErrorMessage } from '@/services';
 
 /**
  * Hook personalizado para gerenciar endereços do usuário
@@ -18,7 +19,7 @@ export function useAddresses(isActive: boolean, isAuthenticated: boolean) {
       setEnderecos(result || []);
     } catch (err) {
       console.error('Erro ao buscar endereços:', err);
-      setError('Erro ao carregar endereços');
+      setError(getErrorMessage(err));
       setEnderecos([]);
     } finally {
       setIsLoading(false);

@@ -1,9 +1,8 @@
 /**
- * Barrel export para componentes de Steps do Checkout
- * Facilita imports no arquivo principal
+ * Barrel file para componentes de etapas do checkout
  */
 
-export { default as CompradorStep } from './CompradorStep';
-export { default as DestinatarioStep } from './DestinatarioStep';
+export { default as DadosStep } from './DadosStep';
+export { default as EntregaStep } from './EntregaStep';
 export { default as PagamentoStep } from './PagamentoStep';
 export { default as ConfirmacaoStep } from './ConfirmacaoStep';

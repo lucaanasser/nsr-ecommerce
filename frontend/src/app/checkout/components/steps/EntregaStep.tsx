@@ -1,5 +1,5 @@
 /**
- * Etapa 2: Dados do Destinatário e Endereço de Entrega
+ * Etapa 2: Endereço de Entrega e Endereço de Entrega
  * Permite escolher entre ser o próprio destinatário ou informar outra pessoa
  * Permite selecionar endereços salvos ou cadastrar um novo
  */
@@ -11,7 +11,7 @@ import Input from '@/components/ui/Input';
 import type { DadosDestinatario, DadosEntrega } from '@/types/checkout.types';
 import type { SavedAddress } from '@/services';
 
-interface DestinatarioStepProps {
+interface EntregaStepProps {
   isAuthenticated: boolean;
   dadosDestinatario: DadosDestinatario;
   setDadosDestinatario: (dados: DadosDestinatario | ((prev: DadosDestinatario) => DadosDestinatario)) => void;
@@ -31,7 +31,7 @@ interface DestinatarioStepProps {
   onVoltar: () => void;
 }
 
-export default function DestinatarioStep({
+export default function EntregaStep({
   isAuthenticated,
   dadosDestinatario,
   setDadosDestinatario,
@@ -49,7 +49,7 @@ export default function DestinatarioStep({
   onLimparSelecaoEndereco,
   onSubmit,
   onVoltar,
-}: DestinatarioStepProps) {
+}: EntregaStepProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -58,7 +58,7 @@ export default function DestinatarioStep({
     >
       <div className="flex items-center gap-3 mb-2">
         <Truck className="text-primary-bronze" size={24} />
-        <h2 className="text-2xl font-semibold">Dados do Destinatário</h2>
+        <h2 className="text-2xl font-semibold">Endereço de Entrega</h2>
       </div>
       <p className="text-xs text-primary-white/50 mb-6">
         Quem vai receber o pedido

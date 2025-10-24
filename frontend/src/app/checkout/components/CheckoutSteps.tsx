@@ -10,8 +10,8 @@ interface CheckoutStepsProps {
 }
 
 const etapas = [
-  { id: 'comprador' as CheckoutStep, numero: 1, titulo: 'Comprador' },
-  { id: 'destinatario' as CheckoutStep, numero: 2, titulo: 'Destinatário' },
+  { id: 'comprador' as CheckoutStep, numero: 1, titulo: 'Dados' },
+  { id: 'destinatario' as CheckoutStep, numero: 2, titulo: 'Entrega' },
   { id: 'pagamento' as CheckoutStep, numero: 3, titulo: 'Pagamento' },
   { id: 'confirmacao' as CheckoutStep, numero: 4, titulo: 'Confirmação' },
 ];

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
-import { authService } from '@/services';
+import { authService, getErrorMessage } from '@/services';
 import { convertBirthDateToISO, formatBirthDate } from '../utils/formatters';
 
 interface EditData {
@@ -181,8 +181,7 @@ export function useProfileData() {
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao salvar alterações:', error);
-      const errorMessage = error?.response?.data?.error || error?.message || 'Erro ao salvar alterações';
-      setSaveError(errorMessage);
+      setSaveError(getErrorMessage(error));
       setIsEditing(true);
       throw error;
     } finally {

@@ -12,16 +12,34 @@ import crypto from 'crypto';
 const SALT_ROUNDS = 12;
 
 /**
- * Lista de senhas mais comuns (top 100)
- * Em produção, considere usar uma lista maior (top 10k)
+ * Lista de senhas óbvias e padrões comuns
+ * Incluindo variações comuns com caracteres especiais e números
  */
 const COMMON_PASSWORDS = [
-  '123456', 'password', '12345678', 'qwerty', '123456789',
-  '12345', '1234', '111111', '1234567', 'dragon',
-  '123123', 'baseball', 'iloveyou', 'trustno1', '1234567890',
-  'sunshine', 'master', 'welcome', 'shadow', 'ashley',
-  'football', 'jesus', 'michael', 'ninja', 'mustang',
-  'password1', '000000', 'admin', 'letmein', 'monkey'
+  // Senhas numéricas simples
+  '123456', '12345678', '123456789', '1234567890',
+  '12345', '1234', '111111', '1234567', '123123',
+  '000000', '00000000',
+  
+  // Palavras comuns
+  'password', 'qwerty', 'dragon', 'baseball', 'iloveyou',
+  'trustno1', 'sunshine', 'master', 'welcome', 'shadow',
+  'ashley', 'football', 'jesus', 'michael', 'ninja',
+  'mustang', 'password1', 'admin', 'letmein', 'monkey',
+  
+  // Padrões óbvios com caracteres especiais e números (conforme solicitado)
+  'senha123', 'senha!123', 'senha@123', 'senha#123',
+  'abcde!123', 'abcde@123', 'abcde#123', 'abcde$123',
+  'abc123!', 'abc123@', 'abc123#', 'abc123$',
+  'password!', 'password@', 'password#', 'password$',
+  'password!123', 'password@123', 'password#123',
+  'qwerty123', 'qwerty!123', 'qwerty@123',
+  'admin123', 'admin!123', 'admin@123',
+  'teste123', 'teste!123', 'teste@123',
+  '12345678!', '12345678@', '12345678#',
+  'aaaaa!123', 'aaaaa@123', 'bbbbb!123',
+  'abcd1234', 'abcd!234', 'abcd@234',
+  '1234abcd', '1234abcd!', '1234abcd@',
 ];
 
 /**
@@ -48,14 +66,20 @@ export async function comparePassword(
 }
 
 /**
- * Valida força da senha segundo OWASP
+ * Valida força da senha
+ * Regras:
+ * - Mínimo 8 caracteres
+ * - Pelo menos 1 letra maiúscula
+ * - Pelo menos 1 letra minúscula
+ * - Pelo menos 1 número
+ * - Pelo menos 1 caractere especial
+ * - Não pode ser senha óbvia/comum
+ * 
  * @param password - Senha a validar
- * @param userInfo - Informações do usuário (email, nome) para evitar senhas pessoais
- * @returns Objeto com validação e mensagens de erro
+ * @returns Objeto com validação e mensagens de erro detalhadas
  */
 export function validatePasswordStrength(
-  password: string,
-  userInfo?: { email?: string; name?: string }
+  password: string
 ): {
   isValid: boolean;
   errors: string[];
@@ -74,46 +98,27 @@ export function validatePasswordStrength(
 
   // Pelo menos uma letra minúscula
   if (!/[a-z]/.test(password)) {
-    errors.push('A senha deve conter pelo menos uma letra minúscula');
+    errors.push('A senha deve conter pelo menos uma letra minúscula (a-z)');
   }
 
   // Pelo menos uma letra maiúscula
   if (!/[A-Z]/.test(password)) {
-    errors.push('A senha deve conter pelo menos uma letra maiúscula');
+    errors.push('A senha deve conter pelo menos uma letra maiúscula (A-Z)');
   }
 
   // Pelo menos um número
   if (!/\d/.test(password)) {
-    errors.push('A senha deve conter pelo menos um número');
+    errors.push('A senha deve conter pelo menos um número (0-9)');
   }
 
-  // Recomenda caractere especial (não obrigatório para não frustrar usuários)
+  // OBRIGATÓRIO: Pelo menos um caractere especial
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    // Apenas warning, não adiciona ao array de erros
+    errors.push('A senha deve conter pelo menos um caractere especial (!@#$%&*...)');
   }
 
-  // Verifica senhas comuns
+  // Verifica senhas óbvias/comuns (case insensitive)
   if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
-    errors.push('Esta senha é muito comum e fácil de adivinhar');
-  }
-
-  // Verifica se senha contém email
-  if (userInfo?.email) {
-    const emailUsername = userInfo.email.split('@')[0]?.toLowerCase();
-    if (emailUsername && password.toLowerCase().includes(emailUsername)) {
-      errors.push('A senha não deve conter seu email');
-    }
-  }
-
-  // Verifica se senha contém nome
-  if (userInfo?.name) {
-    const nameParts = userInfo.name.toLowerCase().split(' ');
-    for (const part of nameParts) {
-      if (part.length >= 3 && password.toLowerCase().includes(part)) {
-        errors.push('A senha não deve conter seu nome');
-        break;
-      }
-    }
+    errors.push('Esta senha é muito óbvia e fácil de adivinhar. Por favor, escolha uma senha mais única');
   }
 
   // Verifica sequências óbvias
@@ -122,7 +127,7 @@ export function validatePasswordStrength(
     /012|123|234|345|456|567|678|789/.test(password) || // sequências numéricas
     /abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz/i.test(password) // sequências alfabéticas
   ) {
-    errors.push('Evite sequências óbvias ou caracteres repetidos');
+    errors.push('Evite sequências óbvias (abc, 123) ou caracteres repetidos (aaa, 111)');
   }
 
   return {

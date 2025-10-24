@@ -1,5 +1,5 @@
 /**
- * Etapa 1: Dados do Comprador
+ * Etapa 1: Seus Dados
  * Formulário para criar conta (usuários não logados) ou completar dados (usuários logados)
  */
 
@@ -10,7 +10,7 @@ import Input from '@/components/ui/Input';
 import type { DadosComprador } from '@/types/checkout.types';
 import type { AuthUser } from '@/services';
 
-interface CompradorStepProps {
+interface DadosStepProps {
   user: AuthUser | null;
   dadosComprador: DadosComprador;
   setDadosComprador: (dados: DadosComprador | ((prev: DadosComprador) => DadosComprador)) => void;
@@ -28,7 +28,7 @@ interface CompradorStepProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
-export default function CompradorStep({
+export default function DadosStep({
   user,
   dadosComprador,
   setDadosComprador,
@@ -44,7 +44,7 @@ export default function CompradorStep({
   salvarDadosComprador,
   setSalvarDadosComprador,
   onSubmit,
-}: CompradorStepProps) {
+}: DadosStepProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -53,7 +53,7 @@ export default function CompradorStep({
     >
       <div className="flex items-center gap-3 mb-2">
         <Package className="text-primary-bronze" size={24} />
-        <h2 className="text-2xl font-semibold">Dados do Comprador</h2>
+        <h2 className="text-2xl font-semibold">Seus Dados</h2>
       </div>
       <p className="text-xs text-primary-white/50 mb-6">
         Quem está realizando a compra (para nota fiscal)
@@ -65,7 +65,7 @@ export default function CompradorStep({
           <>
             <div className="bg-primary-bronze/10 border border-primary-bronze/30 p-4 rounded-sm mb-6">
               <p className="text-sm text-primary-white/80">
-                ⚠️ Para finalizar sua compra e acompanhar seu pedido, você precisa criar uma conta.
+                Para finalizar sua compra e acompanhar seu pedido, você precisa criar uma conta.
               </p>
             </div>
 
@@ -236,7 +236,7 @@ export default function CompradorStep({
         )}
 
         <Button type="submit" className="w-full mt-6">
-          Continuar para Destinatário
+          Continuar para Entrega
         </Button>
       </form>
     </motion.div>

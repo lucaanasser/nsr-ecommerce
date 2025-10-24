@@ -38,10 +38,7 @@ export class AuthService {
    */
   async register(data: RegisterDTO): Promise<UserResponse> {
     // Valida força da senha
-    const passwordValidation = validatePasswordStrength(data.password, {
-      email: data.email,
-      name: `${data.firstName} ${data.lastName}`,
-    });
+    const passwordValidation = validatePasswordStrength(data.password);
 
     if (!passwordValidation.isValid) {
       throw new ValidationError(
@@ -173,7 +170,14 @@ export class AuthService {
       role: user.role,
     });
 
-    // Salva refresh token no banco
+    // Limpa tokens antigos deste usuário antes de criar novo
+    await prisma.refreshToken.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    // Salva novo refresh token no banco
     await prisma.refreshToken.create({
       data: {
         token: tokens.refreshToken,
@@ -405,10 +409,7 @@ export class AuthService {
     }
 
     // Valida força da nova senha
-    const passwordValidation = validatePasswordStrength(newPassword, {
-      email: user.email,
-      name: `${user.firstName} ${user.lastName}`,
-    });
+    const passwordValidation = validatePasswordStrength(newPassword);
 
     if (!passwordValidation.isValid) {
       throw new ValidationError(

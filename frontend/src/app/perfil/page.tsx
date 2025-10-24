@@ -10,6 +10,7 @@ import Container from '@/components/ui/Container';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useAuthContext } from '@/context/AuthContext';
 import { IMAGES } from '@/config/images';
+import { getErrorMessage } from '@/services';
 
 // Hooks customizados
 import { useProfileData } from './hooks/useProfileData';
@@ -76,8 +77,7 @@ export default function PerfilPage() {
       alert('Sua conta foi excluída com sucesso. Você será redirecionado para a página inicial.');
       router.push('/');
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error?.message || 'Erro ao excluir conta';
-      alert('Erro ao excluir conta: ' + errorMessage);
+      alert('Erro ao excluir conta: ' + getErrorMessage(error));
     }
   };
 
