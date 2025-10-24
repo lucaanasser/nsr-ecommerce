@@ -31,16 +31,27 @@ export class ProductRepository extends BaseRepository<Product> {
   protected model = prisma.product;
 
   /**
+   * Include padrão para produtos (reutilizável)
+   */
+  private readonly defaultInclude = {
+    category: true,
+    collection: true,
+    details: true,
+    dimensions: true,
+    seo: true,
+    images: {
+      orderBy: { order: 'asc' as const },
+    },
+    variants: true,
+  };
+
+  /**
    * Encontra produto por slug
    */
   async findBySlug(slug: string): Promise<Product | null> {
     return this.model.findUnique({
       where: { slug },
-      include: {
-        category: true,
-        collection: true,
-        variants: true,
-      },
+      include: this.defaultInclude,
     });
   }
 
@@ -60,6 +71,7 @@ export class ProductRepository extends BaseRepository<Product> {
     return this.model.findUnique({
       where: { id },
       include: {
+        ...this.defaultInclude,
         variants: {
           where: {
             stock: {
@@ -153,8 +165,8 @@ export class ProductRepository extends BaseRepository<Product> {
     if (filters.search) {
       where.OR = [
         { name: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
         { sku: { contains: filters.search, mode: 'insensitive' } },
+        { details: { description: { contains: filters.search, mode: 'insensitive' } } },
       ];
     }
 
@@ -164,8 +176,7 @@ export class ProductRepository extends BaseRepository<Product> {
       skip: options?.skip,
       orderBy: options?.orderBy ?? { createdAt: 'desc' },
       include: {
-        category: true,
-        collection: true,
+        ...this.defaultInclude,
         variants: {
           where: {
             stock: { gt: 0 },
@@ -191,14 +202,7 @@ export class ProductRepository extends BaseRepository<Product> {
       orderBy: {
         createdAt: 'desc',
       },
-      include: {
-        category: true,
-        variants: {
-          where: {
-            stock: { gt: 0 },
-          },
-        },
-      },
+      include: this.defaultInclude,
     });
   }
 
@@ -219,10 +223,7 @@ export class ProductRepository extends BaseRepository<Product> {
       orderBy: {
         createdAt: 'desc',
       },
-      include: {
-        category: true,
-        variants: true,
-      },
+      include: this.defaultInclude,
     });
   }
 
@@ -243,10 +244,7 @@ export class ProductRepository extends BaseRepository<Product> {
       orderBy: {
         createdAt: 'desc',
       },
-      include: {
-        collection: true,
-        variants: true,
-      },
+      include: this.defaultInclude,
     });
   }
 
@@ -266,9 +264,7 @@ export class ProductRepository extends BaseRepository<Product> {
       orderBy: {
         createdAt: 'desc',
       },
-      include: {
-        category: true,
-      },
+      include: this.defaultInclude,
     });
   }
 

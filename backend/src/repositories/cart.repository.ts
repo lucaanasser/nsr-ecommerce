@@ -40,9 +40,17 @@ export class CartRepository extends BaseRepository<Cart> {
                 name: true,
                 slug: true,
                 price: true,
-                images: true,
                 stock: true,
                 isActive: true,
+                images: {
+                  orderBy: { order: 'asc' },
+                  select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    isPrimary: true,
+                  },
+                },
               },
             },
           },

@@ -51,23 +51,30 @@ export class CartService {
     }
 
     // Formatar itens e calcular totais
-    const items: CartItemResponse[] = cartWithItems.items.map((item) => ({
-      id: item.id,
-      productId: item.productId,
-      product: {
-        id: item.product.id,
-        name: item.product.name,
-        slug: item.product.slug,
-        price: Number(item.product.price),
-        images: item.product.images,
-        stock: item.product.stock,
-        isActive: item.product.isActive,
-      },
-      size: item.size || '',
-      color: item.color || '',
-      quantity: item.quantity,
-      subtotal: Number(item.product.price) * item.quantity,
-    }));
+    const items: CartItemResponse[] = cartWithItems.items.map((item) => {
+      // Pegar primeira imagem ou array vazio
+      const productImages = item.product.images && item.product.images.length > 0
+        ? item.product.images.map((img: any) => img.url)
+        : [];
+      
+      return {
+        id: item.id,
+        productId: item.productId,
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          slug: item.product.slug,
+          price: Number(item.product.price),
+          images: productImages,
+          stock: item.product.stock,
+          isActive: item.product.isActive,
+        },
+        size: item.size || '',
+        color: item.color || '',
+        quantity: item.quantity,
+        subtotal: Number(item.product.price) * item.quantity,
+      };
+    });
 
     // Calcular resumo
     const summary: CartSummary = {

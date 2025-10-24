@@ -5,12 +5,20 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Instalar dependências necessárias para compilar bcrypt
+RUN apk add --no-cache python3 make g++
+
+
+RUN npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-mintimeout 10000 && \
+    npm config set fetch-retries 5
+
 # Copiar package files
 COPY package*.json ./
 COPY prisma ./prisma/
 
 # Instalar dependências (incluindo devDependencies para build)
-RUN npm ci
+RUN npm ci --maxsockets=1 --prefer-offline
 
 # Copiar código fonte
 COPY . .
@@ -28,11 +36,19 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Instalar dependências necessárias para rodar bcrypt em produção
+RUN apk add --no-cache python3 make g++
+
+# Configurar npm para ser mais robusto
+RUN npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-mintimeout 10000 && \
+    npm config set fetch-retries 5
+
 # Instalar apenas dependências de produção
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm ci --only=production && \
+RUN npm ci --omit=dev --maxsockets=1 --prefer-offline && \
     npx prisma generate && \
     npm cache clean --force
 

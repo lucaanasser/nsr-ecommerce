@@ -1,178 +1,251 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
-import { products } from '@/data/products';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
+import { useProducts } from './hooks/useProducts';
+import { useSelection } from './hooks/useSelection';
+import SearchBar from './components/SearchBar';
+import FilterButtonGroup from './components/FilterButtonGroup';
+import ProductTable from './components/ProductTable';
+import LoadingState from './components/LoadingState';
+import ErrorState from './components/ErrorState';
+import EmptyState from './components/EmptyState';
+import ProductQuickView from './components/ProductQuickView';
+import ConfirmModal from './components/ConfirmModal';
+import BulkActionsBar from './components/BulkActionsBar';
+import { Product } from '@/data/products';
 
 /**
- * Página de Gestão de Produtos
- * Listagem, busca, filtros e ações de CRUD (mockado)
+ * Página de Listagem de Produtos - Versão Completa
+ * Suporta seleção múltipla, ações em lote, visualização rápida
  */
-export default function AdminProdutos() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'todos' | 'masculino' | 'feminino'>('todos');
+export default function AdminProdutosPage() {
+  const router = useRouter();
+  const { 
+    products, 
+    isLoading, 
+    error, 
+    filters, 
+    updateFilters,
+    refetch 
+  } = useProducts();
 
-  // Filtra produtos
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'todos' || product.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  // Seleção múltipla
+  const selection = useSelection(products);
+
+  // Estados de modais
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    show: boolean;
+    product?: Product;
+    multiple?: boolean;
+  }>({ show: false });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Opções de filtro de gênero
+  const genderOptions = [
+    { value: 'todos' as const, label: 'Todos' },
+    { value: 'masculino' as const, label: 'Masculino' },
+    { value: 'feminino' as const, label: 'Feminino' },
+  ];
+
+  // Handlers individuais
+  const handleView = (product: Product) => {
+    setQuickViewProduct(product);
+  };
+
+  const handleEdit = (product: Product) => {
+    router.push(`/admin/produtos/${product.id}`);
+  };
+
+  const handleDelete = (product: Product) => {
+    setDeleteConfirm({ show: true, product });
+  };
+
+  const handleDuplicate = (product: Product) => {
+    console.log('Duplicar produto:', product);
+    alert(`Produto "${product.name}" duplicado com sucesso!`);
+    refetch();
+  };
+
+  const handleNewProduct = () => {
+    router.push('/admin/produtos/novo');
+  };
+
+  // Handlers de ações em lote
+  const handleBulkActivate = () => {
+    console.log('Ativar produtos:', selection.selectedItems);
+    alert(`${selection.selectedCount} produtos ativados!`);
+    selection.deselectAll();
+    refetch();
+  };
+
+  const handleBulkDeactivate = () => {
+    console.log('Desativar produtos:', selection.selectedItems);
+    alert(`${selection.selectedCount} produtos desativados!`);
+    selection.deselectAll();
+    refetch();
+  };
+
+  const handleBulkDuplicate = () => {
+    console.log('Duplicar produtos:', selection.selectedItems);
+    alert(`${selection.selectedCount} produtos duplicados!`);
+    selection.deselectAll();
+    refetch();
+  };
+
+  const handleBulkDelete = () => {
+    setDeleteConfirm({ show: true, multiple: true });
+  };
+
+  // Confirmar exclusão
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+
+    try {
+      // Simular delay da API
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (deleteConfirm.multiple) {
+        console.log('Excluir múltiplos:', selection.selectedItems);
+        alert(`${selection.selectedCount} produtos excluídos!`);
+        selection.deselectAll();
+      } else if (deleteConfirm.product) {
+        console.log('Excluir produto:', deleteConfirm.product);
+        alert(`Produto "${deleteConfirm.product.name}" excluído!`);
+      }
+
+      refetch();
+      setDeleteConfirm({ show: false });
+    } catch (error) {
+      alert('Erro ao excluir');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-primary-white mb-2">Produtos</h1>
-          <p className="text-primary-white/60">Gerencie o catálogo de produtos</p>
+    <>
+      {/* Header com botão de ação */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-sm text-primary-white/50">
+          {!isLoading && (
+            <>
+              {products.length} produto{products.length !== 1 ? 's' : ''} encontrado{products.length !== 1 ? 's' : ''}
+              {selection.selectedCount > 0 && (
+                <span className="ml-2 text-primary-gold font-medium">
+                  ({selection.selectedCount} selecionado{selection.selectedCount !== 1 ? 's' : ''})
+                </span>
+              )}
+            </>
+          )}
         </div>
-        <Button variant="primary" className="flex items-center gap-2 px-4 py-2">
+        <Button 
+          variant="primary" 
+          onClick={handleNewProduct}
+          className="flex items-center gap-2 px-4 py-2"
+        >
           <Plus size={20} />
           Novo Produto
         </Button>
       </div>
 
       {/* Filtros e Busca */}
-      <div className="bg-dark-card/50 backdrop-blur-sm border border-dark-border rounded-sm p-4">
+      <div className="bg-dark-card/50 backdrop-blur-sm border border-dark-border rounded-sm p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-white/40 z-10" size={18} />
-            <Input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar produtos..."
-              className="w-full pl-10"
-            />
-          </div>
+          <SearchBar
+            value={filters.search || ''}
+            onChange={(value) => updateFilters({ search: value })}
+            placeholder="Buscar produtos..."
+            className="flex-1"
+          />
 
-          {/* Filtro de Categoria */}
-          <div className="flex gap-2">
-            <Button
-              variant={categoryFilter === 'todos' ? 'primary' : 'ghost'}
-              onClick={() => setCategoryFilter('todos')}
-              className={`px-4 py-2 text-sm ${categoryFilter === 'todos' ? '' : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'}`}
-            >
-              Todos
-            </Button>
-            <Button
-              variant={categoryFilter === 'masculino' ? 'primary' : 'ghost'}
-              onClick={() => setCategoryFilter('masculino')}
-              className={`px-4 py-2 text-sm ${categoryFilter === 'masculino' ? '' : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'}`}
-            >
-              Masculino
-            </Button>
-            <Button
-              variant={categoryFilter === 'feminino' ? 'primary' : 'ghost'}
-              onClick={() => setCategoryFilter('feminino')}
-              className={`px-4 py-2 text-sm ${categoryFilter === 'feminino' ? '' : 'bg-dark-bg/50 text-primary-white/60 hover:text-primary-white border border-dark-border'}`}
-            >
-              Feminino
-            </Button>
-          </div>
-        </div>
-
-        {/* Contador */}
-        <div className="mt-3 text-sm text-primary-white/50">
-          {filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''} encontrado{filteredProducts.length !== 1 ? 's' : ''}
+          {/* Filtro de Gênero */}
+          <FilterButtonGroup
+            options={genderOptions}
+            selected={filters.gender || 'todos'}
+            onChange={(value) => updateFilters({ gender: value })}
+          />
         </div>
       </div>
 
-      {/* Tabela de Produtos */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-dark-card/50 backdrop-blur-sm border border-dark-border rounded-sm overflow-hidden"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-dark-bg/50">
-              <tr className="border-b border-dark-border">
-                <th className="text-left text-sm font-medium text-primary-white/60 p-4">Produto</th>
-                <th className="text-left text-sm font-medium text-primary-white/60 p-4">Categoria</th>
-                <th className="text-left text-sm font-medium text-primary-white/60 p-4">Coleção</th>
-                <th className="text-left text-sm font-medium text-primary-white/60 p-4">Preço</th>
-                <th className="text-center text-sm font-medium text-primary-white/60 p-4">Status</th>
-                <th className="text-right text-sm font-medium text-primary-white/60 p-4">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.map((product, index) => (
-                <motion.tr
-                  key={product.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="border-b border-dark-border/50 hover:bg-dark-bg/30 transition-colors"
-                >
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-dark-bg rounded-sm overflow-hidden flex-shrink-0">
-                        <Image
-                          src={product.images[0]}
-                          alt={product.name}
-                          width={48}
-                          height={48}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-primary-white">{product.name}</p>
-                        <p className="text-xs text-primary-white/50 line-clamp-1">{product.description}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-primary-white/80 capitalize">{product.category}</span>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-primary-white/60">{product.collection}</span>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm font-semibold text-primary-gold">
-                      R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      {product.new && (
-                        <span className="inline-block px-2 py-1 bg-green-500/10 border border-green-500/30 text-green-500 text-xs rounded-sm">
-                          Novo
-                        </span>
-                      )}
-                      {product.featured && (
-                        <span className="inline-block px-2 py-1 bg-primary-gold/10 border border-primary-gold/30 text-primary-gold text-xs rounded-sm">
-                          Destaque
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-blue-500 hover:bg-blue-500/10" title="Ver">
-                        <Eye size={16} />
-                      </Button>
-                      <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-primary-gold hover:bg-primary-gold/10" title="Editar">
-                        <Edit size={16} />
-                      </Button>
-                      <Button variant="ghost" className="p-2 text-primary-white/60 hover:text-red-500 hover:bg-red-500/10" title="Excluir">
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
-    </div>
+      {/* Conteúdo principal */}
+      {isLoading ? (
+        <LoadingState message="Carregando produtos..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={refetch} />
+      ) : products.length === 0 ? (
+        <EmptyState
+          title="Nenhum produto encontrado"
+          description={
+            filters.search || filters.gender !== 'todos'
+              ? 'Tente ajustar os filtros de busca'
+              : 'Comece criando seu primeiro produto'
+          }
+          action={
+            !filters.search && filters.gender === 'todos'
+              ? {
+                  label: 'Criar Primeiro Produto',
+                  onClick: handleNewProduct,
+                }
+              : undefined
+          }
+        />
+      ) : (
+        <ProductTable
+          products={products}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
+          selectable
+          selectedIds={selection.selectedIds}
+          onToggleSelection={selection.toggleSelection}
+          onSelectAll={selection.allSelected ? selection.deselectAll : selection.selectAll}
+          allSelected={selection.allSelected}
+          someSelected={selection.someSelected}
+        />
+      )}
+
+      {/* Barra de Ações em Lote */}
+      <BulkActionsBar
+        selectedCount={selection.selectedCount}
+        totalCount={selection.totalCount}
+        onSelectAll={selection.selectAll}
+        onDeselectAll={selection.deselectAll}
+        onActivate={handleBulkActivate}
+        onDeactivate={handleBulkDeactivate}
+        onDuplicate={handleBulkDuplicate}
+        onDelete={handleBulkDelete}
+      />
+
+      {/* Modal de Visualização Rápida */}
+      <ProductQuickView
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        onEdit={handleEdit}
+      />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmModal
+        isOpen={deleteConfirm.show}
+        onClose={() => setDeleteConfirm({ show: false })}
+        onConfirm={confirmDelete}
+        title={deleteConfirm.multiple ? 'Excluir Produtos' : 'Excluir Produto'}
+        message={
+          deleteConfirm.multiple
+            ? `Tem certeza que deseja excluir ${selection.selectedCount} produto${selection.selectedCount !== 1 ? 's' : ''}? Esta ação não pode ser desfeita.`
+            : `Tem certeza que deseja excluir "${deleteConfirm.product?.name}"? Esta ação não pode ser desfeita.`
+        }
+        confirmText="Sim, Excluir"
+        cancelText="Cancelar"
+        type="danger"
+        isLoading={isDeleting}
+      />
+    </>
   );
 }

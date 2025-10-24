@@ -31,12 +31,12 @@ class ProductService {
       isActive: filters.isActive ?? true, // Por padrão, mostrar apenas ativos
     };
 
-    // Filtro de busca (nome ou descrição)
+        // Busca por texto
     if (filters.search) {
       where.OR = [
         { name: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
         { sku: { contains: filters.search, mode: 'insensitive' } },
+        { details: { description: { contains: filters.search, mode: 'insensitive' } } },
       ];
     }
 
@@ -164,7 +164,6 @@ class ProductService {
       data: {
         name: data.name,
         slug: data.slug,
-        description: data.description,
         price: new Prisma.Decimal(data.price),
         comparePrice: data.comparePrice ? new Prisma.Decimal(data.comparePrice) : null,
         stock: data.stock,
@@ -172,17 +171,55 @@ class ProductService {
         categoryId: data.categoryId,
         collectionId: data.collectionId,
         gender: data.gender || 'UNISEX',
-        images: data.images || [],
-        weight: data.weight ? new Prisma.Decimal(data.weight) : null,
-        length: data.length ? new Prisma.Decimal(data.length) : null,
-        width: data.width ? new Prisma.Decimal(data.width) : null,
-        height: data.height ? new Prisma.Decimal(data.height) : null,
-        material: data.material,
-        careInstructions: data.careInstructions,
-        metaTitle: data.metaTitle,
-        metaDescription: data.metaDescription,
         isFeatured: data.isFeatured || false,
         isActive: data.isActive ?? true,
+        
+        // Criar detalhes do produto
+        details: data.details
+          ? {
+              create: {
+                description: data.details.description,
+                material: data.details.material,
+                careInstructions: data.details.careInstructions,
+              },
+            }
+          : undefined,
+        
+        // Criar dimensões
+        dimensions: data.dimensions
+          ? {
+              create: {
+                weight: new Prisma.Decimal(data.dimensions.weight),
+                length: new Prisma.Decimal(data.dimensions.length),
+                width: new Prisma.Decimal(data.dimensions.width),
+                height: new Prisma.Decimal(data.dimensions.height),
+              },
+            }
+          : undefined,
+        
+        // Criar SEO
+        seo: data.seo
+          ? {
+              create: {
+                metaTitle: data.seo.metaTitle,
+                metaDescription: data.seo.metaDescription,
+                keywords: data.seo.keywords || [],
+              },
+            }
+          : undefined,
+        
+        // Criar imagens
+        images: data.images
+          ? {
+              create: data.images.map((img, index) => ({
+                url: img.url,
+                altText: img.altText,
+                order: img.order ?? index,
+                isPrimary: img.isPrimary ?? index === 0,
+              })),
+            }
+          : undefined,
+        
         // Criar variantes se fornecidas
         variants: data.variants
           ? {
@@ -191,8 +228,7 @@ class ProductService {
                 color: v.color,
                 sku: v.sku,
                 stock: v.stock,
-                price: v.price ? new Prisma.Decimal(v.price) : null,
-                comparePrice: v.comparePrice ? new Prisma.Decimal(v.comparePrice) : null,
+                priceAdjustment: v.price ? new Prisma.Decimal(v.price) : null,
               })),
             }
           : undefined,
@@ -204,6 +240,10 @@ class ProductService {
         collection: {
           select: { id: true, name: true, slug: true },
         },
+        details: true,
+        dimensions: true,
+        seo: true,
+        images: { orderBy: { order: 'asc' } },
         variants: true,
       },
     });
@@ -240,30 +280,75 @@ class ProductService {
     }
 
     const updateData: Prisma.ProductUpdateInput = {};
+    
+    // Campos básicos
     if (data.name !== undefined) updateData.name = data.name;
     if (data.slug !== undefined) updateData.slug = data.slug;
-    if (data.description !== undefined) updateData.description = data.description;
     if (data.price !== undefined) updateData.price = new Prisma.Decimal(data.price);
     if (data.comparePrice !== undefined)
       updateData.comparePrice = data.comparePrice ? new Prisma.Decimal(data.comparePrice) : null;
     if (data.stock !== undefined) updateData.stock = data.stock;
     if (data.sku !== undefined) updateData.sku = data.sku;
     if (data.gender !== undefined) updateData.gender = data.gender;
-    if (data.images !== undefined) updateData.images = data.images;
-    if (data.weight !== undefined)
-      updateData.weight = data.weight ? new Prisma.Decimal(data.weight) : null;
-    if (data.length !== undefined)
-      updateData.length = data.length ? new Prisma.Decimal(data.length) : null;
-    if (data.width !== undefined)
-      updateData.width = data.width ? new Prisma.Decimal(data.width) : null;
-    if (data.height !== undefined)
-      updateData.height = data.height ? new Prisma.Decimal(data.height) : null;
-    if (data.material !== undefined) updateData.material = data.material;
-    if (data.careInstructions !== undefined) updateData.careInstructions = data.careInstructions;
-    if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
-    if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
     if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    
+    // Atualizar detalhes
+    if (data.details) {
+      updateData.details = {
+        upsert: {
+          create: data.details,
+          update: data.details,
+        },
+      };
+    }
+    
+    // Atualizar dimensões
+    if (data.dimensions) {
+      updateData.dimensions = {
+        upsert: {
+          create: {
+            weight: new Prisma.Decimal(data.dimensions.weight!),
+            length: new Prisma.Decimal(data.dimensions.length!),
+            width: new Prisma.Decimal(data.dimensions.width!),
+            height: new Prisma.Decimal(data.dimensions.height!),
+          },
+          update: {
+            ...(data.dimensions.weight && { weight: new Prisma.Decimal(data.dimensions.weight) }),
+            ...(data.dimensions.length && { length: new Prisma.Decimal(data.dimensions.length) }),
+            ...(data.dimensions.width && { width: new Prisma.Decimal(data.dimensions.width) }),
+            ...(data.dimensions.height && { height: new Prisma.Decimal(data.dimensions.height) }),
+          },
+        },
+      };
+    }
+    
+    // Atualizar SEO
+    if (data.seo) {
+      updateData.seo = {
+        upsert: {
+          create: {
+            metaTitle: data.seo.metaTitle,
+            metaDescription: data.seo.metaDescription,
+            keywords: data.seo.keywords || [],
+          },
+          update: data.seo,
+        },
+      };
+    }
+    
+    // Atualizar imagens (deletar todas e recriar)
+    if (data.images) {
+      updateData.images = {
+        deleteMany: {},
+        create: data.images.map((img, index) => ({
+          url: img.url,
+          altText: img.altText,
+          order: img.order ?? index,
+          isPrimary: img.isPrimary ?? index === 0,
+        })),
+      };
+    }
     
     // Relações precisam usar connect/disconnect
     if (data.categoryId !== undefined) {
@@ -312,27 +397,43 @@ class ProductService {
       id: product.id,
       name: product.name,
       slug: product.slug,
-      description: product.description,
       price: Number(product.price),
       comparePrice: product.comparePrice ? Number(product.comparePrice) : null,
       stock: product.stock,
       sku: product.sku,
       gender: product.gender,
-      images: product.images,
-      weight: product.weight ? Number(product.weight) : null,
-      length: product.length ? Number(product.length) : null,
-      width: product.width ? Number(product.width) : null,
-      height: product.height ? Number(product.height) : null,
-      material: product.material,
-      careInstructions: product.careInstructions,
-      metaTitle: product.metaTitle,
-      metaDescription: product.metaDescription,
       isFeatured: product.isFeatured,
       isActive: product.isActive,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
+      
+      // Dados relacionados
+      details: product.details || null,
+      
+      dimensions: product.dimensions
+        ? {
+            weight: Number(product.dimensions.weight),
+            length: Number(product.dimensions.length),
+            width: Number(product.dimensions.width),
+            height: Number(product.dimensions.height),
+          }
+        : null,
+      
+      seo: product.seo || null,
+      
+      images: product.images
+        ? product.images.map((img: any) => ({
+            id: img.id,
+            url: img.url,
+            altText: img.altText,
+            order: img.order,
+            isPrimary: img.isPrimary,
+          }))
+        : undefined,
+      
       category: product.category || null,
       collection: product.collection || null,
+      
       variants: product.variants
         ? product.variants.map((v: any) => ({
             id: v.id,
@@ -340,8 +441,8 @@ class ProductService {
             color: v.color,
             sku: v.sku,
             stock: v.stock,
-            price: v.price ? Number(v.price) : null,
-            comparePrice: v.comparePrice ? Number(v.comparePrice) : null,
+            price: v.priceAdjustment ? Number(v.priceAdjustment) : null,
+            comparePrice: null,
             createdAt: v.createdAt,
             updatedAt: v.updatedAt,
           }))

@@ -44,7 +44,6 @@ export interface PaginatedResponse<T> {
 export interface CreateProductDTO {
   name: string;
   slug: string;
-  description?: string;
   price: number;
   comparePrice?: number;
   stock: number;
@@ -52,24 +51,42 @@ export interface CreateProductDTO {
   categoryId?: string;
   collectionId?: string;
   gender?: Gender;
-  images?: string[];
-  weight?: number;
-  length?: number;
-  width?: number;
-  height?: number;
-  material?: string;
-  careInstructions?: string;
-  metaTitle?: string;
-  metaDescription?: string;
   isFeatured?: boolean;
   isActive?: boolean;
+  
+  // Nested objects
+  details?: {
+    description?: string;
+    material?: string;
+    careInstructions?: string;
+  };
+  
+  dimensions?: {
+    weight: number;
+    length: number;
+    width: number;
+    height: number;
+  };
+  
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string[];
+  };
+  
+  images?: Array<{
+    url: string;
+    altText?: string;
+    order?: number;
+    isPrimary?: boolean;
+  }>;
+  
   variants?: CreateVariantDTO[];
 }
 
 export interface UpdateProductDTO {
   name?: string;
   slug?: string;
-  description?: string;
   price?: number;
   comparePrice?: number;
   stock?: number;
@@ -77,17 +94,36 @@ export interface UpdateProductDTO {
   categoryId?: string;
   collectionId?: string;
   gender?: Gender;
-  images?: string[];
-  weight?: number;
-  length?: number;
-  width?: number;
-  height?: number;
-  material?: string;
-  careInstructions?: string;
-  metaTitle?: string;
-  metaDescription?: string;
   isFeatured?: boolean;
   isActive?: boolean;
+  
+  // Nested objects
+  details?: {
+    description?: string;
+    material?: string;
+    careInstructions?: string;
+  };
+  
+  dimensions?: {
+    weight?: number;
+    length?: number;
+    width?: number;
+    height?: number;
+  };
+  
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string[];
+  };
+  
+  images?: Array<{
+    id?: string; // For update/delete
+    url: string;
+    altText?: string;
+    order?: number;
+    isPrimary?: boolean;
+  }>;
 }
 
 // ================================
@@ -158,35 +194,56 @@ export interface ProductResponse {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
   price: number;
   comparePrice: number | null;
   stock: number;
   sku: string | null;
   gender: Gender;
-  images: string[];
-  weight: number | null;
-  length: number | null;
-  width: number | null;
-  height: number | null;
-  material: string | null;
-  careInstructions: string | null;
-  metaTitle: string | null;
-  metaDescription: string | null;
   isFeatured: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Related data
+  details?: {
+    description: string | null;
+    material: string | null;
+    careInstructions: string | null;
+  } | null;
+  
+  dimensions?: {
+    weight: number;
+    length: number;
+    width: number;
+    height: number;
+  } | null;
+  
+  seo?: {
+    metaTitle: string | null;
+    metaDescription: string | null;
+    keywords: string[];
+  } | null;
+  
+  images?: Array<{
+    id: string;
+    url: string;
+    altText: string | null;
+    order: number;
+    isPrimary: boolean;
+  }>;
+  
   category?: {
     id: string;
     name: string;
     slug: string;
   } | null;
+  
   collection?: {
     id: string;
     name: string;
     slug: string;
   } | null;
+  
   variants?: VariantResponse[];
 }
 

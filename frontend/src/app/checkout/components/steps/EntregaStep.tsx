@@ -192,16 +192,6 @@ export default function EntregaStep({
                   </label>
                 ))}
               </div>
-              <div className="text-center mt-4">
-                <p className="text-sm text-primary-white/50 mb-2">Nenhum desses endereços?</p>
-                <button
-                  type="button"
-                  onClick={onLimparSelecaoEndereco}
-                  className="text-sm text-primary-bronze hover:underline"
-                >
-                  + Cadastrar novo endereço
-                </button>
-              </div>
             </div>
           )}
 

@@ -11,11 +11,40 @@ import { z } from 'zod';
 
 // ========== PRODUCT SCHEMAS ==========
 
+// Schema para detalhes do produto
+const productDetailsSchema = z.object({
+  description: z.string().optional(),
+  material: z.string().optional(),
+  careInstructions: z.string().optional(),
+}).optional();
+
+// Schema para dimensões
+const productDimensionsSchema = z.object({
+  weight: z.number().positive('Peso deve ser positivo'),
+  length: z.number().positive('Comprimento deve ser positivo'),
+  width: z.number().positive('Largura deve ser positiva'),
+  height: z.number().positive('Altura deve ser positiva'),
+}).optional();
+
+// Schema para SEO
+const productSEOSchema = z.object({
+  metaTitle: z.string().max(60, 'Meta title deve ter no máximo 60 caracteres').optional(),
+  metaDescription: z.string().max(160, 'Meta description deve ter no máximo 160 caracteres').optional(),
+  keywords: z.array(z.string()).optional(),
+}).optional();
+
+// Schema para imagens
+const productImageSchema = z.object({
+  url: z.string().url('URL de imagem inválida'),
+  altText: z.string().optional(),
+  order: z.number().int().min(0).optional(),
+  isPrimary: z.boolean().optional(),
+});
+
 // Criar produto
 export const createProductSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(200, 'Nome muito longo'),
   slug: z.string().regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens'),
-  description: z.string().optional(),
   price: z.number().positive('Preço deve ser positivo'),
   comparePrice: z.number().positive('Preço de comparação deve ser positivo').optional(),
   stock: z.number().int('Estoque deve ser um número inteiro').min(0, 'Estoque não pode ser negativo'),
@@ -23,13 +52,41 @@ export const createProductSchema = z.object({
   categoryId: z.string().uuid('ID de categoria inválido').optional(),
   collectionId: z.string().uuid('ID de coleção inválido').optional(),
   gender: z.enum(['MALE', 'FEMALE', 'UNISEX']).optional(),
-  images: z.array(z.string().url('URL de imagem inválida')).optional(),
   isFeatured: z.boolean().optional(),
   isActive: z.boolean().optional(),
+  
+  // Nested objects
+  details: productDetailsSchema,
+  dimensions: productDimensionsSchema,
+  seo: productSEOSchema,
+  images: z.array(productImageSchema).optional(),
 });
 
 // Atualizar produto (todos os campos opcionais)
-export const updateProductSchema = createProductSchema.partial();
+export const updateProductSchema = z.object({
+  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(200, 'Nome muito longo').optional(),
+  slug: z.string().regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens').optional(),
+  price: z.number().positive('Preço deve ser positivo').optional(),
+  comparePrice: z.number().positive('Preço de comparação deve ser positivo').optional(),
+  stock: z.number().int('Estoque deve ser um número inteiro').min(0, 'Estoque não pode ser negativo').optional(),
+  sku: z.string().optional(),
+  categoryId: z.string().uuid('ID de categoria inválido').optional(),
+  collectionId: z.string().uuid('ID de coleção inválido').optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'UNISEX']).optional(),
+  isFeatured: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+  
+  // Nested objects (partial)
+  details: productDetailsSchema,
+  dimensions: z.object({
+    weight: z.number().positive().optional(),
+    length: z.number().positive().optional(),
+    width: z.number().positive().optional(),
+    height: z.number().positive().optional(),
+  }).optional(),
+  seo: productSEOSchema,
+  images: z.array(productImageSchema.extend({ id: z.string().uuid().optional() })).optional(),
+});
 
 // ========== VARIANT SCHEMAS ==========
 

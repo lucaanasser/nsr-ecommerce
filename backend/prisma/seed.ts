@@ -229,8 +229,6 @@ async function main() {
       city: 'São Paulo',
       state: 'SP',
       zipCode: '01234-567',
-      receiverName: 'João Silva',
-      receiverPhone: '11988888888',
       isDefault: true,
     },
   });

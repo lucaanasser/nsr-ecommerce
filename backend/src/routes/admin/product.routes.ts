@@ -73,12 +73,12 @@ router.post(
 );
 
 /**
- * @route   DELETE /api/v1/admin/products/:id/images
+ * @route   DELETE /api/v1/admin/products/:id/images/:imageId
  * @desc    Remove uma imagem de um produto
  * @access  Private (Admin)
  */
 router.delete(
-  '/:id/images',
+  '/:id/images/:imageId',
   validateParams(uuidParamSchema),
   adminProductController.deleteImage.bind(adminProductController)
 );

@@ -37,7 +37,13 @@ export class OrderService {
       const products = await tx.product.findMany({
         where: {
           id: { in: data.items.map(i => i.productId) }
-        }
+        },
+        include: {
+          images: {
+            orderBy: { order: 'asc' },
+            take: 1,
+          },
+        },
       });
 
       this.validateStock(products, data.items);
@@ -128,10 +134,15 @@ export class OrderService {
               const product = products.find(p => p.id === item.productId)!;
               const unitPrice = Number(product.price);
               
+              // Pegar primeira imagem ou null
+              const firstImage = product.images && product.images.length > 0
+                ? (product.images[0] as any).url
+                : null;
+              
               return {
                 productId: item.productId,
                 productName: product.name,
-                productImage: product.images[0] || null,
+                productImage: firstImage,
                 size: item.size,
                 color: item.color,
                 quantity: item.quantity,

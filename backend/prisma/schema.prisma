@@ -180,7 +180,6 @@ model Product {
   id          String   @id @default(uuid())
   name        String
   slug        String   @unique
-  description String?
   
   // Preço
   price       Decimal  @db.Decimal(10, 2)
@@ -199,23 +198,6 @@ model Product {
   
   gender      Gender   @default(UNISEX)
   
-  // Imagens (URLs do Cloudinary)
-  images      String[]
-  
-  // Dimensões para cálculo de frete
-  weight      Decimal?  @db.Decimal(10, 3) // Peso em kg
-  length      Decimal?  @db.Decimal(10, 2) // Comprimento em cm
-  width       Decimal?  @db.Decimal(10, 2) // Largura em cm
-  height      Decimal?  @db.Decimal(10, 2) // Altura em cm
-  
-  // Informações adicionais
-  material    String?   // Material do produto
-  careInstructions String? // Instruções de cuidado
-  
-  // SEO
-  metaTitle       String?
-  metaDescription String?
-  
   // Flags
   isFeatured  Boolean  @default(false)
   isActive    Boolean  @default(true)
@@ -224,12 +206,78 @@ model Product {
   updatedAt   DateTime @updatedAt
   
   // Relações
+  details     ProductDetails?
+  dimensions  ProductDimensions?
+  seo         ProductSEO?
+  images      ProductImage[]
   variants    ProductVariant[]
   cartItems   CartItem[]
   orderItems  OrderItem[]
   reviews     Review[]
   
   @@map("products")
+}
+
+model ProductDetails {
+  id          String  @id @default(uuid())
+  productId   String  @unique
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  description String?
+  material    String?
+  careInstructions String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("product_details")
+}
+
+model ProductDimensions {
+  id        String   @id @default(uuid())
+  productId String   @unique
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  weight    Decimal  @db.Decimal(10, 3) // kg
+  length    Decimal  @db.Decimal(10, 2) // cm
+  width     Decimal  @db.Decimal(10, 2) // cm
+  height    Decimal  @db.Decimal(10, 2) // cm
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("product_dimensions")
+}
+
+model ProductSEO {
+  id              String  @id @default(uuid())
+  productId       String  @unique
+  product         Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("product_seo")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  url       String
+  altText   String?
+  order     Int      @default(0)
+  isPrimary Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([productId])
+  @@map("product_images")
 }
 
 model ProductVariant {

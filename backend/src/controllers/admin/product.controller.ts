@@ -103,12 +103,32 @@ export class AdminProductController {
         throw new NotFoundError('Produto não encontrado');
       }
 
-      // Adicionar novas imagens às existentes
-      const updatedImages = [...product.images, ...imageUrls];
+      // Criar array de novas imagens
+      const currentImages = product.images || [];
+      const nextOrder = currentImages.length;
+      
+      const newImages = imageUrls.map((url, index) => ({
+        url,
+        altText: `${product.name} - Imagem ${nextOrder + index + 1}`,
+        order: nextOrder + index,
+        isPrimary: currentImages.length === 0 && index === 0, // Primeira imagem é primary se não houver outras
+      }));
+
+      // Combinar imagens existentes com novas
+      const allImages = [
+        ...currentImages.map(img => ({
+          id: img.id,
+          url: img.url,
+          altText: img.altText || undefined,
+          order: img.order,
+          isPrimary: img.isPrimary,
+        })),
+        ...newImages,
+      ];
 
       // Atualizar produto
       const updatedProduct = await productService.updateProduct(id!, {
-        images: updatedImages,
+        images: allImages,
       });
 
       res.status(200).json({
@@ -116,7 +136,7 @@ export class AdminProductController {
         message: 'Imagens enviadas com sucesso',
         data: {
           product: updatedProduct,
-          uploadedImages: imageUrls,
+          uploadedImages: newImages,
         },
       });
     } catch (error) {
@@ -125,7 +145,7 @@ export class AdminProductController {
   }
 
   /**
-   * DELETE /api/v1/admin/products/:id/images
+   * DELETE /api/v1/admin/products/:id/images/:imageId
    * Remove uma imagem de um produto
    */
   async deleteImage(
@@ -134,11 +154,10 @@ export class AdminProductController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { id } = req.params;
-      const { imageUrl } = req.body;
+      const { id, imageId } = req.params;
 
-      if (!imageUrl) {
-        throw new BadRequestError('URL da imagem é obrigatória');
+      if (!imageId) {
+        throw new BadRequestError('ID da imagem é obrigatório');
       }
 
       // Buscar produto
@@ -147,20 +166,29 @@ export class AdminProductController {
         throw new NotFoundError('Produto não encontrado');
       }
 
-      // Verificar se a imagem existe no produto
-      if (!product.images.includes(imageUrl)) {
+      // Encontrar a imagem
+      const imageToDelete = product.images?.find(img => img.id === imageId);
+      if (!imageToDelete) {
         throw new BadRequestError('Imagem não encontrada no produto');
       }
 
       // Deletar do Cloudinary
-      await cloudinaryService.deleteImage(imageUrl);
+      await cloudinaryService.deleteImage(imageToDelete.url);
 
-      // Remover da lista de imagens
-      const updatedImages = product.images.filter((img) => img !== imageUrl);
+      // Remover da lista e reorganizar ordem
+      const remainingImages = product.images!
+        .filter(img => img.id !== imageId)
+        .map((img, index) => ({
+          id: img.id,
+          url: img.url,
+          altText: img.altText || undefined,
+          order: index,
+          isPrimary: index === 0, // Primeira imagem sempre é primary
+        }));
 
       // Atualizar produto
       const updatedProduct = await productService.updateProduct(id!, {
-        images: updatedImages,
+        images: remainingImages,
       });
 
       res.status(200).json({
