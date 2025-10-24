@@ -15,21 +15,6 @@ const addressBaseSchema = z.object({
     .max(50, 'Título deve ter no máximo 50 caracteres')
     .trim(),
 
-  receiverName: z
-    .string()
-    .min(3, 'Nome do destinatário deve ter no mínimo 3 caracteres')
-    .max(100, 'Nome muito longo')
-    .trim()
-    .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, 'Nome contém caracteres inválidos'),
-
-  receiverPhone: z
-    .string()
-    .regex(
-      /^(\+55\s?)?(\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}$/,
-      'Telefone inválido. Use formato: (11) 98765-4321'
-    )
-    .transform((phone) => phone.replace(/[^\d+]/g, '')),
-
   zipCode: z
     .string()
     .regex(/^\d{5}-?\d{3}$/, 'CEP inválido. Use formato: 12345-678')

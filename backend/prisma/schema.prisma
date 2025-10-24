@@ -125,10 +125,6 @@ model Address {
   state      String
   zipCode    String
   
-  // Dados de contato
-  receiverName String
-  receiverPhone String
-  
   // Flags
   isDefault  Boolean @default(false)
   

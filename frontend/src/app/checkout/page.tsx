@@ -179,6 +179,7 @@ export default function CheckoutPage() {
     }
 
     try {
+      // Salva endereço SEM dados de destinatário - isso será usado apenas no pedido
       const novoEndereco = await addressService.createAddress({
         label: checkoutData.tituloNovoEndereco,
         street: checkoutData.dadosEntrega.endereco,
@@ -188,12 +189,6 @@ export default function CheckoutPage() {
         city: checkoutData.dadosEntrega.cidade,
         state: checkoutData.dadosEntrega.estado,
         zipCode: checkoutData.dadosEntrega.cep,
-        receiverName: checkoutData.destinatarioIgualComprador 
-          ? `${checkoutData.dadosComprador.nome} ${checkoutData.dadosComprador.sobrenome}`
-          : checkoutData.dadosDestinatario.nomeCompleto,
-        receiverPhone: checkoutData.destinatarioIgualComprador
-          ? checkoutData.dadosComprador.telefone
-          : checkoutData.dadosDestinatario.telefone,
         isDefault: enderecosSalvos.length === 0, // Primeiro endereço é padrão
       });
 

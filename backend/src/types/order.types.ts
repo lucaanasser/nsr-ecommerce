@@ -9,6 +9,10 @@ export interface CreateOrderDTO {
   couponCode?: string;
   paymentMethod: 'credit_card' | 'pix' | 'boleto';
   notes?: string;
+  
+  // Dados opcionais do destinatário (quando diferente do comprador)
+  receiverName?: string;
+  receiverPhone?: string;
 }
 
 export interface OrderItemInput {

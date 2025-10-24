@@ -12,8 +12,6 @@ export interface Address {
   city: string;
   state: string;
   zipCode: string;
-  receiverName: string;
-  receiverPhone: string;
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
@@ -28,8 +26,6 @@ export interface CreateAddressData {
   city: string;
   state: string;
   zipCode: string;
-  receiverName: string;
-  receiverPhone: string;
   isDefault?: boolean;
 }
 

@@ -115,9 +115,6 @@ export default function AddressesTab({
               )}
               <h3 className="text-primary-bronze font-semibold mb-3">{endereco.label}</h3>
               <p className="text-primary-white/70 text-sm mb-1">
-                {endereco.receiverName} - {endereco.receiverPhone}
-              </p>
-              <p className="text-primary-white/70 text-sm mb-1">
                 {endereco.street}, {endereco.number}
                 {endereco.complement && ` - ${endereco.complement}`}
               </p>

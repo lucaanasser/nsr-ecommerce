@@ -98,10 +98,10 @@ export class OrderService {
           userId,
           addressId: data.addressId,
           
-          // Snapshots
-          customerName: `${user.firstName} ${user.lastName}`,
+          // Snapshots - usa dados do destinatário se fornecidos, senão usa do usuário
+          customerName: data.receiverName || `${user.firstName} ${user.lastName}`,
           customerEmail: user.email,
-          customerPhone: user.phone || '',
+          customerPhone: data.receiverPhone || user.phone || '',
 
           // Valores
           subtotal,
@@ -200,8 +200,8 @@ export class OrderService {
           discount: Number(order.discount),
           total: Number(order.total),
           shippingAddress: {
-            receiverName: address.receiverName,
-            receiverPhone: address.receiverPhone,
+            receiverName: order.customerName, // Nome do destinatário do pedido
+            receiverPhone: order.customerPhone, // Telefone do destinatário do pedido
             street: address.street,
             number: address.number,
             complement: address.complement || undefined,

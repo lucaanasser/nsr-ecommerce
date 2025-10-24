@@ -17,7 +17,11 @@ export const createOrderSchema = z.object({
   shippingMethodId: z.string().uuid(),
   couponCode: z.string().optional(),
   paymentMethod: z.enum(['credit_card', 'pix', 'boleto']),
-  notes: z.string().max(500).optional()
+  notes: z.string().max(500).optional(),
+  
+  // Dados opcionais do destinatário (quando diferente do comprador)
+  receiverName: z.string().min(3).max(100).optional(),
+  receiverPhone: z.string().regex(/^(\+55\s?)?(\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}$/).optional(),
 });
 
 export const cancelOrderSchema = z.object({

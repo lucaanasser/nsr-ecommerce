@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Address } from '@/services/address.service';
 import { getErrorMessage } from '@/services';
+import { useCepLookup } from '@/hooks/useCepLookup';
+import { formatCep, cleanCep } from '@/utils/cep';
 
 interface AddressFormModalProps {
   isOpen: boolean;
@@ -18,8 +20,6 @@ interface AddressFormModalProps {
 export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdit }: AddressFormModalProps) {
   const [formData, setFormData] = useState({
     label: '',
-    receiverName: '',
-    receiverPhone: '',
     zipCode: '',
     street: '',
     number: '',
@@ -32,14 +32,13 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const { loading: loadingCep, error: cepError, lookupCep } = useCepLookup();
 
   // Preenche o formulário quando está editando
   useEffect(() => {
     if (addressToEdit) {
       setFormData({
         label: addressToEdit.label || '',
-        receiverName: addressToEdit.receiverName || '',
-        receiverPhone: addressToEdit.receiverPhone || '',
         zipCode: addressToEdit.zipCode || '',
         street: addressToEdit.street || '',
         number: addressToEdit.number || '',
@@ -53,8 +52,6 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
       // Limpa o formulário para novo endereço
       setFormData({
         label: '',
-        receiverName: '',
-        receiverPhone: '',
         zipCode: '',
         street: '',
         number: '',
@@ -73,6 +70,31 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
     setError('');
   };
 
+  const handleCepChange = async (cep: string) => {
+    // Formata o CEP enquanto digita
+    const formatted = formatCep(cep);
+    setFormData(prev => ({ ...prev, zipCode: formatted }));
+    setError('');
+
+    // Remove caracteres não numéricos para validação
+    const cleanedCep = cleanCep(cep);
+
+    // Só busca quando tiver 8 dígitos
+    if (cleanedCep.length === 8) {
+      const data = await lookupCep(cleanedCep);
+      
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          street: data.logradouro || prev.street,
+          neighborhood: data.bairro || prev.neighborhood,
+          city: data.localidade || prev.city,
+          state: data.uf || prev.state,
+        }));
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -80,11 +102,6 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
     // Validações básicas
     if (!formData.label.trim()) {
       setError('O título do endereço é obrigatório');
-      return;
-    }
-
-    if (!formData.receiverName.trim()) {
-      setError('O nome do destinatário é obrigatório');
       return;
     }
 
@@ -180,34 +197,9 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
                   onChange={(e) => handleChange('label', e.target.value)}
                   required
                 />
-              </div>
-
-              {/* Destinatário */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-primary-white/80 mb-2">
-                    Nome do Destinatário *
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Nome completo"
-                    value={formData.receiverName}
-                    onChange={(e) => handleChange('receiverName', e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-primary-white/80 mb-2">
-                    Telefone *
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="(11) 98765-4321"
-                    value={formData.receiverPhone}
-                    onChange={(e) => handleChange('receiverPhone', e.target.value)}
-                    required
-                  />
-                </div>
+                <p className="text-xs text-primary-white/50 mt-1">
+                  Dê um nome para identificar facilmente este endereço
+                </p>
               </div>
 
               {/* CEP */}
@@ -215,14 +207,27 @@ export default function AddressFormModal({ isOpen, onClose, onSave, addressToEdi
                 <label className="block text-sm font-medium text-primary-white/80 mb-2">
                   CEP *
                 </label>
-                <Input
-                  type="text"
-                  placeholder="12345-678"
-                  value={formData.zipCode}
-                  onChange={(e) => handleChange('zipCode', e.target.value)}
-                  maxLength={9}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="12345-678"
+                    value={formData.zipCode}
+                    onChange={(e) => handleCepChange(e.target.value)}
+                    maxLength={9}
+                    required
+                  />
+                  {loadingCep && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary-bronze" />
+                    </div>
+                  )}
+                </div>
+                {cepError && (
+                  <p className="text-xs text-red-500 mt-1">{cepError}</p>
+                )}
+                <p className="text-xs text-primary-white/50 mt-1">
+                  Digite o CEP para preencher automaticamente
+                </p>
               </div>
 
               {/* Endereço */}

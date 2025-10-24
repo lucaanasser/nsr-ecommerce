@@ -5,11 +5,13 @@
  */
 
 import { motion } from 'framer-motion';
-import { Truck, MapPin, Check, ChevronRight } from 'lucide-react';
+import { Truck, MapPin, Check, ChevronRight, Loader2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import type { DadosDestinatario, DadosEntrega } from '@/types/checkout.types';
 import type { SavedAddress } from '@/services';
+import { useCepLookup } from '@/hooks/useCepLookup';
+import { formatCep, cleanCep } from '@/utils/cep';
 
 interface EntregaStepProps {
   isAuthenticated: boolean;
@@ -50,6 +52,32 @@ export default function EntregaStep({
   onSubmit,
   onVoltar,
 }: EntregaStepProps) {
+  const { loading: loadingCep, error: cepError, lookupCep } = useCepLookup();
+
+  const handleCepChange = async (cep: string) => {
+    // Formata o CEP enquanto digita
+    const formatted = formatCep(cep);
+    setDadosEntrega({ ...dadosEntrega, cep: formatted });
+
+    // Remove caracteres não numéricos para validação
+    const cleanedCep = cleanCep(cep);
+
+    // Só busca quando tiver 8 dígitos
+    if (cleanedCep.length === 8) {
+      const data = await lookupCep(cleanedCep);
+      
+      if (data) {
+        setDadosEntrega(prev => ({
+          ...prev,
+          endereco: data.logradouro || prev.endereco,
+          bairro: data.bairro || prev.bairro,
+          cidade: data.localidade || prev.cidade,
+          estado: data.uf || prev.estado,
+        }));
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -211,14 +239,33 @@ export default function EntregaStep({
           {/* Formulário de endereço manual */}
           {(!enderecoSelecionadoId || !isAuthenticated) && (
             <div className="space-y-4">
-              <Input
-                type="text"
-                placeholder="CEP"
-                required
-                value={dadosEntrega.cep}
-                onChange={(e) => setDadosEntrega({ ...dadosEntrega, cep: e.target.value })}
-                className="bg-dark-bg/50"
-              />
+              <div>
+                <label className="block text-sm font-medium text-primary-white/80 mb-2">
+                  CEP *
+                </label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="CEP"
+                    required
+                    value={dadosEntrega.cep}
+                    onChange={(e) => handleCepChange(e.target.value)}
+                    className="bg-dark-bg/50"
+                    maxLength={9}
+                  />
+                  {loadingCep && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary-bronze" />
+                    </div>
+                  )}
+                </div>
+                {cepError && (
+                  <p className="text-xs text-red-500 mt-1">{cepError}</p>
+                )}
+                <p className="text-xs text-primary-white/50 mt-1">
+                  Digite o CEP para preencher automaticamente
+                </p>
+              </div>
 
               <Input
                 type="text"
