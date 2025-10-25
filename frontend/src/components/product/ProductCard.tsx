@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Product } from '@/data/products';
@@ -25,6 +26,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [idProdutoClicado, setIdProdutoClicado] = useState(false);
   const [adicionadoAoCarrinho, setAdicionadoAoCarrinho] = useState<string | null>(null);
   const { adicionarAoCarrinho } = useCart();
+  const router = useRouter();
 
   const manipularAdicaoAoCarrinho = (tamanho: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,6 +39,20 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     setTimeout(() => {
       setAdicionadoAoCarrinho(null);
     }, 2000);
+  };
+
+  const manipularCompraImediata = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Verifica se há um tamanho adicionado recentemente ou usa o primeiro disponível
+    const tamanhoParaCompra = adicionadoAoCarrinho || product.sizes[0];
+    
+    // Adiciona ao carrinho
+    adicionarAoCarrinho(product, tamanhoParaCompra);
+    
+    // Redireciona para a página de checkout
+    router.push('/checkout');
   };
 
   const manipularCliqueMobile = (e: React.MouseEvent) => {
@@ -99,7 +115,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               </h3>
               
               {/* Tamanhos Disponíveis - Minimalista */}
-              <div className="flex flex-wrap gap-3 mb-4">
+              <div className="flex flex-wrap gap-3 mb-3">
                 {product.sizes.map((size) => {
                   const foiAdicionado = adicionadoAoCarrinho === size;
                   const estaIndisponivel = product.unavailableSizes?.includes(size);
@@ -133,6 +149,14 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
                   );
                 })}
               </div>
+              
+              {/* Botão Compre Agora - Minimalista */}
+              <button
+                onClick={manipularCompraImediata}
+                className="text-sm text-primary-gold/70 hover:text-primary-gold underline underline-offset-2 transition-colors font-nsr uppercase tracking-wider mb-2"
+              >
+                Compre Agora
+              </button>
               
               {/* Botão "Ver detalhes" apenas em mobile */}
               <Button
