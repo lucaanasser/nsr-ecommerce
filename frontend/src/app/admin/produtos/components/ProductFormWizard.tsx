@@ -7,6 +7,7 @@ import StepIndicator, { Step } from './StepIndicator';
 import BasicInfoStep from './form-steps/BasicInfoStep';
 import DescriptionStep from './form-steps/DescriptionStep';
 import ImagesStep from './form-steps/ImagesStep';
+import VariantsStep from './form-steps/VariantsStep';
 import ReviewStep from './form-steps/ReviewStep';
 
 /**
@@ -16,7 +17,8 @@ const STEPS: Step[] = [
   { id: 0, label: 'Informações Básicas', shortLabel: 'Básico' },
   { id: 1, label: 'Descrição', shortLabel: 'Descrição' },
   { id: 2, label: 'Imagens', shortLabel: 'Imagens' },
-  { id: 3, label: 'Revisão', shortLabel: 'Revisão' },
+  { id: 3, label: 'Tamanhos e Cores', shortLabel: 'Variantes' },
+  { id: 4, label: 'Revisão', shortLabel: 'Revisão' },
 ];
 
 interface ProductFormWizardProps {
@@ -100,6 +102,15 @@ export default function ProductFormWizard({
         );
       
       case 3:
+        return (
+          <VariantsStep
+            formData={formData}
+            errors={errors}
+            onUpdateField={updateField}
+          />
+        );
+      
+      case 4:
         return <ReviewStep formData={formData} />;
       
       default:

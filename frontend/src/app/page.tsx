@@ -17,9 +17,9 @@ export default function Inicio() {
   const [estaReproduzindo, setEstaReproduzindo] = useState(true);
 
   const itensMenu = [
-    { label: 'Shop', href: '/loja' },
-    { label: 'Login', href: '/login' },
-    { label: 'Lookbook', href: '/lookbook' },
+    { label: 'Novidades', href: '/novidades' },
+    { label: 'Loja', href: '/loja' },
+    { label: 'Arquivo', href: '/arquivo' },
     { label: 'Sobre', href: '/sobre' },
   ];
 

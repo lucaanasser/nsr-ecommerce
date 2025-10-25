@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Search, ChevronDown } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Menu, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuthContext } from '@/context/AuthContext';
@@ -19,33 +19,10 @@ import UserIcon from '@/components/icons/UserIcon';
 export default function Header({ hideLogo = false }: { hideLogo?: boolean }) {
   const { isAuthenticated } = useAuthContext();
   const [menuEstaAberto, setMenuEstaAberto] = useState(false);
-  const [lojaEstaAberta, setLojaEstaAberta] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
-  const referenciaLoja = useRef<HTMLDivElement>(null);
   const referenciaBusca = useRef<HTMLInputElement>(null);
   const { obterContagemCarrinho } = useCart();
   const caminhoAtual = usePathname();
-  const roteador = useRouter();
-
-  // Verifica se estamos na página da loja
-  const estaNaPaginaDaLoja = caminhoAtual === '/loja';
-
-  // Fecha o dropdown ao clicar fora
-  useEffect(() => {
-    const manipularCliqueFora = (event: MouseEvent) => {
-      if (referenciaLoja.current && !referenciaLoja.current.contains(event.target as Node)) {
-        setLojaEstaAberta(false);
-      }
-    };
-
-    if (lojaEstaAberta) {
-      document.addEventListener('mousedown', manipularCliqueFora);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', manipularCliqueFora);
-    };
-  }, [lojaEstaAberta]);
 
   // Foca no input quando a busca abre
   useEffect(() => {
@@ -54,31 +31,12 @@ export default function Header({ hideLogo = false }: { hideLogo?: boolean }) {
     }
   }, [buscaAberta]);
 
-  const categoriasLoja = [
-    { label: 'All', href: '/loja' },
-    { label: 'Masculino', href: '/loja?filter=masculino' },
-    { label: 'Feminino', href: '/loja?filter=feminino' },
-    { label: 'Camisetas', href: '/loja?category=camisetas' },
-    { label: 'Calças', href: '/loja?category=calcas' },
-    { label: 'Moletons', href: '/loja?category=moletons' },
-    { label: 'Acessórios', href: '/loja?category=acessorios' },
-  ];
-
   const itensMenu = [
-    { label: 'Lookbook', href: '/lookbook' },
+    { label: 'Novidades', href: '/novidades' },
+    { label: 'Loja', href: '/loja' },
+    { label: 'Arquivo', href: '/arquivo' },
     { label: 'Sobre', href: '/sobre' },
   ];
-
-  // Handler para o botão Shop
-  const manipularCliqueShop = () => {
-    if (estaNaPaginaDaLoja) {
-      // Se já estamos na página da loja, abre/fecha o dropdown
-      setLojaEstaAberta(!lojaEstaAberta);
-    } else {
-      // Se não estamos na página da loja, redireciona para /loja
-      roteador.push('/loja');
-    }
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary-black backdrop-blur-sm border-b border-dark-border">
@@ -101,47 +59,6 @@ export default function Header({ hideLogo = false }: { hideLogo?: boolean }) {
 
           {/* Menu Desktop */}
           <nav className="hidden lg:flex items-center space-x-8">
-            {/* Shop com Dropdown */}
-            <div 
-              ref={referenciaLoja}
-              className="relative"
-            >
-              <button 
-                onClick={manipularCliqueShop}
-                className="text-2xl font-nsr uppercase tracking-wider text-primary-white/70 hover:text-primary-gold transition-colors duration-300 flex items-center gap-1"
-              >
-                Shop
-                {estaNaPaginaDaLoja && (
-                  <ChevronDown size={18} className={`transition-transform duration-300 ${lojaEstaAberta ? 'rotate-180' : ''}`} />
-                )}
-              </button>
-              
-              {/* Dropdown */}
-              <AnimatePresence>
-                {lojaEstaAberta && estaNaPaginaDaLoja && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 mt-2 w-48 bg-dark-card/95 backdrop-blur-sm border border-dark-border rounded-sm shadow-xl py-2"
-                  >
-                    {categoriasLoja.map((category) => (
-                      <Link
-                        key={category.href}
-                        href={category.href}
-                        onClick={() => setLojaEstaAberta(false)}
-                        className="block px-4 py-2 text-lg font-nsr text-primary-white/70 hover:text-primary-gold hover:bg-dark-bg/50 transition-colors uppercase tracking-wider"
-                      >
-                        {category.label}
-                      </Link>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Outros itens do menu */}
             {itensMenu.map((item) => (
               <Link
                 key={item.href}
@@ -251,42 +168,6 @@ export default function Header({ hideLogo = false }: { hideLogo?: boolean }) {
             className="lg:hidden bg-dark-card border-t border-dark-border"
           >
             <nav className="container-custom py-6 space-y-4">
-              {/* Shop com subcategorias no mobile */}
-              <div>
-                <button
-                  onClick={manipularCliqueShop}
-                  className="w-full flex items-center justify-between text-2xl font-nsr uppercase tracking-wider text-primary-white/70 hover:text-arabic-bronze transition-colors duration-300 py-2"
-                >
-                  Shop
-                  {estaNaPaginaDaLoja && (
-                    <ChevronDown size={20} className={`transition-transform duration-300 ${lojaEstaAberta ? 'rotate-180' : ''}`} />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {lojaEstaAberta && estaNaPaginaDaLoja && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="pl-4 pt-2 space-y-2"
-                    >
-                      {categoriasLoja.map((category) => (
-                        <Link
-                          key={category.href}
-                          href={category.href}
-                          className="block text-lg font-nsr uppercase tracking-wider text-primary-white/60 hover:text-arabic-bronze transition-colors py-1"
-                          onClick={() => setMenuEstaAberto(false)}
-                        >
-                          {category.label}
-                        </Link>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Outros itens */}
               {itensMenu.map((item) => (
                 <Link
                   key={item.href}

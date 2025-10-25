@@ -45,7 +45,6 @@ export default function EditarProdutoPage() {
           name: product.name,
           slug: product.slug,
           price: product.price,
-          stock: 50, // Mock
           description: product.description,
           images: product.images.map((url, index) => ({
             url,

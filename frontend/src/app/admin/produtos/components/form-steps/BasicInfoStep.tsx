@@ -122,20 +122,6 @@ export default function BasicInfoStep({
           </p>
         </div>
 
-        {/* Estoque */}
-        <div>
-          <label className="block text-sm font-medium text-primary-white mb-2">
-            Estoque Inicial <span className="text-red-500">*</span>
-          </label>
-          <Input
-            type="number"
-            min="0"
-            value={formData.stock || ''}
-            onChange={(e) => onUpdateField('stock', parseInt(e.target.value) || 0)}
-            placeholder="0"
-          />
-        </div>
-
         {/* Gênero */}
         <div>
           <label className="block text-sm font-medium text-primary-white mb-2">

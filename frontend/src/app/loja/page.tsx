@@ -1,40 +1,25 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import ProductCard from '@/components/product/ProductCard';
+import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { products } from '@/data/products';
-import { useCart } from '@/context/CartContext';
-import { ShoppingCart, Check } from 'lucide-react';
-import { IMAGES } from '@/config/images';
+import { SlidersHorizontal } from 'lucide-react';
 
 /**
- * Loja - Página de Vitrine
+ * Produtos - Página de Catálogo
  * 
- * Grid de produtos com imagens grandes ocupando a tela.
- * Preço sempre visível, hover mostra segunda imagem e tamanhos para adicionar ao carrinho direto.
- * Experiência visual e rápida de compra.
+ * Catálogo completo com grid de produtos, filtros avançados e ordenação.
+ * Layout minimalista com espaçamento generoso e cards navegáveis.
  */
-function LojaContent() {
-  const parametrosBusca = useSearchParams();
-  const parametroFiltro = parametrosBusca.get('filter');
-  const { adicionarAoCarrinho } = useCart();
-  
+export default function ProdutosPage() {
   const [filtro, setFiltro] = useState<'todos' | 'masculino' | 'feminino'>('todos');
-  const [idProdutoHover, setIdProdutoHover] = useState<string | null>(null);
-  const [adicionadoAoCarrinho, setAdicionadoAoCarrinho] = useState<{ idProduto: string; tamanho: string } | null>(null);
-  const [idProdutoClicado, setIdProdutoClicado] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (parametroFiltro === 'masculino' || parametroFiltro === 'feminino') {
-      setFiltro(parametroFiltro);
-    }
-  }, [parametroFiltro]);
+  const [ordenarPor, setOrdenarPor] = useState<'novos' | 'preco-asc' | 'preco-desc'>('novos');
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   // Aplicar filtros
   let produtosFiltrados = products;
@@ -42,199 +27,191 @@ function LojaContent() {
     produtosFiltrados = products.filter(p => p.category === filtro);
   }
 
-  const manipularAdicaoAoCarrinho = (idProduto: string, tamanho: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const produto = products.find(p => p.id === idProduto);
-    if (produto) {
-      adicionarAoCarrinho(produto, tamanho);
-      setAdicionadoAoCarrinho({ idProduto, tamanho });
-      
-      // Remove o feedback visual após 2 segundos
-      setTimeout(() => {
-        setAdicionadoAoCarrinho(null);
-      }, 2000);
-    }
-  };
-
-  const manipularCliqueMobile = (idProduto: string, e: React.MouseEvent) => {
-    // Em mobile, o primeiro clique mostra os detalhes
-    if (window.innerWidth < 768) {
-      if (idProdutoClicado !== idProduto) {
-        e.preventDefault();
-        setIdProdutoClicado(idProduto);
-      }
-      // Se já estiver clicado, deixa navegar
-    }
-  };
+  // Aplicar ordenação
+  const produtosOrdenados = [...produtosFiltrados].sort((a, b) => {
+    if (ordenarPor === 'preco-asc') return a.price - b.price;
+    if (ordenarPor === 'preco-desc') return b.price - a.price;
+    return b.new ? 1 : -1; // Novos primeiro
+  });
 
   return (
     <>
       <Header />
       
-      <main className="pt-20 min-h-screen relative pb-20">
-        {/* Background com banner repetido */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `url(${IMAGES.pattern1})`,
-              backgroundRepeat: 'repeat',
-              backgroundSize: 'auto 350px',
-              backgroundPosition: 'center',
-            }}
-          />
-        </div>
+      <main className="pt-32 pb-20">
+        <Container>
+          {/* Layout com Sidebar */}
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+            {/* Sidebar de Filtros - Desktop */}
+            <aside className="hidden lg:block w-64 flex-shrink-0">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                className="sticky top-32"
+              >
+                <h2 className="text-2xl font-bold mb-6">Filtros</h2>
 
-        {/* Grid de Produtos - Imagens grandes */}
-        {produtosFiltrados.length > 0 ? (
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-            {produtosFiltrados.map((product, index) => {
-              const estaClicado = idProdutoClicado === product.id;
-              
-              return (
-                <Link 
-                  key={product.id}
-                  href={`/produto/${product.slug}`}
-                  onClick={(e) => manipularCliqueMobile(product.id, e)}
-                >
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="relative group aspect-[3/4] overflow-hidden cursor-pointer"
-                    onMouseEnter={() => setIdProdutoHover(product.id)}
-                    onMouseLeave={() => setIdProdutoHover(null)}
+                {/* Categoria */}
+                <div className="mb-8">
+                  <h3 className="text-sm uppercase tracking-wider font-semibold mb-4 text-primary-gold">
+                    Categoria
+                  </h3>
+                  <div className="space-y-3">
+                    {(['todos', 'masculino', 'feminino'] as const).map((cat) => (
+                      <label
+                        key={cat}
+                        className="flex items-center cursor-pointer group"
+                      >
+                        <input
+                          type="radio"
+                          name="categoria"
+                          checked={filtro === cat}
+                          onChange={() => setFiltro(cat)}
+                          className="w-4 h-4 text-primary-gold bg-dark-bg border-dark-border focus:ring-primary-gold focus:ring-2"
+                        />
+                        <span className="ml-3 text-primary-white/70 group-hover:text-primary-gold transition-colors capitalize">
+                          {cat}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tamanhos */}
+                <div className="mb-8">
+                  <h3 className="text-sm uppercase tracking-wider font-semibold mb-4 text-primary-gold">
+                    Tamanhos
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {['40', '42', '44', '46', '48', '50', 'UN', 'XXG', 'XXXG', 'P', 'M', 'G', 'GG'].map((size) => (
+                      <button
+                        key={size}
+                        className="px-3 py-2 bg-dark-card border border-dark-border text-primary-white/60 hover:text-primary-gold hover:border-primary-gold rounded-sm text-sm transition-colors"
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Ordenação */}
+                <div className="mb-8">
+                  <h3 className="text-sm uppercase tracking-wider font-semibold mb-4 text-primary-gold">
+                    Ordenar por
+                  </h3>
+                  <select
+                    value={ordenarPor}
+                    onChange={(e) => setOrdenarPor(e.target.value as any)}
+                    className="w-full px-4 py-2 bg-dark-card border border-dark-border text-primary-white rounded-sm text-sm focus:outline-none focus:border-primary-gold transition-colors"
                   >
-                    {/* Imagem Principal */}
-                    <Image
-                      src={product.images[0]}
-                      alt={product.name}
-                      fill
-                      className={`object-cover transition-opacity duration-500 ${
-                        (idProdutoHover === product.id || estaClicado) && product.images[1] ? 'opacity-0' : 'opacity-100'
-                      }`}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                    
-                    {/* Segunda Imagem (Hover) */}
-                    {product.images[1] && (
-                      <Image
-                        src={product.images[1]}
-                        alt={`${product.name} - ângulo alternativo`}
-                        fill
-                        className={`object-cover transition-opacity duration-500 ${
-                          idProdutoHover === product.id || estaClicado ? 'opacity-100' : 'opacity-0'
-                        }`}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    )}
-                    
-                    {/* Overlay com informações no hover ou clique mobile */}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-dark-bg/70 via-dark-bg/40 to-transparent transition-opacity duration-500 ${
-                      estaClicado ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}>
-                      <div className="absolute bottom-0 left-0 right-0 p-8">
-                        <h3 className="text-4xl text-primary-gold mb-4" style={{ fontFamily: 'Nsr, sans-serif', textShadow: '0 0 10px rgba(212, 175, 55, 0.5)' }}>
-                          {product.name}
-                        </h3>
-                        
-                        {/* Tamanhos Disponíveis - Minimalista */}
-                        <div className="flex flex-wrap gap-3 mb-4">
-                          {product.sizes.map((size) => {
-                            const foiAdicionado = adicionadoAoCarrinho?.idProduto === product.id && adicionadoAoCarrinho?.tamanho === size;
-                            const estaIndisponivel = product.unavailableSizes?.includes(size);
-                            
-                            return (
-                              <motion.button
-                                key={size}
-                                onClick={(e) => !estaIndisponivel && manipularAdicaoAoCarrinho(product.id, size, e)}
-                                disabled={estaIndisponivel}
-                                className={`
-                                  text-lg uppercase tracking-widest transition-all duration-300
-                                  ${estaIndisponivel
-                                    ? 'text-primary-gold/30 line-through cursor-not-allowed'
-                                    : foiAdicionado 
-                                      ? 'text-primary-gold underline underline-offset-4' 
-                                      : 'text-primary-gold/80 hover:text-primary-gold'
-                                  }
-                                `}
-                                style={!estaIndisponivel && !foiAdicionado ? { 
-                                  fontFamily: 'Nsr, sans-serif',
-                                  textShadow: 'none',
-                                  transition: 'all 0.3s ease'
-                                } : { fontFamily: 'Nsr, sans-serif' }}
-                                whileHover={!estaIndisponivel ? { 
-                                  scale: 1.1,
-                                  textShadow: '0 0 10px rgba(212, 175, 55, 0.6)'
-                                } : undefined}
-                                whileTap={!estaIndisponivel ? { scale: 0.95 } : undefined}
-                              >
-                                {size}
-                              </motion.button>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* Botão "Ver detalhes" apenas em mobile */}
-                        <Button
-                          variant="ghost"
-                          onClick={(e) => {
-                            e?.preventDefault();
-                            e?.stopPropagation();
-                            // No segundo clique, navega para a página
-                            if (estaClicado) {
-                              window.location.href = `/produto/${product.slug}`;
-                            }
-                          }}
-                          className="md:hidden text-primary-gold/60 hover:text-primary-gold font-nsr py-2"
-                        >
-                          Ver detalhes
-                        </Button>
+                    <option value="novos">Novidades</option>
+                    <option value="preco-asc">Menor preço</option>
+                    <option value="preco-desc">Maior preço</option>
+                  </select>
+                </div>
+              </motion.div>
+            </aside>
+
+            {/* Filtros Mobile - Toggle */}
+            <div className="lg:hidden">
+              <Button
+                variant="secondary"
+                onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                className="w-full py-3 px-4 mb-6"
+              >
+                <SlidersHorizontal size={18} className="mr-2" />
+                Filtros
+              </Button>
+
+              <AnimatePresence>
+                {mostrarFiltros && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-dark-card border border-dark-border p-6 rounded-sm mb-8"
+                  >
+                    {/* Categoria Mobile */}
+                    <div className="mb-6">
+                      <h3 className="text-sm uppercase tracking-wider font-semibold mb-4 text-primary-gold">
+                        Categoria
+                      </h3>
+                      <div className="flex gap-2">
+                        {(['todos', 'masculino', 'feminino'] as const).map((cat) => (
+                          <Button
+                            key={cat}
+                            onClick={() => setFiltro(cat)}
+                            variant={filtro === cat ? 'primary' : 'secondary'}
+                            className="py-2 px-4 flex-1"
+                          >
+                            {cat}
+                          </Button>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Badge de novidade - Minimalista */}
-                    {product.new && (
-                      <div className="absolute top-4 left-4 text-primary-gold text-base uppercase tracking-widest z-10" style={{ fontFamily: 'Nsr, sans-serif' }}>
-                        Novo
-                      </div>
-                    )}
-
-                    {/* Preço sempre visível - Simples e discreto */}
-                    <div className="absolute bottom-4 right-4 z-10">
-                      <p className="text-2xl text-black group-hover:text-primary-gold transition-colors" style={{ fontFamily: 'Nsr, sans-serif'}}>
-                        R$ {product.price.toFixed(2)}
-                      </p>
+                    {/* Ordenação Mobile */}
+                    <div>
+                      <h3 className="text-sm uppercase tracking-wider font-semibold mb-4 text-primary-gold">
+                        Ordenar por
+                      </h3>
+                      <select
+                        value={ordenarPor}
+                        onChange={(e) => setOrdenarPor(e.target.value as any)}
+                        className="w-full px-4 py-2 bg-dark-bg border border-dark-border text-primary-white rounded-sm text-sm focus:outline-none focus:border-primary-gold transition-colors"
+                      >
+                        <option value="novos">Novidades</option>
+                        <option value="preco-asc">Menor preço</option>
+                        <option value="preco-desc">Maior preço</option>
+                      </select>
                     </div>
                   </motion.div>
-                </Link>
-              );
-            })}
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Conteúdo Principal */}
+            <div className="flex-1">
+              {/* Título */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="mb-8"
+              >
+                <h1 className="text-5xl md:text-6xl font-bold mb-4">
+                  Shop All
+                </h1>
+                <p className="text-primary-white/60 text-lg">
+                  {produtosOrdenados.length} {produtosOrdenados.length === 1 ? 'produto' : 'produtos'}
+                </p>
+              </motion.div>
+
+              {/* Grid de Produtos - 3 por linha */}
+              {produtosOrdenados.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {produtosOrdenados.map((product, index) => (
+                    <ProductCard key={product.id} product={product} index={index} />
+                  ))}
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20"
+                >
+                  <p className="text-2xl text-primary-white/40">
+                    Nenhum produto encontrado com os filtros selecionados.
+                  </p>
+                </motion.div>
+              )}
+            </div>
           </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="relative z-10 text-center py-32"
-          >
-            <p className="text-2xl text-primary-white/30">
-              Nenhum produto em destaque nesta categoria.
-            </p>
-          </motion.div>
-        )}
+        </Container>
       </main>
 
       <Footer />
     </>
-  );
-}
-
-export default function LojaPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-dark-bg flex items-center justify-center"><p className="text-primary-gold">Carregando...</p></div>}>
-      <LojaContent />
-    </Suspense>
   );
 }

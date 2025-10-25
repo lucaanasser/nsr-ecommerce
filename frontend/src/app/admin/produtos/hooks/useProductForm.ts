@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VariantConfig, INITIAL_VARIANT_CONFIG } from '../types/variant.types';
 
 /**
  * Interface do formulário de produto
@@ -12,10 +13,9 @@ export interface ProductFormData {
   collectionId?: string;
   gender: 'MALE' | 'FEMALE' | 'UNISEX';
   
-  // Preços e estoque
+  // Preços
   price: number;
   comparePrice?: number;
-  stock: number;
   
   // Descrição e detalhes
   description: string;
@@ -30,16 +30,17 @@ export interface ProductFormData {
     isPrimary: boolean;
   }>;
   
-  // Variantes
+  // Variantes (configuração completa)
+  variantConfig: VariantConfig;
+  
+  // Variantes (para compatibilidade com backend)
   variants: Array<{
     size: string;
     color?: string;
     stock: number;
     sku?: string;
     priceAdjustment?: number;
-  }>;
-  
-  // Dimensões
+  }>;  // Dimensões
   dimensions?: {
     weight: number;
     length: number;
@@ -68,9 +69,9 @@ const initialFormData: ProductFormData = {
   sku: '',
   gender: 'UNISEX',
   price: 0,
-  stock: 0,
   description: '',
   images: [],
+  variantConfig: INITIAL_VARIANT_CONFIG,
   variants: [],
   isFeatured: false,
   isActive: true,
@@ -160,6 +161,35 @@ export function useProductForm(initialData?: Partial<ProductFormData>) {
       case 2: // Imagens
         if (formData.images.length === 0) {
           newErrors.images = 'Adicione pelo menos uma imagem';
+        }
+        break;
+      
+      case 3: // Variantes
+        // Verificar se há tamanhos selecionados (exceto se for único)
+        if (formData.variantConfig.sizeType !== 'unique' && formData.variantConfig.sizes.length === 0) {
+          newErrors.variants = 'Selecione pelo menos um tamanho';
+        }
+        
+        // Verificar se há cores selecionadas (quando cores estão ativadas)
+        if (formData.variantConfig.hasColors && formData.variantConfig.colors.length === 0) {
+          newErrors.variants = 'Selecione pelo menos uma cor ou desative as cores';
+        }
+        
+        // Verificar se há variantes geradas
+        if (formData.variantConfig.variants.length === 0) {
+          newErrors.variants = 'Configure pelo menos uma variante';
+        }
+        
+        // Verificar se há estoque negativo
+        const hasNegativeStock = formData.variantConfig.variants.some(v => v.stock < 0);
+        if (hasNegativeStock) {
+          newErrors.variants = 'Estoque não pode ser negativo';
+        }
+        
+        // Verificar se todas as variantes estão zeradas
+        const allZeroStock = formData.variantConfig.variants.every(v => v.stock === 0);
+        if (allZeroStock && formData.variantConfig.variants.length > 0) {
+          newErrors.variants = 'Pelo menos uma variante deve ter estoque maior que zero';
         }
         break;
     }
