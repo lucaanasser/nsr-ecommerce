@@ -41,7 +41,7 @@ class ProductService {
     }
 
     // Filtros específicos
-    if (filters.categoryId) where.categoryId = filters.categoryId;
+    if (filters.category) where.category = filters.category;
     if (filters.collectionId) where.collectionId = filters.collectionId;
     if (filters.gender) where.gender = filters.gender;
     if (filters.isFeatured !== undefined) where.isFeatured = filters.isFeatured;
@@ -168,7 +168,7 @@ class ProductService {
         comparePrice: data.comparePrice ? new Prisma.Decimal(data.comparePrice) : null,
         stock: data.stock,
         sku: data.sku,
-        categoryId: data.categoryId,
+        category: data.category,
         collectionId: data.collectionId,
         gender: data.gender || 'UNISEX',
         isFeatured: data.isFeatured || false,
@@ -179,8 +179,7 @@ class ProductService {
           ? {
               create: {
                 description: data.details.description,
-                material: data.details.material,
-                careInstructions: data.details.careInstructions,
+                specifications: data.details.specifications,
               },
             }
           : undefined,
@@ -289,6 +288,7 @@ class ProductService {
       updateData.comparePrice = data.comparePrice ? new Prisma.Decimal(data.comparePrice) : null;
     if (data.stock !== undefined) updateData.stock = data.stock;
     if (data.sku !== undefined) updateData.sku = data.sku;
+    if (data.category !== undefined) updateData.category = data.category;
     if (data.gender !== undefined) updateData.gender = data.gender;
     if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
@@ -351,9 +351,6 @@ class ProductService {
     }
     
     // Relações precisam usar connect/disconnect
-    if (data.categoryId !== undefined) {
-      updateData.category = data.categoryId ? { connect: { id: data.categoryId } } : { disconnect: true };
-    }
     if (data.collectionId !== undefined) {
       updateData.collection = data.collectionId ? { connect: { id: data.collectionId } } : { disconnect: true };
     }

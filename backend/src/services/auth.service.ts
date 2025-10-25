@@ -25,6 +25,7 @@ import {
 import { prisma } from '../config/database';
 import { logger } from '@config/logger.colored';
 import { emailService } from './email.service';
+import { consentService } from './consent.service';
 
 /**
  * Auth Service
@@ -64,19 +65,6 @@ export class AuthService {
     // Hash da senha
     const hashedPassword = await hashPassword(data.password);
 
-    // Preparar dados LGPD
-    const now = new Date();
-    const lgpdData = {
-      privacyPolicyAccepted: data.privacyPolicy || false,
-      privacyPolicyAcceptedAt: data.privacyPolicy ? now : null,
-      privacyPolicyVersion: data.privacyPolicy ? '1.0' : null,
-      termsAccepted: data.terms || false,
-      termsAcceptedAt: data.terms ? now : null,
-      termsVersion: data.terms ? '1.0' : null,
-      marketingConsent: data.marketing || false,
-      marketingConsentAt: data.marketing ? now : null,
-    };
-
     // Cria usuário
     const user = await userRepository.create({
       email: data.email,
@@ -87,7 +75,16 @@ export class AuthService {
       cpf: data.cpf,
       birthDate: data.birthDate,
       role: 'CUSTOMER', // Todos começam como CUSTOMER
-      ...lgpdData,
+    });
+
+    // Salva consentimentos no histórico
+    await consentService.saveConsents({
+      userId: user.id,
+      privacyPolicy: data.privacyPolicy,
+      terms: data.terms,
+      marketing: data.marketing,
+      ipAddress: undefined, // Pode ser passado do controller se disponível
+      userAgent: undefined, // Pode ser passado do controller se disponível
     });
 
     logger.info('User registered', {

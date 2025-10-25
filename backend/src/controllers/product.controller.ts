@@ -4,7 +4,6 @@
  */
 import { Request, Response, NextFunction } from 'express';
 import { productService } from '../services/product.service';
-import { categoryService } from '../services/category.service';
 import { collectionService } from '../services/collection.service';
 import { ProductFilters, Pagination } from '../types/product.types';
 
@@ -26,7 +25,7 @@ export class ProductController {
       // Extrair filtros da query
       const filters: ProductFilters = {
         search: req.query['search'] as string,
-        categoryId: req.query['categoryId'] as string,
+        category: req.query['category'] as string,
         collectionId: req.query['collectionId'] as string,
         gender: req.query['gender'] as 'MALE' | 'FEMALE' | 'UNISEX',
         minPrice: req.query['minPrice'] ? Number(req.query['minPrice']) : undefined,
@@ -95,51 +94,6 @@ export class ProductController {
         success: true,
         message: 'Produto recuperado com sucesso',
         data: product,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * GET /api/v1/categories
-   * Lista todas as categorias
-   */
-  async getCategories(
-    _req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const categories = await categoryService.getCategories();
-
-      res.status(200).json({
-        success: true,
-        message: 'Categorias recuperadas com sucesso',
-        data: categories,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * GET /api/v1/categories/:slug
-   * Busca categoria por slug
-   */
-  async getCategoryBySlug(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { slug } = req.params;
-      const category = await categoryService.getCategoryBySlug(slug!);
-
-      res.status(200).json({
-        success: true,
-        message: 'Categoria recuperada com sucesso',
-        data: category,
       });
     } catch (error) {
       next(error);

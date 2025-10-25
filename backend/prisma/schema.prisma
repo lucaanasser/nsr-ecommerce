@@ -59,17 +59,6 @@ model User {
   phone     String?
   cpf       String?  @unique
   
-  
-  // LGPD - Consentimentos
-  privacyPolicyAccepted    Boolean   @default(false)
-  privacyPolicyAcceptedAt  DateTime?
-  privacyPolicyVersion     String?
-  termsAccepted            Boolean   @default(false)
-  termsAcceptedAt          DateTime?
-  termsVersion             String?
-  marketingConsent         Boolean   @default(false)
-  marketingConsentAt       DateTime?
-  
   // LGPD - Rastreabilidade
   dataRetentionDate        DateTime?
   anonymizedAt             DateTime?
@@ -137,25 +126,6 @@ model Address {
   @@map("addresses")
 }
 
-model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  slug        String    @unique
-  description String?
-  imageUrl    String?
-  
-  // Ordenação
-  order       Int       @default(0)
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // Relações
-  products    Product[]
-  
-  @@map("categories")
-}
-
 model Collection {
   id          String    @id @default(uuid())
   name        String    @unique
@@ -190,8 +160,7 @@ model Product {
   sku         String?  @unique
   
   // Categorização
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  category    String?  // Ex: "camiseta", "calça", "acessório"
   
   collectionId String?
   collection   Collection? @relation(fields: [collectionId], references: [id])
@@ -224,8 +193,7 @@ model ProductDetails {
   product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   
   description String?
-  material    String?
-  careInstructions String?
+  specifications String?
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

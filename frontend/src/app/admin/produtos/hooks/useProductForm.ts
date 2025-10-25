@@ -9,7 +9,7 @@ export interface ProductFormData {
   name: string;
   slug: string;
   sku: string;
-  categoryId?: string;
+  category?: string;
   collectionId?: string;
   gender: 'MALE' | 'FEMALE' | 'UNISEX';
   
@@ -19,8 +19,7 @@ export interface ProductFormData {
   
   // Descrição e detalhes
   description: string;
-  material?: string;
-  careInstructions?: string;
+  specifications?: string;
   
   // Imagens
   images: Array<{

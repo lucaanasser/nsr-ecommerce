@@ -12,7 +12,7 @@ type Product = Prisma.ProductGetPayload<{}>;
  * Filtros de busca de produtos
  */
 export interface ProductFilters {
-  categoryId?: string;
+  category?: string;
   collectionId?: string;
   gender?: string;
   minPrice?: number;
@@ -124,8 +124,8 @@ export class ProductRepository extends BaseRepository<Product> {
     };
 
     // Filtro por categoria
-    if (filters.categoryId) {
-      where.categoryId = filters.categoryId;
+    if (filters.category) {
+      where.category = filters.category;
     }
 
     // Filtro por coleção
@@ -209,13 +209,13 @@ export class ProductRepository extends BaseRepository<Product> {
   /**
    * Encontra produtos por categoria
    */
-  async findByCategory(categoryId: string, options?: {
+  async findByCategory(category: string, options?: {
     take?: number;
     skip?: number;
   }) {
     return this.model.findMany({
       where: {
-        categoryId,
+        category,
         isActive: true,
       },
       take: options?.take,
@@ -251,10 +251,10 @@ export class ProductRepository extends BaseRepository<Product> {
   /**
    * Encontra produtos relacionados (mesma categoria, exceto o atual)
    */
-  async findRelated(productId: string, categoryId: string, limit = 4) {
+  async findRelated(productId: string, category: string, limit = 4) {
     return this.model.findMany({
       where: {
-        categoryId,
+        category,
         isActive: true,
         id: {
           not: productId,

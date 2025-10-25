@@ -12,8 +12,6 @@ import {
   createProductSchema,
   updateProductSchema,
   uuidParamSchema,
-  createCategorySchema,
-  updateCategorySchema,
   createCollectionSchema,
   updateCollectionSchema,
 } from '../../validators/product.validator';
@@ -81,42 +79,6 @@ router.delete(
   '/:id/images/:imageId',
   validateParams(uuidParamSchema),
   adminProductController.deleteImage.bind(adminProductController)
-);
-
-// ========== CATEGORY ROUTES ==========
-
-/**
- * @route   POST /api/v1/admin/categories
- * @desc    Cria nova categoria
- * @access  Private (Admin)
- */
-router.post(
-  '/categories',
-  validateBody(createCategorySchema),
-  adminProductController.createCategory.bind(adminProductController)
-);
-
-/**
- * @route   PUT /api/v1/admin/categories/:id
- * @desc    Atualiza categoria existente
- * @access  Private (Admin)
- */
-router.put(
-  '/categories/:id',
-  validateParams(uuidParamSchema),
-  validateBody(updateCategorySchema),
-  adminProductController.updateCategory.bind(adminProductController)
-);
-
-/**
- * @route   DELETE /api/v1/admin/categories/:id
- * @desc    Deleta categoria
- * @access  Private (Admin)
- */
-router.delete(
-  '/categories/:id',
-  validateParams(uuidParamSchema),
-  adminProductController.deleteCategory.bind(adminProductController)
 );
 
 // ========== COLLECTION ROUTES ==========

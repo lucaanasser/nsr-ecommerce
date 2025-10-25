@@ -10,7 +10,7 @@ import { Gender } from '@prisma/client';
 
 export interface ProductFilters {
   search?: string;
-  categoryId?: string;
+  category?: string;
   collectionId?: string;
   gender?: Gender;
   minPrice?: number;
@@ -48,7 +48,7 @@ export interface CreateProductDTO {
   comparePrice?: number;
   stock: number;
   sku?: string;
-  categoryId?: string;
+  category?: string;
   collectionId?: string;
   gender?: Gender;
   isFeatured?: boolean;
@@ -57,8 +57,7 @@ export interface CreateProductDTO {
   // Nested objects
   details?: {
     description?: string;
-    material?: string;
-    careInstructions?: string;
+    specifications?: string;
   };
   
   dimensions?: {
@@ -91,7 +90,7 @@ export interface UpdateProductDTO {
   comparePrice?: number;
   stock?: number;
   sku?: string;
-  categoryId?: string;
+  category?: string;
   collectionId?: string;
   gender?: Gender;
   isFeatured?: boolean;
@@ -100,8 +99,7 @@ export interface UpdateProductDTO {
   // Nested objects
   details?: {
     description?: string;
-    material?: string;
-    careInstructions?: string;
+    specifications?: string;
   };
   
   dimensions?: {
@@ -149,26 +147,6 @@ export interface UpdateVariantDTO {
 }
 
 // ================================
-// CATEGORY DTOs
-// ================================
-
-export interface CreateCategoryDTO {
-  name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  parentId?: string;
-}
-
-export interface UpdateCategoryDTO {
-  name?: string;
-  slug?: string;
-  description?: string;
-  image?: string;
-  parentId?: string;
-}
-
-// ================================
 // COLLECTION DTOs
 // ================================
 
@@ -198,6 +176,7 @@ export interface ProductResponse {
   comparePrice: number | null;
   stock: number;
   sku: string | null;
+  category: string | null;
   gender: Gender;
   isFeatured: boolean;
   isActive: boolean;
@@ -207,8 +186,7 @@ export interface ProductResponse {
   // Related data
   details?: {
     description: string | null;
-    material: string | null;
-    careInstructions: string | null;
+    specifications: string | null;
   } | null;
   
   dimensions?: {
@@ -232,12 +210,6 @@ export interface ProductResponse {
     isPrimary: boolean;
   }>;
   
-  category?: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  
   collection?: {
     id: string;
     name: string;
@@ -257,25 +229,6 @@ export interface VariantResponse {
   comparePrice: number | null;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface CategoryResponse {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  image: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  parent?: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  children?: CategoryResponse[];
-  _count?: {
-    products: number;
-  };
 }
 
 export interface CollectionResponse {

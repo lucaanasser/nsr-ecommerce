@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { productService } from '../../services/product.service';
-import { categoryService } from '../../services/category.service';
 import { collectionService } from '../../services/collection.service';
 import { cloudinaryService } from '../../services/cloudinary.service';
 import { BadRequestError, NotFoundError } from '../../utils/errors';
@@ -195,75 +194,6 @@ export class AdminProductController {
         success: true,
         message: 'Imagem deletada com sucesso',
         data: updatedProduct,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // ========== CATEGORY METHODS ==========
-
-  /**
-   * POST /api/v1/admin/categories
-   * Cria nova categoria
-   */
-  async createCategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const category = await categoryService.createCategory(req.body);
-
-      res.status(201).json({
-        success: true,
-        message: 'Categoria criada com sucesso',
-        data: category,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * PUT /api/v1/admin/categories/:id
-   * Atualiza categoria existente
-   */
-  async updateCategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { id } = req.params;
-      const category = await categoryService.updateCategory(id!, req.body);
-
-      res.status(200).json({
-        success: true,
-        message: 'Categoria atualizada com sucesso',
-        data: category,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * DELETE /api/v1/admin/categories/:id
-   * Deleta categoria
-   */
-  async deleteCategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { id } = req.params;
-      await categoryService.deleteCategory(id!);
-
-      res.status(200).json({
-        success: true,
-        message: 'Categoria deletada com sucesso',
       });
     } catch (error) {
       next(error);

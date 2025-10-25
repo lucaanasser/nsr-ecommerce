@@ -156,13 +156,13 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
               </p>
             </div>
 
-            {formData.material && (
+            {formData.specifications && (
               <div className="pt-4 border-t border-dark-border">
                 <p className="text-xs font-semibold text-primary-white/60 mb-1">
-                  MATERIAL
+                  ESPECIFICAÇÕES
                 </p>
-                <p className="text-sm text-primary-white/80">
-                  {formData.material}
+                <p className="text-sm text-primary-white/80 whitespace-pre-wrap">
+                  {formData.specifications}
                 </p>
               </div>
             )}

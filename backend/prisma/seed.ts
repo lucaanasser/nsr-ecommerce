@@ -23,45 +23,7 @@ async function main() {
   console.log('🌱 Starting seed...\n');
 
   // ================================
-  // 1. CATEGORIES
-  // ================================
-  console.log('📦 Creating categories...');
-  const categories = await Promise.all([
-    prisma.category.upsert({
-      where: { slug: 'camisetas' },
-      update: {},
-      create: {
-        name: 'Camisetas',
-        slug: 'camisetas',
-        description: 'Camisetas de alta qualidade com designs exclusivos',
-        order: 1,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: 'calcas' },
-      update: {},
-      create: {
-        name: 'Calças',
-        slug: 'calcas',
-        description: 'Calças confortáveis e estilosas',
-        order: 2,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: 'acessorios' },
-      update: {},
-      create: {
-        name: 'Acessórios',
-        slug: 'acessorios',
-        description: 'Acessórios que complementam seu look',
-        order: 3,
-      },
-    }),
-  ]);
-  console.log(`✓ Created ${categories.length} categories\n`);
-
-  // ================================
-  // 2. COLLECTIONS
+  // 1. COLLECTIONS
   // ================================
   console.log('🎨 Creating collections...');
   const collections = await Promise.all([
@@ -239,7 +201,6 @@ async function main() {
   // ================================
   console.log('👕 Creating products...');
   
-  const camisetasCategory = categories.find(c => c.slug === 'camisetas');
   const verao2025Collection = collections.find(c => c.slug === 'verao-2025');
   
   const products = await Promise.all([
@@ -253,7 +214,7 @@ async function main() {
         comparePrice: 129.90,
         stock: 50,
         sku: 'NSR-CAM-001',
-        categoryId: camisetasCategory?.id,
+        category: 'camiseta',
         collectionId: verao2025Collection?.id,
         gender: 'UNISEX',
         images: [
@@ -264,8 +225,7 @@ async function main() {
         length: 30,
         width: 40,
         height: 2,
-        material: '100% Algodão',
-        careInstructions: 'Lavar à mão ou máquina em água fria. Não usar alvejante.',
+        specifications: 'Material: 100% Algodão; Instruções de Cuidado: Lavar à mão ou máquina em água fria. Não usar alvejante.',
         metaTitle: 'Camiseta NSR Classic - Conforto e Estilo',
         metaDescription: 'Camiseta de algodão premium com design exclusivo NSR. Ideal para o dia a dia.',
         isFeatured: true,
@@ -293,7 +253,7 @@ async function main() {
         price: 99.90,
         stock: 40,
         sku: 'NSR-CAM-002',
-        categoryId: camisetasCategory?.id,
+        category: 'camiseta',
         collectionId: verao2025Collection?.id,
         gender: 'UNISEX',
         images: [
@@ -303,7 +263,7 @@ async function main() {
         length: 35,
         width: 45,
         height: 2,
-        material: '100% Algodão',
+        specifications: 'Material: 100% Algodão',
         isFeatured: true,
         isActive: true,
         variants: {
@@ -326,13 +286,13 @@ async function main() {
         comparePrice: 99.90,
         stock: 60,
         sku: 'NSR-CAM-003',
-        categoryId: camisetasCategory?.id,
+        category: 'camiseta',
         gender: 'UNISEX',
         images: [
           'https://via.placeholder.com/800x1000/FFFFFF/000000?text=Logo+NSR',
         ],
         weight: 0.25,
-        material: '100% Algodão Egípcio',
+        specifications: 'Material: 100% Algodão Egípcio',
         isFeatured: false,
         isActive: true,
         variants: {
@@ -369,7 +329,6 @@ async function main() {
   // ================================
   console.log('✅ Seed completed successfully!\n');
   console.log('📊 Summary:');
-  console.log(`   - ${categories.length} categories`);
   console.log(`   - ${collections.length} collections`);
   console.log(`   - ${shippingMethods.length} shipping methods`);
   console.log(`   - ${coupons.length} coupons`);

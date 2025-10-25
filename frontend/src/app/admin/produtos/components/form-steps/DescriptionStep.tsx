@@ -55,32 +55,21 @@ export default function DescriptionStep({
           </p>
         </div>
 
-        {/* Material */}
+        {/* Especificações */}
         <div>
           <label className="block text-sm font-medium text-primary-white mb-2">
-            Material/Composição
-          </label>
-          <input
-            type="text"
-            value={formData.material || ''}
-            onChange={(e) => onUpdateField('material', e.target.value)}
-            placeholder="Ex: 100% Algodão Premium"
-            className="w-full px-4 py-2 bg-dark-bg border border-dark-border text-primary-white rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-gold"
-          />
-        </div>
-
-        {/* Instruções de Cuidado */}
-        <div>
-          <label className="block text-sm font-medium text-primary-white mb-2">
-            Instruções de Cuidado
+            Especificações
           </label>
           <textarea
-            value={formData.careInstructions || ''}
-            onChange={(e) => onUpdateField('careInstructions', e.target.value)}
-            placeholder="Ex: Lavar à mão em água fria. Não usar alvejante."
+            value={formData.specifications || ''}
+            onChange={(e) => onUpdateField('specifications', e.target.value)}
+            placeholder="Ex: Material: 100% Algodão Premium; Instruções de Cuidado: Lavar à mão em água fria. Não usar alvejante."
             rows={4}
             className="w-full px-4 py-3 bg-dark-bg border border-dark-border text-primary-white placeholder-primary-white/30 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-gold resize-none"
           />
+          <p className="mt-1 text-xs text-primary-white/50">
+            Use o formato "Campo: Valor; Campo2: Valor2" para múltiplas especificações
+          </p>
         </div>
       </div>
     </div>
