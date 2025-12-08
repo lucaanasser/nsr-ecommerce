@@ -2,6 +2,12 @@
  * Configuração do PagBank (PagSeguro)
  * Gerencia credenciais e URLs da API de pagamentos
  */
+import dotenv from 'dotenv';
+
+// Carregar .env.dev se existir (para testes)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: '.env.dev' });
+}
 
 export const pagbankConfig = {
   // Ambiente (sandbox ou production)

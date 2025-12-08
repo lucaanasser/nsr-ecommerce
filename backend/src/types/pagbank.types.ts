@@ -13,7 +13,15 @@ export interface CreateChargeRequest {
   items: ChargeItem[];
   shipping?: Shipping;
   notification_urls?: string[];
-  charges: ChargePayment[];
+  charges?: ChargePayment[]; // Para cartão de crédito
+  qr_codes?: QrCode[]; // Para PIX
+}
+
+export interface QrCode {
+  amount: {
+    value: number; // Valor em centavos
+  };
+  expiration_date?: string;
 }
 
 export interface Customer {

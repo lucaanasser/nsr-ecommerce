@@ -18,6 +18,12 @@ class PagBankService {
   private client: AxiosInstance;
 
   constructor() {
+    logger.info('Initializing PagBank Service', {
+      apiUrl: pagbankConfig.apiUrl,
+      tokenLength: pagbankConfig.token.length,
+      tokenStart: pagbankConfig.token.substring(0, 20),
+    });
+    
     this.client = axios.create({
       baseURL: pagbankConfig.apiUrl,
       headers: {
@@ -147,7 +153,7 @@ class PagBankService {
       };
 
       const response = await this.client.post<ChargeResponse>(
-        '/charges',
+        '/orders',
         request
       );
 
@@ -179,23 +185,17 @@ class PagBankService {
         notification_urls: pagbankConfig.notificationUrl
           ? [pagbankConfig.notificationUrl]
           : [],
-        charges: [
+        qr_codes: [
           {
-            reference_id: data.orderId,
-            description: `Pedido ${data.orderId}`,
             amount: {
               value: Math.round(data.amount * 100),
-              currency: 'BRL',
-            },
-            payment_method: {
-              type: 'PIX',
             },
           },
         ],
       };
 
       const response = await this.client.post<ChargeResponse>(
-        '/charges',
+        '/orders',
         request
       );
 
@@ -211,7 +211,7 @@ class PagBankService {
   async getChargeStatus(chargeId: string): Promise<PaymentResult> {
     try {
       const response = await this.client.get<ChargeResponse>(
-        `/charges/${chargeId}`
+        `/orders/${chargeId}`
       );
 
       return this.mapChargeResponse(response.data);
@@ -225,7 +225,7 @@ class PagBankService {
    */
   async cancelCharge(chargeId: string): Promise<boolean> {
     try {
-      await this.client.post(`/charges/${chargeId}/cancel`);
+      await this.client.post(`/orders/${chargeId}/cancel`);
       logger.info('Charge cancelled successfully', { chargeId });
       return true;
     } catch (error) {
@@ -243,7 +243,7 @@ class PagBankService {
         ? { amount: { value: Math.round(amount * 100) } }
         : {};
 
-      await this.client.post(`/charges/${chargeId}/refund`, data);
+      await this.client.post(`/orders/${chargeId}/refund`, data);
       logger.info('Charge refunded successfully', { chargeId, amount });
       return true;
     } catch (error) {
@@ -255,15 +255,26 @@ class PagBankService {
   /**
    * Mapeia a resposta do PagBank para o formato interno
    */
-  private mapChargeResponse(charge: ChargeResponse): PaymentResult {
+  private mapChargeResponse(charge: any): PaymentResult {
+    // Para orders com PIX, não tem status na raiz
+    const status = charge.status || (charge.qr_codes ? 'WAITING' : 'DECLINED');
+    
     const result: PaymentResult = {
-      success: ['PAID', 'AUTHORIZED', 'WAITING'].includes(charge.status),
+      success: true, // Se chegou aqui, foi criado com sucesso
       chargeId: charge.id,
-      status: charge.status,
+      status: status as ChargeStatus,
     };
 
-    // Dados do PIX
-    if (charge.payment_method.pix?.qr_codes?.[0]) {
+    // Dados do PIX (diretamente no root da response para orders)
+    if (charge.qr_codes?.[0]) {
+      const qrCode = charge.qr_codes[0];
+      result.pixQrCode = qrCode.text;
+      result.pixQrCodeImage = qrCode.links?.find((l: any) => l.media === 'image/png')?.href;
+      result.pixExpiresAt = new Date(qrCode.expiration_date);
+    }
+    
+    // Dados do PIX (dentro de payment_method para charges)
+    if (charge.payment_method?.pix?.qr_codes?.[0]) {
       const qrCode = charge.payment_method.pix.qr_codes[0];
       result.pixQrCode = qrCode.text;
       result.pixQrCodeImage = qrCode.links[0]?.href;
@@ -274,6 +285,7 @@ class PagBankService {
     if (charge.payment_response?.message) {
       result.errorMessage = charge.payment_response.message;
       result.errorCode = charge.payment_response.code;
+      result.success = false;
     }
 
     return result;
