@@ -28,10 +28,13 @@ export interface DadosEntrega {
 }
 
 export interface DadosPagamento {
+  metodo: 'pix' | 'credit_card';
+  // Dados do cartão (apenas para credit_card)
   numeroCartao: string;
   nomeCartao: string;
   validade: string;
   cvv: string;
+  cpfTitular: string;
 }
 
 export interface CheckoutFormData {

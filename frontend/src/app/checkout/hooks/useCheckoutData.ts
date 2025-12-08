@@ -55,10 +55,12 @@ export function useCheckoutData() {
 
   // Estados - Pagamento
   const [dadosPagamento, setDadosPagamento] = useState<DadosPagamento>({
+    metodo: 'pix', // Padrão: PIX
     numeroCartao: '',
     nomeCartao: '',
     validade: '',
     cvv: '',
+    cpfTitular: '',
   });
 
   return {
