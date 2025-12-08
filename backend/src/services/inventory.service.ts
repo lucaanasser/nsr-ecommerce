@@ -11,12 +11,14 @@ interface StockItem {
   quantity: number;
   size?: string;
   color?: string;
+  productName?: string;
 }
 
 interface StockValidationResult {
   available: boolean;
   unavailableItems: Array<{
     productId: string;
+    productName?: string;
     requestedQuantity: number;
     availableQuantity: number;
   }>;
@@ -27,11 +29,12 @@ class InventoryService {
    * Valida se há estoque disponível para os itens (sem reservar)
    * Usado para cartão de crédito e antes de criar pedidos
    */
-  async validateStockAvailability(items: StockItem[]): Promise<StockValidationResult> {
+  async validateStockAvailability(items: StockItem[], tx?: Prisma.TransactionClient): Promise<StockValidationResult> {
     const unavailableItems: StockValidationResult['unavailableItems'] = [];
+    const client = tx ?? prisma;
 
     for (const item of items) {
-      const product = await prisma.product.findUnique({
+      const product = await client.product.findUnique({
         where: { id: item.productId },
         select: { stock: true, name: true },
       });
@@ -39,6 +42,7 @@ class InventoryService {
       if (!product) {
         unavailableItems.push({
           productId: item.productId,
+          productName: undefined,
           requestedQuantity: item.quantity,
           availableQuantity: 0,
         });
@@ -48,6 +52,7 @@ class InventoryService {
       if (product.stock < item.quantity) {
         unavailableItems.push({
           productId: item.productId,
+          productName: product.name,
           requestedQuantity: item.quantity,
           availableQuantity: product.stock,
         });

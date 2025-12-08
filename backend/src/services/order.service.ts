@@ -69,6 +69,14 @@ export class OrderService {
         },
       });
 
+      if (products.length !== data.items.length) {
+        // Fail fast if algum productId não existe
+        const missing = data.items
+          .filter(i => !products.find(p => p.id === i.productId))
+          .map(i => i.productId);
+        throw new BadRequestError(`Produto(s) inválido(s): ${missing.join(', ')}`);
+      }
+
       // 3.1. Validar estoque disponível (sem reservar ainda)
       const stockValidation = await inventoryService.validateStockAvailability(
         data.items.map(item => ({
@@ -76,15 +84,17 @@ export class OrderService {
           quantity: item.quantity,
           size: item.size,
           color: item.color,
-        }))
+        })),
+        tx
       );
 
       if (!stockValidation.available) {
         const unavailable = stockValidation.unavailableItems[0];
         if (unavailable) {
           const product = products.find(p => p.id === unavailable.productId);
+          const productName = product?.name || unavailable.productName || unavailable.productId;
           throw new BadRequestError(
-            `Estoque insuficiente para ${product?.name}. Disponível: ${unavailable.availableQuantity}, Solicitado: ${unavailable.requestedQuantity}`
+            `Estoque insuficiente para ${productName}. Disponível: ${unavailable.availableQuantity}, Solicitado: ${unavailable.requestedQuantity}`
           );
         }
         throw new BadRequestError('Estoque insuficiente para alguns produtos');
@@ -577,7 +587,7 @@ export class OrderService {
     });
 
     // Validate stock availability (without reserving yet)
-    await inventoryService.validateStockAvailability(
+    const retryStockValidation = await inventoryService.validateStockAvailability(
       order.items.map(item => ({
         productId: item.productId,
         productName: item.productName,
@@ -586,6 +596,17 @@ export class OrderService {
         color: item.color || undefined,
       }))
     );
+
+    if (!retryStockValidation.available) {
+      const unavailable = retryStockValidation.unavailableItems[0];
+      if (unavailable) {
+        const productName = unavailable.productName || unavailable.productId;
+        throw new BadRequestError(
+          `Estoque insuficiente para ${productName}. Disponível: ${unavailable.availableQuantity}, Solicitado: ${unavailable.requestedQuantity}`
+        );
+      }
+      throw new BadRequestError('Estoque insuficiente para alguns produtos');
+    }
 
     // Create new payment record
     const payment = await prisma.payment.create({

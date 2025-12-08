@@ -36,6 +36,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { addressService, orderService } from '@/services';
 import { pagbankService } from '@/services/pagbank.service';
 import type { SavedAddress, AuthUser } from '@/services';
+import { validateCartItemsForCheckout } from './utils/validateCartItems';
 
 /**
  * Página de Checkout - REFATORADA
@@ -286,7 +287,10 @@ export default function CheckoutPage() {
         throw new Error('Selecione um método de frete');
       }
 
-      // 3. Preparar dados do pedido
+      // 3. Validar itens do carrinho
+      validateCartItemsForCheckout(itensCarrinho);
+
+      // 4. Preparar dados do pedido
       const orderData = {
         addressId: checkoutData.enderecoSelecionadoId,
         items: itensCarrinho.map(item => ({

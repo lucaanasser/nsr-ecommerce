@@ -112,17 +112,28 @@ export class CartService {
       throw new BadRequestError('Este produto não está mais disponível');
     }
 
-    // 3. Verificar estoque
-    if (product.stock < quantity) {
-      throw new BadRequestError(
-        `Estoque insuficiente. Disponível: ${product.stock} unidade(s)`
-      );
+    // 3. Verificar estoque (sem permitir produtos zerados)
+    if (product.stock <= 0) {
+      throw new BadRequestError('Produto sem estoque disponível');
     }
 
     // 4. Buscar ou criar carrinho
     const cart = await cartRepository.findOrCreate(userId);
 
-    // 5. Adicionar item ao carrinho
+    // 5. Verificar se já existe item igual no carrinho para checar estoque total
+    const cartWithItems = await cartRepository.findWithItems(userId);
+    const existingItem = cartWithItems?.items.find(
+      (i) => i.productId === productId && i.size === size && i.color === color
+    );
+    const requestedTotal = (existingItem?.quantity ?? 0) + quantity;
+
+    if (product.stock < requestedTotal) {
+      throw new BadRequestError(
+        `Estoque insuficiente. Disponível: ${product.stock} unidade(s)`
+      );
+    }
+
+    // 6. Adicionar item ao carrinho
     await cartRepository.addItem(cart.id, productId, size, color, quantity);
 
     logger.info(`Item added successfully to cart ${cart.id}`);
@@ -160,7 +171,11 @@ export class CartService {
       throw new BadRequestError('Este produto não está mais disponível');
     }
 
-    // 4. Verificar estoque
+    // 4. Verificar estoque (sem permitir estoque zerado)
+    if (item.product.stock <= 0) {
+      throw new BadRequestError('Produto sem estoque disponível');
+    }
+
     if (item.product.stock < quantity) {
       throw new BadRequestError(
         `Estoque insuficiente. Disponível: ${item.product.stock} unidade(s)`

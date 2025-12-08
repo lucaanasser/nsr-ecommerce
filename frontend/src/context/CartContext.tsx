@@ -7,6 +7,8 @@ export interface CartItem extends Product {
   quantity: number;
   selectedSize: string;
   selectedColor: string;
+  stock?: number;
+  isActive?: boolean;
 }
 
 interface CartContextType {
@@ -33,6 +35,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const addToCart = (product: Product, size: string, color?: string) => {
+    // Bloqueia inclusão se produto estiver inativo ou sem estoque conhecido
+    if ((product as any).isActive === false) {
+      console.warn('Produto inativo, não será adicionado ao carrinho');
+      return;
+    }
+    if (typeof (product as any).stock === 'number' && (product as any).stock <= 0) {
+      console.warn('Produto sem estoque, não será adicionado ao carrinho');
+      return;
+    }
+
     setCartItems(items => {
       // Verifica se o produto com o mesmo tamanho já existe no carrinho
       const existingItem = items.find(
@@ -40,10 +52,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       );
 
       if (existingItem) {
+        const newQuantity = existingItem.quantity + 1;
+        const stockLimit = (existingItem as any).stock;
+        if (typeof stockLimit === 'number' && newQuantity > stockLimit) {
+          console.warn('Estoque insuficiente para aumentar quantidade no carrinho');
+          return items;
+        }
         // Se existir, aumenta a quantidade
         return items.map(item =>
           item.id === product.id && item.selectedSize === size
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       } else {
