@@ -14,6 +14,7 @@
 
 import axios from 'axios';
 import { logger } from '../config/logger.colored';
+import { encryptCardForTest } from './helpers/encrypt-card.helper';
 
 const API_URL = process.env['API_URL'] || 'http://localhost:4000/api/v1';
 
@@ -190,6 +191,19 @@ async function testCreateOrderWithCreditCard() {
   try {
     logger.info('\n💳 PASSO 5: Criando pedido com cartão de crédito...');
 
+    // Criptografar cartão (simulado para testes)
+    logger.info('🔐 Criptografando dados do cartão...');
+    const encryptedCard = await encryptCardForTest(
+      {
+        number: TEST_CARD.numeroCartao.replace(/\s/g, ''),
+        holder: TEST_CARD.nomeCartao,
+        expMonth: TEST_CARD.validade.split('/')[0],
+        expYear: '20' + TEST_CARD.validade.split('/')[1],
+        cvv: TEST_CARD.cvv,
+      },
+      TEST_CARD.cpfTitular
+    );
+
     const orderData = {
       addressId: context.addressId,
       items: [
@@ -200,11 +214,7 @@ async function testCreateOrderWithCreditCard() {
       ],
       shippingMethodId: context.shippingMethodId,
       paymentMethod: 'credit_card',
-      creditCard: {
-        encrypted: 'test_encrypted_card_data', // Em produção, vem do SDK do PagBank no frontend
-        holderName: TEST_CARD.nomeCartao,
-        holderCpf: TEST_CARD.cpfTitular.replace(/\D/g, ''),
-      },
+      creditCard: encryptedCard,
     };
 
     logger.info('📤 Enviando pedido para API...');
