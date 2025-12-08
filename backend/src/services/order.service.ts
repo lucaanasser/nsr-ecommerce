@@ -259,11 +259,13 @@ export class OrderService {
       }
 
       // 11.3. Atualizar Payment com resultado
+      const mappedStatus = pagbankService.mapChargeStatusToPaymentStatus(paymentResult.status);
+      
       await tx.payment.update({
         where: { id: payment.id },
         data: {
           chargeId: paymentResult.chargeId,
-          status: paymentResult.success ? PaymentStatus.APPROVED : PaymentStatus.DECLINED,
+          status: mappedStatus as PaymentStatus,
           pixQrCode: paymentResult.pixQrCode,
           pixQrCodeBase64: paymentResult.pixQrCodeImage,
           pixExpiresAt: paymentResult.pixExpiresAt,

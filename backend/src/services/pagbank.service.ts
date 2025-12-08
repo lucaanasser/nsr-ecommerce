@@ -318,6 +318,26 @@ class PagBankService {
   }
 
   /**
+   * Mapeia status do PagBank para status do sistema
+   */
+  public mapChargeStatusToPaymentStatus(pagbankStatus: ChargeStatus): string {
+    const statusMap: Record<ChargeStatus, string> = {
+      'WAITING': 'WAITING',           // PIX gerado, aguardando pagamento
+      'IN_ANALYSIS': 'IN_ANALYSIS',   // Em análise antifraude
+      'PAID': 'PAID',                 // Pago e confirmado
+      'AVAILABLE': 'PAID',            // Disponível = Pago
+      'AUTHORIZED': 'AUTHORIZED',     // Cartão pré-autorizado
+      'DECLINED': 'DECLINED',         // Recusado
+      'CANCELED': 'CANCELLED',        // Cancelado
+      'CANCELLED': 'CANCELLED',       // Cancelado (alias)
+      'IN_DISPUTE': 'IN_ANALYSIS',    // Disputa = análise
+      'RETURNED': 'REFUNDED',         // Devolvido = reembolsado
+    };
+
+    return statusMap[pagbankStatus] || 'PENDING';
+  }
+
+  /**
    * Faz parse de um telefone brasileiro
    */
   private parsePhone(phone: string): { country: string; area: string; number: string; type: 'MOBILE' } {

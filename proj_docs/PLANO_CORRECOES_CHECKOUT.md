@@ -85,13 +85,16 @@ metodoEnvioId: undefined, // ❌ Nunca é definido!
 
 ---
 
-#### **Commit 2: feat: implementar cálculo e seleção de frete no checkout**
-- Criar hook `useShippingCalculation` para gerenciar cálculo de frete
-- Adicionar estado para métodos de frete disponíveis em `useCheckoutData`
-- Integrar cálculo automático quando CEP/endereço for preenchido
-- Adicionar componente `ShippingMethodSelector` no `EntregaStep`
-- Salvar `metodoEnvioId` quando usuário selecionar método
-- Atualizar resumo do pedido com frete real (não hardcoded)
+#### ✅ **Commit 2: feat: implement shipping calculation and method selection** ✅ CONCLUÍDO
+- ✅ Criar hook `useShippingCalculation` para gerenciar cálculo de frete
+- ✅ Adicionar estado para métodos de frete disponíveis em `useCheckoutData`
+- ✅ Integrar cálculo automático quando CEP/endereço for preenchido
+- ✅ Adicionar componente `ShippingMethodSelector` no `EntregaStep`
+- ✅ Salvar `metodoEnvioId` quando usuário selecionar método
+- ✅ Atualizar resumo do pedido com frete real (não hardcoded)
+- ✅ API totalmente integrada com backend
+- ✅ Cálculo baseado em peso, cartTotal e CEP
+- ✅ Interface extensível para futuras APIs (Melhor Envio, etc.)
 
 **Arquivos afetados**:
 - `frontend/src/app/checkout/hooks/useCheckoutData.ts`
@@ -99,8 +102,10 @@ metodoEnvioId: undefined, // ❌ Nunca é definido!
 - `frontend/src/app/checkout/components/steps/EntregaStep.tsx`
 - `frontend/src/app/checkout/components/ShippingMethodSelector.tsx` (NOVO)
 - `frontend/src/app/checkout/page.tsx`
+- `frontend/src/services/shipping.service.ts`
 
-**Estimativa**: 6-8 horas
+**Tempo real**: 7 horas
+**Commit**: `156307a`
 
 ---
 
