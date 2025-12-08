@@ -175,7 +175,7 @@ export class WebhookController {
         } else if (payment.method === PaymentMethod.CREDIT_CARD) {
       // Credit card: Decrement stock if not already done
       if (!payment.stockReserved) {
-        await inventoryService.decrementStockForOrder(payment.orderId, payment.order.items);        await prisma.payment.update({
+        await inventoryService.reserveStock(payment.orderId, payment.order.items);        await prisma.payment.update({
           where: { id: payment.id },
           data: { stockReserved: true },
         });

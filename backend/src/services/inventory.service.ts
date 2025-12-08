@@ -221,14 +221,6 @@ class InventoryService {
     logger.info('Stock reservation confirmed (payment approved)', { orderId });
     // Não precisa fazer nada, o estoque já foi decrementado na reserva
   }
-
-  /**
-   * Decrementa estoque para pedidos com cartão (sem reserva prévia)
-   * Chamado após aprovação do pagamento
-   */
-  async decrementStockForOrder(orderId: string, items: StockItem[], tx?: Prisma.TransactionClient): Promise<void> {
-    return this.reserveStock(orderId, items, tx);
-  }
 }
 
 export const inventoryService = new InventoryService();
