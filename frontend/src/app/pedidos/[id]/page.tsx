@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { CheckCircle, Package, CreditCard, Clock, Copy, CheckCheck, AlertCircle } from 'lucide-react';
+import { CheckCircle, Package, Clock, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 
 // Layouts
@@ -14,6 +14,9 @@ import Button from '@/components/ui/Button';
 
 // Services
 import { orderService, type Order } from '@/services';
+
+// Components
+import PixPaymentDisplay from '@/app/checkout/components/PixPaymentDisplay';
 
 /**
  * Página de Confirmação do Pedido
@@ -27,7 +30,6 @@ export default function OrderConfirmationPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pixCopied, setPixCopied] = useState(false);
 
   useEffect(() => {
     if (!orderId) return;
@@ -47,19 +49,6 @@ export default function OrderConfirmationPage() {
 
     fetchOrder();
   }, [orderId]);
-
-  const handleCopyPixCode = async () => {
-    if (order?.payment?.pixQrCode) {
-      try {
-        await navigator.clipboard.writeText(order.payment.pixQrCode);
-        setPixCopied(true);
-        setTimeout(() => setPixCopied(false), 2000);
-      } catch (err) {
-        console.error('Erro ao copiar código PIX:', err);
-        alert('Erro ao copiar código. Tente selecionar manualmente.');
-      }
-    }
-  };
 
   const getPaymentStatusInfo = () => {
     if (!order?.payment) return null;
@@ -199,63 +188,14 @@ export default function OrderConfirmationPage() {
             )}
 
             {/* QR Code PIX */}
-            {isPixPending && order.payment?.pixQrCodeBase64 && (
-              <div className="bg-dark-card border border-dark-border rounded-sm p-6 mb-6">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <CreditCard size={24} className="text-primary-bronze" />
-                  Pagamento via PIX
-                </h3>
-
-                <div className="bg-white p-4 rounded-sm inline-block mb-4">
-                  <Image
-                    src={`data:image/png;base64,${order.payment.pixQrCodeBase64}`}
-                    alt="QR Code PIX"
-                    width={256}
-                    height={256}
-                    className="mx-auto"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-primary-white/70">
-                      Ou copie o código Pix Copia e Cola:
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="flex-1 bg-dark-bg/50 border border-dark-border rounded-sm p-3 overflow-x-auto">
-                        <code className="text-xs text-primary-white/80 font-mono break-all">
-                          {order.payment.pixQrCode}
-                        </code>
-                      </div>
-                      <Button
-                        variant="secondary"
-                        onClick={handleCopyPixCode}
-                        className="flex items-center gap-2 whitespace-nowrap"
-                      >
-                        {pixCopied ? (
-                          <>
-                            <CheckCheck size={18} />
-                            Copiado!
-                          </>
-                        ) : (
-                          <>
-                            <Copy size={18} />
-                            Copiar
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {order.payment.pixExpiresAt && (
-                    <p className="text-sm text-primary-white/60">
-                      ⏰ Este QR Code expira em:{' '}
-                      <span className="font-semibold">
-                        {new Date(order.payment.pixExpiresAt).toLocaleString('pt-BR')}
-                      </span>
-                    </p>
-                  )}
-                </div>
+            {isPixPending && order.payment?.pixQrCodeBase64 && order.payment?.pixQrCode && order.payment?.pixExpiresAt && (
+              <div className="mb-6">
+                <PixPaymentDisplay
+                  pixQrCode={order.payment.pixQrCode}
+                  pixQrCodeBase64={`data:image/png;base64,${order.payment.pixQrCodeBase64}`}
+                  pixExpiresAt={new Date(order.payment.pixExpiresAt)}
+                  orderNumber={order.orderNumber}
+                />
               </div>
             )}
 
