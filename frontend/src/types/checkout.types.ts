@@ -25,6 +25,7 @@ export interface DadosEntrega {
   bairro: string;
   cidade: string;
   estado: string;
+  metodoEnvioId?: string; // ID do método de frete selecionado
 }
 
 export interface DadosPagamento {

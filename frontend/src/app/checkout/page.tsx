@@ -271,16 +271,18 @@ export default function CheckoutPage() {
         addressId: checkoutData.enderecoSelecionadoId || '',
         items: itensCarrinho.map(item => ({
           productId: item.id,
-          quantity: item.quantidade,
-          size: item.tamanho,
-          color: item.cor,
+          quantity: item.quantity,
+          size: item.selectedSize,
+          color: item.selectedColor,
         })),
-        shippingMethodId: checkoutData.dadosEntrega.metodoEnvio || '',
+        // TODO: Implementar seleção de método de frete
+        // Por enquanto, usando método fixo baseado no valor do frete
+        shippingMethodId: checkoutData.dadosEntrega.metodoEnvioId || 'standard',
         paymentMethod: checkoutData.dadosPagamento.metodo,
         creditCard: creditCardData,
         receiverName: checkoutData.destinatarioIgualComprador 
           ? undefined 
-          : checkoutData.dadosDestinatario.nome,
+          : checkoutData.dadosDestinatario.nomeCompleto,
         receiverPhone: checkoutData.destinatarioIgualComprador 
           ? undefined 
           : checkoutData.dadosDestinatario.telefone,

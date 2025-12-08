@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { logger } from '../config/logger.colored';
+import { logger } from '../../config/logger.colored';
 
 const PAGBANK_PUBLIC_KEY = process.env['PAGBANK_PUBLIC_KEY'] || 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr+ZqgD892U9/HXsa7XqBZUayPquAfh9xx4iwUbTSUAvTlmiXFQNTp0Bvt/5vK2FhMj39qSv1zi2OuBjvW38q1E2TfDl6c7E1y3hx3VdKVN/EkP7qUcIXYF/KdPKF4SqK3fH6c7jlCTLTEv/2X7wLGY9CAGNqPLDzPKKTU9PVlGp9MVpAL0B8qCGSFRF8D6GwX7MF9pBp7ynFvMkPzGQFJNGi0bCMPCYbU6L9oyfBGaHWqc5TH3vHpkEbPr1H1vu9TIhG7Cqv5IlYzlF0W0Ew1KQDCeMqXLEGRhLZnqPBHt9PknmMM4lZXRB0u0QCDJ/PEqVQQJNGvwAQaLWiWp5P4wIDAQAB';
 

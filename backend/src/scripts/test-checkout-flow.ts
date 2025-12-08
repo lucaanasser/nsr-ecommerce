@@ -26,7 +26,7 @@ const TEST_USER = {
 
 // Cartões de teste PagBank
 const TEST_CARD = {
-  numeroCartao: '4111 1111 1111 1111',
+  numeroCartao: '4539620659922097',
   nomeCartao: 'JOSE DA SILVA',
   validade: '12/30',
   cvv: '123',
@@ -193,12 +193,13 @@ async function testCreateOrderWithCreditCard() {
 
     // Criptografar cartão (simulado para testes)
     logger.info('🔐 Criptografando dados do cartão...');
+    const [expMonth, expYear] = TEST_CARD.validade.split('/');
     const encryptedCard = await encryptCardForTest(
       {
         number: TEST_CARD.numeroCartao.replace(/\s/g, ''),
         holder: TEST_CARD.nomeCartao,
-        expMonth: TEST_CARD.validade.split('/')[0],
-        expYear: '20' + TEST_CARD.validade.split('/')[1],
+        expMonth: expMonth || '12',
+        expYear: '20' + (expYear || '30'),
         cvv: TEST_CARD.cvv,
       },
       TEST_CARD.cpfTitular

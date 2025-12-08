@@ -47,6 +47,7 @@ export function useCheckoutData() {
     bairro: '',
     cidade: '',
     estado: '',
+    metodoEnvioId: undefined,
   });
   const [salvarEndereco, setSalvarEndereco] = useState(false);
   const [enderecoSelecionadoId, setEnderecoSelecionadoId] = useState<string | null>(null);
