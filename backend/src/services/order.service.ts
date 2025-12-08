@@ -698,7 +698,7 @@ export class OrderService {
           });
         } else if (paymentResult.status === 'PAID') {
           // Credit card approved - decrement stock immediately
-          await inventoryService.decrementStockForOrder(
+          await inventoryService.reserveStock(
             order.id,
             order.items.map(item => ({
               productId: item.productId,

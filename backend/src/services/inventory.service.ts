@@ -4,6 +4,7 @@
  */
 import { prisma } from '@config/database';
 import { logger } from '@config/logger.colored';
+import { Prisma } from '@prisma/client';
 
 interface StockItem {
   productId: string;
@@ -70,8 +71,6 @@ class InventoryService {
   ): Promise<void> {
     logger.info('Reserving stock for order', { orderId, itemCount: items.length });
     
-    const db = tx || prisma;
-
     try {
       // Se já estiver em transação (tx fornecido), usa ela. Senão, cria uma nova.
       const operation = async (transaction: Prisma.TransactionClient) => {
@@ -142,8 +141,6 @@ class InventoryService {
   async releaseStock(orderId: string, tx?: Prisma.TransactionClient): Promise<void> {
     logger.info('Releasing stock', { orderId });
     
-    const db = tx || prisma;
-
     try {
       const operation = async (transaction: Prisma.TransactionClient) => {
         // Buscar o pedido com os itens
