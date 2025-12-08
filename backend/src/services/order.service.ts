@@ -8,6 +8,9 @@ import { BadRequestError } from '@utils/errors';
 import { CouponService } from './coupon.service';
 import { emailService } from './email.service';
 import { logger } from '@config/logger.colored';
+import { pagbankService } from './pagbank.service';
+import { inventoryService } from './inventory.service';
+import { PaymentMethod, PaymentStatus } from '@prisma/client';
 
 export class OrderService {
   private couponService = new CouponService();
@@ -33,7 +36,7 @@ export class OrderService {
         throw new BadRequestError('Endereço inválido');
       }
 
-      // 3. Buscar produtos e validar estoque
+      // 3. Buscar produtos
       const products = await tx.product.findMany({
         where: {
           id: { in: data.items.map(i => i.productId) }
@@ -43,10 +46,27 @@ export class OrderService {
             orderBy: { order: 'asc' },
             take: 1,
           },
+          dimensions: true,
         },
       });
 
-      this.validateStock(products, data.items);
+      // 3.1. Validar estoque disponível (sem reservar ainda)
+      const stockValidation = await inventoryService.validateStockAvailability(
+        data.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color,
+        }))
+      );
+
+      if (!stockValidation.available) {
+        const unavailable = stockValidation.unavailableItems[0];
+        const product = products.find(p => p.id === unavailable.productId);
+        throw new BadRequestError(
+          `Estoque insuficiente para ${product?.name}. Disponível: ${unavailable.availableQuantity}, Solicitado: ${unavailable.requestedQuantity}`
+        );
+      }
 
       // 4. Calcular subtotal
       const subtotal = this.calculateSubtotal(products, data.items);
@@ -97,7 +117,7 @@ export class OrderService {
         estimatedDelivery.getDate() + shippingMethod.maxDays
       );
 
-      // 10. Criar pedido
+      // 10. Criar pedido (PENDING - aguardando pagamento)
       const order = await tx.order.create({
         data: {
           orderNumber,
@@ -121,6 +141,7 @@ export class OrderService {
 
           // Pagamento
           paymentMethod: data.paymentMethod,
+          firstPaymentAttemptAt: new Date(), // Primeira tentativa
 
           // Cupom
           couponCode: data.couponCode?.toUpperCase(),
@@ -158,16 +179,111 @@ export class OrderService {
         }
       });
 
-      // 11. Decrementar estoque
-      for (const item of data.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity
-            }
-          }
-        });
+      // 11. Processar pagamento
+      const paymentMethod = data.paymentMethod === 'credit_card' 
+        ? PaymentMethod.CREDIT_CARD 
+        : PaymentMethod.PIX;
+
+      // 11.1. Criar registro de Payment
+      const payment = await tx.payment.create({
+        data: {
+          orderId: order.id,
+          method: paymentMethod,
+          amount: total,
+          attemptNumber: 1,
+          status: PaymentStatus.PENDING,
+        },
+      });
+
+      // 11.2. Processar via PagBank
+      let paymentResult;
+      const paymentData = {
+        orderId: order.orderNumber,
+        amount: Number(total),
+        method: data.paymentMethod === 'credit_card' ? 'CREDIT_CARD' as const : 'PIX' as const,
+        customer: {
+          name: order.customerName,
+          email: user.email,
+          cpf: user.cpf || '00000000000', // CPF obrigatório - deve ser validado no cadastro
+          phone: order.customerPhone,
+        },
+        address: {
+          street: address.street,
+          number: address.number,
+          complement: address.complement,
+          neighborhood: address.neighborhood,
+          city: address.city,
+          state: address.state,
+          zipCode: address.zipCode,
+        },
+        items: data.items.map(item => {
+          const product = products.find(p => p.id === item.productId)!;
+          return {
+            name: product.name,
+            quantity: item.quantity,
+            unitAmount: Number(product.price),
+          };
+        }),
+        creditCard: data.creditCard,
+      };
+
+      if (data.paymentMethod === 'credit_card') {
+        if (!data.creditCard) {
+          throw new BadRequestError('Dados do cartão são obrigatórios');
+        }
+        paymentResult = await pagbankService.createCreditCardCharge(paymentData);
+      } else {
+        paymentResult = await pagbankService.createPixCharge(paymentData);
+      }
+
+      // 11.3. Atualizar Payment com resultado
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          chargeId: paymentResult.chargeId,
+          status: paymentResult.success ? PaymentStatus.APPROVED : PaymentStatus.DECLINED,
+          pixQrCode: paymentResult.pixQrCode,
+          pixQrCodeBase64: paymentResult.pixQrCodeImage,
+          pixExpiresAt: paymentResult.pixExpiresAt,
+          errorMessage: paymentResult.errorMessage,
+        },
+      });
+
+      // 11.4. Gerenciar estoque baseado no método de pagamento
+      if (paymentResult.success) {
+        if (data.paymentMethod === 'pix') {
+          // PIX: Reservar estoque por 15 minutos
+          await inventoryService.reserveStockForPix(
+            order.id,
+            data.items.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              size: item.size,
+              color: item.color,
+            }))
+          );
+        } else {
+          // Cartão aprovado: Decrementar estoque imediatamente
+          await inventoryService.decrementStockForOrder(
+            order.id,
+            data.items.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              size: item.size,
+              color: item.color,
+            }))
+          );
+          
+          // Atualizar status do pedido para PAID
+          await tx.order.update({
+            where: { id: order.id },
+            data: {
+              status: 'PAID',
+              paymentStatus: 'APPROVED',
+              paidAt: new Date(),
+            },
+          });
+        }
       }
 
       // 12. Incrementar uso do cupom
@@ -180,17 +296,19 @@ export class OrderService {
         });
       }
 
-      // 13. Limpar carrinho
-      await tx.cartItem.deleteMany({
-        where: {
-          cart: {
-            userId
-          },
-          productId: {
-            in: data.items.map(i => i.productId)
+      // 13. Limpar carrinho APENAS se pagamento foi aprovado ou é PIX (aguardando)
+      if (paymentResult.success) {
+        await tx.cartItem.deleteMany({
+          where: {
+            cart: {
+              userId
+            },
+            productId: {
+              in: data.items.map(i => i.productId)
+            }
           }
-        }
-      });
+        });
+      }
 
       // 14. Enviar email de confirmação (não bloqueia se falhar)
       emailService
@@ -230,7 +348,17 @@ export class OrderService {
           });
         });
 
-      return order;
+      // Return order with payment data for frontend
+      return {
+        ...order,
+        payment: {
+          status: paymentResult.paymentStatus,
+          pixQrCode: paymentResult.pixQrCode,
+          pixQrCodeBase64: paymentResult.pixQrCodeBase64,
+          pixExpiresAt: paymentResult.pixExpiresAt,
+          errorMessage: paymentResult.errorMessage,
+        },
+      };
     });
   }
 

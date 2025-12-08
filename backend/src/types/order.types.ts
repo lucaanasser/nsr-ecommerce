@@ -7,12 +7,19 @@ export interface CreateOrderDTO {
   items: OrderItemInput[];
   shippingMethodId: string;
   couponCode?: string;
-  paymentMethod: 'credit_card' | 'pix' | 'boleto';
+  paymentMethod: 'credit_card' | 'pix';
   notes?: string;
   
   // Dados opcionais do destinatário (quando diferente do comprador)
   receiverName?: string;
   receiverPhone?: string;
+  
+  // Dados de pagamento (apenas para cartão de crédito)
+  creditCard?: {
+    encrypted: string; // Dados do cartão criptografados pelo frontend
+    holderName: string;
+    holderCpf: string;
+  };
 }
 
 export interface OrderItemInput {
