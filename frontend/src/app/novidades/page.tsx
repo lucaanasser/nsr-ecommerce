@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -8,19 +8,21 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Button from '@/components/ui/Button';
-import { products } from '@/data/products';
+import { useFeaturedProducts } from '@/hooks/useFeaturedProducts';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, Check } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { IMAGES } from '@/config/images';
 
 /**
- * Loja - Página de Vitrine
+ * Novidades - Página de Produtos em Destaque
  * 
  * Grid de produtos com imagens grandes ocupando a tela.
  * Preço sempre visível, hover mostra segunda imagem e tamanhos para adicionar ao carrinho direto.
  * Experiência visual e rápida de compra.
+ * 
+ * INTEGRADO COM BACKEND - Busca produtos featured (isFeatured=true) da API
  */
-function LojaContent() {
+function NovidadesContent() {
   const parametrosBusca = useSearchParams();
   const parametroFiltro = parametrosBusca.get('filter');
   const { adicionarAoCarrinho } = useCart();
@@ -30,23 +32,79 @@ function LojaContent() {
   const [adicionadoAoCarrinho, setAdicionadoAoCarrinho] = useState<{ idProduto: string; tamanho: string } | null>(null);
   const [idProdutoClicado, setIdProdutoClicado] = useState<string | null>(null);
 
+  // Buscar produtos featured do backend
+  const { products, isLoading, error } = useFeaturedProducts();
+
   useEffect(() => {
     if (parametroFiltro === 'masculino' || parametroFiltro === 'feminino') {
       setFiltro(parametroFiltro);
     }
   }, [parametroFiltro]);
 
-  // Aplicar filtros
-  let produtosFiltrados = products;
-  if (filtro !== 'todos') {
-    produtosFiltrados = products.filter(p => p.category === filtro);
-  }
+  // Aplicar filtros localmente (categoria/gender)
+  const produtosFiltrados = useMemo(() => {
+    if (filtro === 'todos') return products;
+    
+    // Mapear filtro para gender do backend
+    const genderMap: Record<string, string> = {
+      'masculino': 'MALE',
+      'feminino': 'FEMALE',
+    };
+    
+    return products.filter(p => {
+      if (!p.gender) return false;
+      return p.gender === genderMap[filtro];
+    });
+  }, [products, filtro]);
+
+  // Adaptador: Converter Product do backend para formato necessário
+  const produtosAdaptados = useMemo(() => {
+    return produtosFiltrados.map(p => {
+      // Extrair tamanhos únicos das variantes
+      const sizes = Array.from(new Set(p.variants?.map(v => v.size) || []));
+      
+      // Extrair cores únicas das variantes
+      const colors = Array.from(new Set(
+        p.variants?.map(v => v.color).filter(Boolean) as string[] || []
+      ));
+      
+      // Extrair URLs das imagens
+      const images = p.images?.map(img => img.url) || [];
+      
+      // Identificar tamanhos indisponíveis (com estoque zero)
+      const unavailableSizes = p.variants
+        ?.filter(v => v.stock === 0)
+        .map(v => v.size) || [];
+      
+      // Mapear gender para category (mock)
+      const categoryMap: Record<string, 'masculino' | 'feminino'> = {
+        'MALE': 'masculino',
+        'FEMALE': 'feminino',
+      };
+      
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        description: p.details?.description || '',
+        price: Number(p.price),
+        category: categoryMap[p.gender] || 'masculino',
+        collection: p.collection?.name || '',
+        sizes,
+        unavailableSizes,
+        colors,
+        images,
+        featured: p.isFeatured,
+        new: false, // Campo 'new' não existe no backend
+      };
+    });
+  }, [produtosFiltrados]);
 
   const manipularAdicaoAoCarrinho = (idProduto: string, tamanho: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const produto = products.find(p => p.id === idProduto);
+    const produto = produtosAdaptados.find(p => p.id === idProduto);
     if (produto) {
       adicionarAoCarrinho(produto, tamanho);
       setAdicionadoAoCarrinho({ idProduto, tamanho });
@@ -87,10 +145,36 @@ function LojaContent() {
           />
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="relative z-10 flex items-center justify-center py-32">
+            <Loader2 className="w-12 h-12 text-primary-gold animate-spin" />
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="relative z-10 text-center py-32"
+          >
+            <p className="text-2xl text-red-500 mb-4">
+              {error}
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => window.location.reload()}
+            >
+              Tentar Novamente
+            </Button>
+          </motion.div>
+        )}
+
         {/* Grid de Produtos - Imagens grandes */}
-        {produtosFiltrados.length > 0 ? (
+        {!isLoading && !error && produtosAdaptados.length > 0 ? (
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-            {produtosFiltrados.map((product, index) => {
+            {produtosAdaptados.map((product, index) => {
               const estaClicado = idProdutoClicado === product.id;
               
               return (
@@ -213,7 +297,7 @@ function LojaContent() {
               );
             })}
           </div>
-        ) : (
+        ) : !isLoading && !error && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -231,10 +315,10 @@ function LojaContent() {
   );
 }
 
-export default function LojaPage() {
+export default function NovidadesPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-dark-bg flex items-center justify-center"><p className="text-primary-gold">Carregando...</p></div>}>
-      <LojaContent />
+      <NovidadesContent />
     </Suspense>
   );
 }

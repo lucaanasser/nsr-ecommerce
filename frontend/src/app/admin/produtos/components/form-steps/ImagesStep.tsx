@@ -26,11 +26,47 @@ export default function ImagesStep({
   const handleImageAdd = (files: FileList | null) => {
     if (!files) return;
 
-    const newImages = Array.from(files).map((file, index) => ({
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_IMAGES = 10;
+    const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+    // Verificar limite de imagens
+    if (formData.images.length >= MAX_IMAGES) {
+      alert(`Máximo de ${MAX_IMAGES} imagens permitido`);
+      return;
+    }
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    Array.from(files).forEach((file) => {
+      // Validar tipo
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        errors.push(`${file.name}: tipo não suportado`);
+        return;
+      }
+
+      // Validar tamanho
+      if (file.size > MAX_SIZE) {
+        errors.push(`${file.name}: tamanho máximo 5MB`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    if (errors.length > 0) {
+      alert('Erros:\n' + errors.join('\n'));
+    }
+
+    if (validFiles.length === 0) return;
+
+    const newImages = validFiles.map((file, index) => ({
       url: URL.createObjectURL(file),
       altText: formData.name || 'Imagem do produto',
       order: formData.images.length + index,
       isPrimary: formData.images.length === 0 && index === 0,
+      file, // Guardar referência ao arquivo para upload posterior
     }));
 
     onUpdateField('images', [...formData.images, ...newImages]);
@@ -58,6 +94,28 @@ export default function ImagesStep({
     }));
 
     onUpdateField('images', newImages);
+  };
+
+  // Handler para atualizar alt text
+  const handleUpdateAltText = (index: number, altText: string) => {
+    const newImages = [...formData.images];
+    newImages[index] = { ...newImages[index], altText };
+    onUpdateField('images', newImages);
+  };
+
+  // Handler para reordenar imagens (drag & drop)
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    const newImages = [...formData.images];
+    const [movedImage] = newImages.splice(fromIndex, 1);
+    newImages.splice(toIndex, 0, movedImage);
+
+    // Atualizar ordem
+    const reorderedImages = newImages.map((img, i) => ({
+      ...img,
+      order: i,
+    }));
+
+    onUpdateField('images', reorderedImages);
   };
 
   // Drag and drop handlers
@@ -146,39 +204,74 @@ export default function ImagesStep({
             {formData.images.map((image, index) => (
               <div
                 key={index}
-                className="relative group aspect-square bg-dark-bg rounded-sm overflow-hidden border-2 border-dark-border"
+                draggable
+                onDragStart={(e) => e.dataTransfer.setData('text/plain', index.toString())}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                  handleReorder(fromIndex, index);
+                }}
+                className={`
+                  relative group bg-dark-bg rounded-sm overflow-hidden cursor-move
+                  ${image.isPrimary 
+                    ? 'border-2 border-primary-gold ring-2 ring-primary-gold/20' 
+                    : 'border-2 border-dark-border hover:border-primary-gold/50'
+                  }
+                  transition-all duration-200
+                `}
               >
-                <Image
-                  src={image.url}
-                  alt={image.altText || `Imagem ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
+                {/* Imagem */}
+                <div className="aspect-square relative">
+                  <Image
+                    src={image.url}
+                    alt={image.altText || `Imagem ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
 
-                {/* Badge de imagem principal */}
-                {image.isPrimary && (
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-primary-gold text-dark-bg text-xs font-semibold rounded">
-                    Principal
-                  </div>
-                )}
-
-                {/* Overlay com ações */}
-                <div className="absolute inset-0 bg-dark-bg/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  {!image.isPrimary && (
-                    <button
-                      onClick={() => handleSetPrimary(index)}
-                      className="px-3 py-1 bg-primary-gold hover:bg-primary-gold/90 text-dark-bg text-xs font-medium rounded transition-colors"
-                    >
-                      Tornar Principal
-                    </button>
+                  {/* Badge de imagem principal */}
+                  {image.isPrimary && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-primary-gold text-dark-bg text-xs font-semibold rounded">
+                      Principal
+                    </div>
                   )}
-                  
-                  <button
-                    onClick={() => handleImageRemove(index)}
-                    className="p-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
+
+                  {/* Número da ordem */}
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-dark-bg/80 text-primary-white text-xs font-medium rounded-full flex items-center justify-center">
+                    {index + 1}
+                  </div>
+
+                  {/* Overlay com ações */}
+                  <div className="absolute inset-0 bg-dark-bg/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    {!image.isPrimary && (
+                      <button
+                        onClick={() => handleSetPrimary(index)}
+                        className="px-3 py-1.5 bg-primary-gold hover:bg-primary-gold/90 text-dark-bg text-xs font-medium rounded transition-colors"
+                      >
+                        Tornar Principal
+                      </button>
+                    )}
+                    
+                    <button
+                      onClick={() => handleImageRemove(index)}
+                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition-colors flex items-center gap-1"
+                    >
+                      <X size={14} />
+                      Remover
+                    </button>
+                  </div>
+                </div>
+
+                {/* Input de Alt Text */}
+                <div className="p-2 bg-dark-card border-t border-dark-border">
+                  <input
+                    type="text"
+                    value={image.altText || ''}
+                    onChange={(e) => handleUpdateAltText(index, e.target.value)}
+                    placeholder="Texto alternativo..."
+                    className="w-full bg-dark-bg border border-dark-border rounded px-2 py-1 text-xs text-primary-white placeholder:text-primary-white/40 focus:outline-none focus:border-primary-gold transition-colors"
+                  />
                 </div>
               </div>
             ))}

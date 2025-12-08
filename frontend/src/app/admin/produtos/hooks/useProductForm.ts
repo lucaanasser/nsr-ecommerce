@@ -1,5 +1,12 @@
 import { useState } from 'react';
 import { VariantConfig, INITIAL_VARIANT_CONFIG } from '../types/variant.types';
+import { productService } from '@/services/productService';
+import { CreateProductDTO } from '@/types/product';
+import { 
+  transformFormDataToAPI, 
+  extractFilesToUpload 
+} from '@/utils/productTransform';
+import { logger, measureTime } from '@/utils/logger';
 
 /**
  * Interface do formulário de produto
@@ -137,6 +144,9 @@ export function useProductForm(initialData?: Partial<ProductFormData>) {
   // Validar step atual
   const validateCurrentStep = (): boolean => {
     const newErrors: Record<string, string> = {};
+    const stepNames = ['Básico', 'Descrição', 'Imagens', 'Variantes', 'Revisão'];
+
+    logger.debug(`Validando step ${currentStep}: ${stepNames[currentStep]}`);
 
     switch (currentStep) {
       case 0: // Informações básicas
@@ -193,8 +203,11 @@ export function useProductForm(initialData?: Partial<ProductFormData>) {
         break;
     }
 
+    const isValid = Object.keys(newErrors).length === 0;
+    logger.productCreation.validation(stepNames[currentStep], isValid, newErrors);
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid;
   };
 
   // Navegar entre steps
@@ -212,24 +225,189 @@ export function useProductForm(initialData?: Partial<ProductFormData>) {
     setCurrentStep(step);
   };
 
+  // Transformar dados do formulário para formato da API
+  const transformToAPI = (): CreateProductDTO => {
+    return transformFormDataToAPI(formData);
+  };
+
+  // Upload de imagens para produto existente
+  const uploadImagesToProduct = async (productId: string, files: File[]): Promise<string[]> => {
+    if (files.length === 0) return [];
+
+    logger.upload.start(files);
+
+    try {
+      const url = `/api/v1/admin/products/${productId}/images`;
+      logger.api.request('POST', url);
+
+      // Fazer upload via productService (retorna array de URLs)
+      const uploadedUrls = await measureTime(
+        'Upload de imagens',
+        () => productService.uploadImages(productId, files)
+      );
+
+      logger.upload.success(uploadedUrls);
+      
+      return uploadedUrls;
+    } catch (error) {
+      logger.upload.error('Upload para produto', error);
+      throw error;
+    }
+  };
+
   // Submeter formulário
   const submitForm = async () => {
+    logger.productCreation.start(formData.name);
+
+    // Validar todas as etapas
+    logger.info('Validando todos os campos...');
+    if (!validateAllSteps()) {
+      logger.productCreation.error('Validação', { errors });
+      return { success: false, error: 'Há erros no formulário. Verifique todos os campos.' };
+    }
+
     setIsSaving(true);
     
     try {
-      // TODO: Integrar com API
-      console.log('Dados do produto:', formData);
+      // 1. Verificar se há imagens para upload
+      const filesToUpload = extractFilesToUpload(formData.images as any);
+      const hasFilesToUpload = filesToUpload.length > 0;
       
-      // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (hasFilesToUpload) {
+        logger.info(`${filesToUpload.length} imagem(ns) será(ão) enviada(s) após criar o produto`);
+      }
+
+      // 2. Transformar dados para API (SEM imagens se houver arquivos locais)
+      logger.info('Transformando dados para API...');
+      const payload = await measureTime(
+        'Transformação de dados',
+        () => transformToAPI()
+      );
       
-      return { success: true, data: formData };
+      // Remover imagens se houver arquivos para upload (enviaremos depois)
+      if (hasFilesToUpload) {
+        payload.images = [];
+        logger.warning('Imagens removidas do payload inicial (serão enviadas após criação)');
+      }
+      
+      logger.productCreation.transform({
+        name: payload.name,
+        slug: payload.slug,
+        price: payload.price,
+        stock: payload.stock,
+        imagens: payload.images?.length || 0,
+        variantes: payload.variants?.length || 0,
+      });
+
+      // 3. Criar produto
+      logger.productCreation.apiCall('POST', '/api/v1/admin/products', {
+        ...payload,
+        images: `${payload.images?.length || 0} imagens no payload`,
+        variants: `${payload.variants?.length || 0} variantes`,
+      });
+
+      const product = await measureTime(
+        'Criação do produto',
+        () => productService.createProduct(payload)
+      );
+      
+      logger.success(`✓ Produto criado com ID: ${product.id}`);
+
+      // 4. Upload de imagens (se houver arquivos locais)
+      if (hasFilesToUpload) {
+        logger.productCreation.imageUpload(filesToUpload.length);
+        
+        try {
+          const uploadedUrls = await measureTime(
+            'Upload de imagens para produto',
+            () => uploadImagesToProduct(product.id, filesToUpload)
+          );
+          
+          logger.productCreation.imageUpload(uploadedUrls.length, uploadedUrls);
+          logger.success(`✓ ${uploadedUrls.length} imagem(ns) enviada(s) com sucesso`);
+        } catch (uploadError: any) {
+          logger.error('Erro ao fazer upload de imagens (produto já criado)', uploadError);
+          logger.warning('ATENÇÃO: Produto foi criado mas as imagens falharam. Você pode adicioná-las depois editando o produto.');
+          
+          // Produto foi criado, mas upload falhou - ainda é um sucesso parcial
+          return { 
+            success: true, 
+            data: product,
+            warning: 'Produto criado, mas falha no upload de imagens. Adicione-as editando o produto.'
+          };
+        }
+      }
+      
+      logger.productCreation.success(product.id, {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        stock: product.stock,
+        images: hasFilesToUpload ? filesToUpload.length : 0,
+      });
+      
+      return { success: true, data: product };
     } catch (error: any) {
-      console.error('Erro ao salvar produto:', error);
-      return { success: false, error: error.message };
+      logger.productCreation.error('Criação do produto', error);
+      
+      let errorMessage = 'Erro ao salvar produto';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+        logger.error('Mensagem do servidor:', error.response.data);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      return { success: false, error: errorMessage };
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Validar todos os steps
+  const validateAllSteps = (): boolean => {
+    logger.group('🔍 Validação Completa');
+    const allErrors: Record<string, string> = {};
+
+    // Step 0: Básico
+    logger.validation.field('name', formData.name, !!formData.name.trim());
+    if (!formData.name.trim()) allErrors.name = 'Nome é obrigatório';
+    
+    logger.validation.field('slug', formData.slug, !!formData.slug.trim());
+    if (!formData.slug.trim()) allErrors.slug = 'Slug é obrigatório';
+    
+    logger.validation.field('price', formData.price, formData.price > 0);
+    if (formData.price <= 0) allErrors.price = 'Preço deve ser maior que zero';
+
+    // Step 1: Descrição
+    logger.validation.field('description', formData.description, !!formData.description.trim());
+    if (!formData.description.trim()) allErrors.description = 'Descrição é obrigatória';
+
+    // Step 2: Imagens
+    logger.validation.field('images', `${formData.images.length} imagem(ns)`, formData.images.length > 0);
+    if (formData.images.length === 0) allErrors.images = 'Adicione pelo menos uma imagem';
+
+    // Step 3: Variantes
+    logger.validation.field('variants', `${formData.variantConfig.variants.length} variante(s)`, formData.variantConfig.variants.length > 0);
+    if (formData.variantConfig.variants.length === 0) {
+      allErrors.variants = 'Configure pelo menos uma variante';
+    }
+
+    const hasNegativeStock = formData.variantConfig.variants.some(v => v.stock < 0);
+    if (hasNegativeStock) {
+      logger.validation.field('stock', 'variantes', false, 'Estoque negativo encontrado');
+      allErrors.variants = 'Estoque não pode ser negativo';
+    }
+
+    const totalFields = 5;
+    const validFields = totalFields - Object.keys(allErrors).length;
+    logger.validation.summary(totalFields, validFields, allErrors);
+    logger.groupEnd();
+
+    setErrors(allErrors);
+    return Object.keys(allErrors).length === 0;
   };
 
   // Resetar formulário
@@ -252,7 +430,9 @@ export function useProductForm(initialData?: Partial<ProductFormData>) {
     prevStep,
     goToStep,
     validateCurrentStep,
+    validateAllSteps,
     submitForm,
     resetForm,
+    transformToAPI,
   };
 }

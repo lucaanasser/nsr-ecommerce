@@ -38,6 +38,16 @@ router.get(
 );
 
 /**
+ * @route   GET /api/v1/products/categories
+ * @desc    Lista todas as categorias únicas em uso
+ * @access  Public
+ */
+router.get(
+  '/categories',
+  productController.getCategories.bind(productController)
+);
+
+/**
  * @route   GET /api/v1/products/:slug
  * @desc    Busca produto por slug
  * @access  Public

@@ -101,6 +101,28 @@ export class ProductController {
   }
 
   /**
+   * GET /api/v1/categories
+   * Lista todas as categorias únicas em uso
+   */
+  async getCategories(
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const categories = await productService.getCategories();
+
+      res.status(200).json({
+        success: true,
+        message: 'Categorias recuperadas com sucesso',
+        data: categories,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/v1/collections
    * Lista todas as coleções
    */

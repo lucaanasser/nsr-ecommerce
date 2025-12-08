@@ -3,19 +3,11 @@ services:
   database:
     image: postgres:16-alpine
     container_name: nsr-database
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-nsr_dev}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_change_in_prod}
-      POSTGRES_DB: ${POSTGRES_DB:-nsr_development}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     networks:
       - nsr-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nsr_dev} -d ${POSTGRES_DB:-nsr_development}"]
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,12 +19,6 @@ services:
       dockerfile: Dockerfile
       target: production
     container_name: nsr-backend
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      PORT: 4000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-nsr_dev}:${POSTGRES_PASSWORD:-dev_password_change_in_prod}@database:5432/${POSTGRES_DB:-nsr_development}
-    env_file:
-      - ./backend/.env
     ports:
       - "4000:4000"
     networks:
@@ -48,13 +34,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: nsr-frontend
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
     ports:
       - "3000:3000"
     networks:
@@ -66,8 +45,3 @@ services:
 networks:
   nsr-network:
     driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
-

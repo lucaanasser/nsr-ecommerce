@@ -25,6 +25,27 @@ router.use(authorize('ADMIN') as any);
 // ========== PRODUCT ROUTES ==========
 
 /**
+ * @route   GET /api/v1/admin/products
+ * @desc    Lista todos os produtos (incluindo inativos)
+ * @access  Private (Admin)
+ */
+router.get(
+  '/',
+  adminProductController.getProducts.bind(adminProductController)
+);
+
+/**
+ * @route   GET /api/v1/admin/products/:id
+ * @desc    Busca produto por ID
+ * @access  Private (Admin)
+ */
+router.get(
+  '/:id',
+  validateParams(uuidParamSchema),
+  adminProductController.getProductById.bind(adminProductController)
+);
+
+/**
  * @route   POST /api/v1/admin/products
  * @desc    Cria novo produto
  * @access  Private (Admin)
@@ -33,6 +54,47 @@ router.post(
   '/',
   validateBody(createProductSchema),
   adminProductController.createProduct.bind(adminProductController)
+);
+
+/**
+ * @route   POST /api/v1/admin/products/:id/duplicate
+ * @desc    Duplica produto existente
+ * @access  Private (Admin)
+ */
+router.post(
+  '/:id/duplicate',
+  validateParams(uuidParamSchema),
+  adminProductController.duplicateProduct.bind(adminProductController)
+);
+
+/**
+ * @route   PATCH /api/v1/admin/products/bulk/activate
+ * @desc    Ativa produtos em lote
+ * @access  Private (Admin)
+ */
+router.patch(
+  '/bulk/activate',
+  adminProductController.bulkActivate.bind(adminProductController)
+);
+
+/**
+ * @route   PATCH /api/v1/admin/products/bulk/deactivate
+ * @desc    Desativa produtos em lote
+ * @access  Private (Admin)
+ */
+router.patch(
+  '/bulk/deactivate',
+  adminProductController.bulkDeactivate.bind(adminProductController)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/products/bulk
+ * @desc    Deleta produtos em lote
+ * @access  Private (Admin)
+ */
+router.delete(
+  '/bulk',
+  adminProductController.bulkDelete.bind(adminProductController)
 );
 
 /**

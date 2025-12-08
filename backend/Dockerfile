@@ -8,6 +8,10 @@ WORKDIR /app
 # Instalar dependências necessárias para compilar bcrypt
 RUN apk add --no-cache python3 make g++
 
+# Defina um DATABASE_URL de build (não precisa existir o banco) para o Prisma gerar o client
+ARG DATABASE_URL="postgresql://nsr_dev:dev_password@localhost:5432/nsr_development"
+ENV DATABASE_URL=${DATABASE_URL}
+
 
 RUN npm config set fetch-retry-maxtimeout 120000 && \
     npm config set fetch-retry-mintimeout 10000 && \
@@ -15,10 +19,12 @@ RUN npm config set fetch-retry-maxtimeout 120000 && \
 
 # Copiar package files
 COPY package*.json ./
-COPY prisma ./prisma/
 
 # Instalar dependências (incluindo devDependencies para build)
 RUN npm ci --maxsockets=1 --prefer-offline
+
+# Copiar Prisma schema após npm ci (precisa do pacote prisma instalado)
+COPY prisma ./prisma/
 
 # Copiar código fonte
 COPY . .
@@ -39,18 +45,28 @@ WORKDIR /app
 # Instalar dependências necessárias para rodar bcrypt em produção
 RUN apk add --no-cache python3 make g++
 
+# Mesmo DATABASE_URL de build para npx prisma generate
+ARG DATABASE_URL="postgresql://nsr_dev:dev_password@localhost:5432/nsr_development"
+ENV DATABASE_URL=${DATABASE_URL}
+
 # Configurar npm para ser mais robusto
 RUN npm config set fetch-retry-maxtimeout 120000 && \
     npm config set fetch-retry-mintimeout 10000 && \
     npm config set fetch-retries 5
+
+# Instalar tsx globalmente para permitir Prisma carregar arquivos TypeScript
+RUN npm install -g tsx
 
 # Instalar apenas dependências de produção
 COPY package*.json ./
 COPY prisma ./prisma/
 
 RUN npm ci --omit=dev --maxsockets=1 --prefer-offline && \
-    npx prisma generate && \
     npm cache clean --force
+
+# Copiar Prisma Client gerado do builder (evita ter que rodar generate aqui)
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Copiar código compilado do stage anterior
 COPY --from=builder /app/dist ./dist

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
+import { productService, Product, ProductFilters as ApiProductFilters } from '@/services/product.service';
 
 /**
- * Filtros para produtos
+ * Filtros para produtos (versão admin)
  */
 export interface ProductFilters {
   search?: string;
-  categoryId?: string;
+  category?: string;
   collectionId?: string;
-  gender?: 'masculino' | 'feminino' | 'unisex' | 'todos';
+  gender?: 'MALE' | 'FEMALE' | 'UNISEX' | 'todos';
   isActive?: boolean;
   isFeatured?: boolean;
   inStock?: boolean;
@@ -18,43 +19,35 @@ export interface ProductFilters {
  * Centraliza toda a lógica de estado e operações CRUD
  */
 export function useProducts(initialFilters?: ProductFilters) {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ProductFilters>(initialFilters || {});
+  const [filters, setFilters] = useState<ProductFilters>(initialFilters || { gender: 'todos' });
 
-  // Função para buscar produtos (mockada por enquanto)
+  // Função para buscar produtos da API (usando endpoint ADMIN)
   const fetchProducts = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: Substituir por chamada real à API
-      // const response = await productService.getProducts(filters);
-      // setProducts(response.data);
-      
-      // Mockado temporariamente
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Importar produtos mockados
-      const { products: mockProducts } = await import('@/data/products');
-      
-      // Aplicar filtros
-      let filtered = mockProducts;
-      
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        filtered = filtered.filter(p => 
-          p.name.toLowerCase().includes(searchLower) ||
-          p.description.toLowerCase().includes(searchLower)
-        );
-      }
-      
+      // Converter filtros para o formato da API (só enviar valores definidos)
+      const apiFilters: ApiProductFilters = {};
+
+      if (filters.search) apiFilters.search = filters.search;
+      if (filters.category) apiFilters.category = filters.category;
+      if (filters.collectionId) apiFilters.collection = filters.collectionId;
+      if (filters.isFeatured !== undefined) apiFilters.featured = filters.isFeatured;
+      if (filters.inStock !== undefined) apiFilters.inStock = filters.inStock;
+
+      // Adicionar filtro de gênero apenas se não for 'todos'
       if (filters.gender && filters.gender !== 'todos') {
-        filtered = filtered.filter(p => p.category === filters.gender);
+        // A API backend espera MALE, FEMALE, UNISEX
+        apiFilters.gender = filters.gender;
       }
       
-      setProducts(filtered);
+      // Usar endpoint ADMIN que não filtra por isActive
+      const response = await productService.getAdminProducts(apiFilters);
+      setProducts(response.data);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar produtos');
       console.error('Erro ao buscar produtos:', err);
@@ -76,7 +69,7 @@ export function useProducts(initialFilters?: ProductFilters) {
 
   // Resetar filtros
   const resetFilters = () => {
-    setFilters({});
+    setFilters({ gender: 'todos' });
   };
 
   return {

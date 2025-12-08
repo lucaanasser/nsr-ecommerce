@@ -80,7 +80,14 @@ export interface CreateProductDTO {
     isPrimary?: boolean;
   }>;
   
-  variants?: CreateVariantDTO[];
+  variants?: Array<{
+    size: string;
+    color?: string;
+    colorHex?: string;
+    sku?: string;
+    stock: number;
+    priceAdjustment?: number;
+  }>;
 }
 
 export interface UpdateProductDTO {
@@ -131,19 +138,19 @@ export interface UpdateProductDTO {
 export interface CreateVariantDTO {
   size: string;
   color?: string;
+  colorHex?: string;
   sku?: string;
   stock: number;
-  price?: number;
-  comparePrice?: number;
+  priceAdjustment?: number;
 }
 
 export interface UpdateVariantDTO {
   size?: string;
   color?: string;
+  colorHex?: string;
   sku?: string;
   stock?: number;
-  price?: number;
-  comparePrice?: number;
+  priceAdjustment?: number;
 }
 
 // ================================

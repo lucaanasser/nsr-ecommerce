@@ -3,6 +3,7 @@
  * Implementa busca, filtros, paginação, criação, atualização e formatação de produtos.
  */
 import { Prisma } from '@prisma/client';
+import { prisma } from '../config/database';
 import { productRepository } from '../repositories/product.repository';
 import {
   CreateProductDTO,
@@ -87,7 +88,7 @@ class ProductService {
         take: limit,
         orderBy: orderByClause,
       }),
-      productRepository.count(where),
+      productRepository.count({ where }),
     ]);
 
     // Formatar resposta
@@ -146,6 +147,11 @@ class ProductService {
    * Criar produto (Admin)
    */
   async createProduct(data: CreateProductDTO): Promise<ProductResponse> {
+    // ⚠️ VALIDAÇÃO CRÍTICA: Produtos featured devem ser active
+    if (data.isFeatured && !data.isActive) {
+      throw new ValidationError('Produtos em destaque (featured) devem estar ativos (isActive=true)');
+    }
+
     // Verificar se slug já existe
     const existingProduct = await productRepository.findBySlug(data.slug);
     if (existingProduct) {
@@ -225,9 +231,10 @@ class ProductService {
               create: data.variants.map((v) => ({
                 size: v.size,
                 color: v.color,
+                colorHex: v.colorHex,
                 sku: v.sku,
                 stock: v.stock,
-                priceAdjustment: v.price ? new Prisma.Decimal(v.price) : null,
+                priceAdjustment: v.priceAdjustment ? new Prisma.Decimal(v.priceAdjustment) : null,
               })),
             }
           : undefined,
@@ -260,6 +267,14 @@ class ProductService {
     const existing = await productRepository.findById(id);
     if (!existing) {
       throw new NotFoundError('Produto não encontrado');
+    }
+
+    // ⚠️ VALIDAÇÃO CRÍTICA: Produtos featured devem ser active
+    const willBeFeatured = data.isFeatured !== undefined ? data.isFeatured : existing.isFeatured;
+    const willBeActive = data.isActive !== undefined ? data.isActive : existing.isActive;
+    
+    if (willBeFeatured && !willBeActive) {
+      throw new ValidationError('Produtos em destaque (featured) devem estar ativos (isActive=true)');
     }
 
     // Verificar slug único (se estiver sendo alterado)
@@ -445,6 +460,171 @@ class ProductService {
           }))
         : undefined,
     };
+  }
+
+  /**
+   * Obter categorias únicas em uso
+   */
+  async getCategories(): Promise<string[]> {
+    const products = await productRepository.findMany({});
+    const categories = new Set<string>();
+    
+    products.forEach((product: any) => {
+      if (product.category) {
+        categories.add(product.category);
+      }
+    });
+    
+    return Array.from(categories).sort();
+  }
+
+  /**
+   * Ativar produtos em lote (Admin)
+   */
+  async bulkActivate(ids: string[]): Promise<{ count: number }> {
+    const result = await prisma.product.updateMany({
+      where: { id: { in: ids } },
+      data: { isActive: true },
+    });
+
+    logger.info('Products bulk activated', { count: result.count, ids });
+
+    return { count: result.count };
+  }
+
+  /**
+   * Desativar produtos em lote (Admin)
+   */
+  async bulkDeactivate(ids: string[]): Promise<{ count: number }> {
+    // Verificar se algum produto é featured
+    const featuredProducts = await productRepository.findMany({
+      where: {
+        id: { in: ids },
+        isFeatured: true,
+      },
+    });
+
+    if (featuredProducts.length > 0) {
+      throw new ValidationError(
+        `Não é possível desativar produtos em destaque. Produtos: ${featuredProducts.map((p: any) => p.name).join(', ')}`
+      );
+    }
+
+    const result = await prisma.product.updateMany({
+      where: { id: { in: ids } },
+      data: { isActive: false },
+    });
+
+    logger.info('Products bulk deactivated', { count: result.count, ids });
+
+    return { count: result.count };
+  }
+
+  /**
+   * Deletar produtos em lote (Admin) - Soft delete
+   */
+  async bulkDelete(ids: string[]): Promise<{ count: number }> {
+    // Soft delete - apenas desativa os produtos
+    const result = await prisma.product.updateMany({
+      where: { id: { in: ids } },
+      data: {
+        isActive: false,
+        isFeatured: false, // Remove featured ao deletar
+      },
+    });
+
+    logger.info('Products bulk deleted (soft)', { count: result.count, ids });
+
+    return { count: result.count };
+  }
+
+  /**
+   * Duplicar produto (Admin)
+   */
+  async duplicateProduct(id: string): Promise<ProductResponse> {
+    // Buscar produto original com todas as relações
+    const original = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        details: true,
+        dimensions: true,
+        seo: true,
+        images: true,
+        variants: true,
+      },
+    });
+
+    if (!original) {
+      throw new NotFoundError('Produto não encontrado');
+    }
+
+    // Criar novo slug único
+    const newSlug = `${original.slug}-copia-${Date.now()}`;
+
+    // Criar cópia do produto
+    const duplicate = await prisma.product.create({
+      data: {
+        name: `${original.name} (Cópia)`,
+        slug: newSlug,
+        price: original.price,
+        comparePrice: original.comparePrice,
+        stock: 0, // Cópia começa sem estoque
+        sku: null, // SKU deve ser único, deixar null
+        category: original.category,
+        collectionId: original.collectionId,
+        gender: original.gender,
+        isFeatured: false, // Cópia não é featured
+        isActive: false, // Cópia começa inativa
+        
+        // Copiar detalhes se existirem
+        details: original.details
+          ? {
+              create: {
+                description: original.details.description,
+                specifications: original.details.specifications,
+              },
+            }
+          : undefined,
+        
+        // Copiar dimensões se existirem
+        dimensions: original.dimensions
+          ? {
+              create: {
+                weight: original.dimensions.weight,
+                length: original.dimensions.length,
+                width: original.dimensions.width,
+                height: original.dimensions.height,
+              },
+            }
+          : undefined,
+        
+        // Copiar SEO se existir
+        seo: original.seo
+          ? {
+              create: {
+                metaTitle: original.seo.metaTitle,
+                metaDescription: original.seo.metaDescription,
+                keywords: original.seo.keywords,
+              },
+            }
+          : undefined,
+      },
+      include: {
+        collection: true,
+        details: true,
+        dimensions: true,
+        seo: true,
+        images: true,
+        variants: true,
+      },
+    });
+
+    logger.info('Product duplicated', {
+      originalId: id,
+      duplicateId: duplicate.id,
+    });
+
+    return this.formatProduct(duplicate);
   }
 }
 

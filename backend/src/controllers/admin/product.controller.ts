@@ -10,6 +10,77 @@ import { BadRequestError, NotFoundError } from '../../utils/errors';
  */
 export class AdminProductController {
   /**
+   * GET /api/v1/admin/products
+   * Lista todos os produtos (incluindo inativos) com filtros e paginação
+   */
+  async getProducts(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      // Extrair filtros da query (só incluir se estiver presente)
+      const filters: any = {};
+      
+      if (req.query['search']) filters.search = req.query['search'] as string;
+      if (req.query['category']) filters.category = req.query['category'] as string;
+      if (req.query['collectionId']) filters.collectionId = req.query['collectionId'] as string;
+      if (req.query['gender']) filters.gender = req.query['gender'] as 'MALE' | 'FEMALE' | 'UNISEX';
+      if (req.query['minPrice']) filters.minPrice = Number(req.query['minPrice']);
+      if (req.query['maxPrice']) filters.maxPrice = Number(req.query['maxPrice']);
+      
+      // Filtros booleanos - só adicionar se explicitamente definidos
+      if (req.query['isFeatured'] !== undefined) {
+        filters.isFeatured = req.query['isFeatured'] === 'true';
+      }
+      if (req.query['isActive'] !== undefined) {
+        filters.isActive = req.query['isActive'] === 'true';
+      }
+
+      // Extrair paginação da query
+      const pagination: any = {
+        page: req.query['page'] ? Number(req.query['page']) : 1,
+        limit: req.query['limit'] ? Number(req.query['limit']) : 20,
+        orderBy: req.query['orderBy'] as any,
+      };
+
+      const result = await productService.getProducts(filters, pagination);
+
+      res.status(200).json({
+        success: true,
+        message: 'Produtos recuperados com sucesso',
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/admin/products/:id
+   * Busca produto por ID
+   */
+  async getProductById(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const product = await productService.getProductById(id!);
+
+      res.status(200).json({
+        success: true,
+        message: 'Produto recuperado com sucesso',
+        data: product,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * POST /api/v1/admin/products
    * Cria novo produto
    */
@@ -263,6 +334,115 @@ export class AdminProductController {
       res.status(200).json({
         success: true,
         message: 'Coleção deletada com sucesso',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ========== BULK OPERATIONS ==========
+
+  /**
+   * PATCH /api/v1/admin/products/bulk/activate
+   * Ativa múltiplos produtos
+   */
+  async bulkActivate(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { productIds } = req.body;
+
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        throw new BadRequestError('productIds deve ser um array não vazio');
+      }
+
+      const result = await productService.bulkActivate(productIds);
+
+      res.status(200).json({
+        success: true,
+        message: `${result.count} produto(s) ativado(s)`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PATCH /api/v1/admin/products/bulk/deactivate
+   * Desativa múltiplos produtos
+   */
+  async bulkDeactivate(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { productIds } = req.body;
+
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        throw new BadRequestError('productIds deve ser um array não vazio');
+      }
+
+      const result = await productService.bulkDeactivate(productIds);
+
+      res.status(200).json({
+        success: true,
+        message: `${result.count} produto(s) desativado(s)`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * DELETE /api/v1/admin/products/bulk
+   * Deleta múltiplos produtos
+   */
+  async bulkDelete(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { productIds } = req.body;
+
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        throw new BadRequestError('productIds deve ser um array não vazio');
+      }
+
+      const result = await productService.bulkDelete(productIds);
+
+      res.status(200).json({
+        success: true,
+        message: `${result.count} produto(s) deletado(s)`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/admin/products/:id/duplicate
+   * Duplica um produto existente
+   */
+  async duplicateProduct(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const product = await productService.duplicateProduct(id!);
+
+      res.status(201).json({
+        success: true,
+        message: 'Produto duplicado com sucesso',
+        data: product,
       });
     } catch (error) {
       next(error);

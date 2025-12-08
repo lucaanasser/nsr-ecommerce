@@ -1,58 +1,81 @@
 import api, { ApiResponse, PaginatedResponse } from './api';
 
-// Tipos de produto
+// Tipos de produto (alinhados com o backend)
 export interface Product {
   id: string;
   name: string;
   slug: string;
-  description: string;
   price: number;
-  compareAtPrice?: number;
-  categoryId: string;
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  collectionId?: string;
+  comparePrice: number | null;
+  stock: number;
+  sku: string | null;
+  category: string | null;
+  gender: 'MALE' | 'FEMALE' | 'UNISEX';
+  isFeatured: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Related data
+  details?: {
+    description: string | null;
+    specifications: string | null;
+  } | null;
+  
+  dimensions?: {
+    weight: number;
+    length: number;
+    width: number;
+    height: number;
+  } | null;
+  
+  seo?: {
+    metaTitle: string | null;
+    metaDescription: string | null;
+    keywords: string[];
+  } | null;
+  
+  images?: ProductImage[];
+  
   collection?: {
     id: string;
     name: string;
     slug: string;
-  };
-  images: ProductImage[];
-  variants: ProductVariant[];
-  featured: boolean;
-  isNew: boolean;
-  stock: number;
-  sku?: string;
-  createdAt: string;
-  updatedAt: string;
+  } | null;
+  
+  variants?: ProductVariant[];
 }
 
 export interface ProductImage {
   id: string;
   url: string;
-  alt?: string;
+  altText: string | null;
   order: number;
+  isPrimary: boolean;
 }
 
 export interface ProductVariant {
   id: string;
   size: string;
-  color?: string;
+  color: string | null;
+  sku: string | null;
   stock: number;
-  sku?: string;
+  price: number | null;
+  comparePrice: number | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProductFilters {
   search?: string;
   category?: string;
   collection?: string;
+  gender?: 'MALE' | 'FEMALE' | 'UNISEX';
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
   featured?: boolean;
+  isActive?: boolean;
   new?: boolean;
   sizes?: string[];
   page?: number;
@@ -89,5 +112,62 @@ export const productService = {
       ...filters,
       search: searchTerm,
     });
+  },
+
+  // ========== ADMIN ENDPOINTS ==========
+
+  // Listar todos os produtos (incluindo inativos) - ADMIN
+  async getAdminProducts(filters?: ProductFilters): Promise<PaginatedResponse<Product>> {
+    const response = await api.get<PaginatedResponse<Product>>('/admin/products', {
+      params: filters,
+    });
+    return response.data;
+  },
+
+  // Obter produto por ID - ADMIN
+  async getAdminProductById(id: string): Promise<Product> {
+    const response = await api.get<ApiResponse<Product>>(`/admin/products/${id}`);
+    return response.data.data;
+  },
+
+  // Criar produto - ADMIN
+  async createProduct(data: any): Promise<Product> {
+    const response = await api.post<ApiResponse<Product>>('/admin/products', data);
+    return response.data.data;
+  },
+
+  // Atualizar produto - ADMIN
+  async updateProduct(id: string, data: any): Promise<Product> {
+    const response = await api.put<ApiResponse<Product>>(`/admin/products/${id}`, data);
+    return response.data.data;
+  },
+
+  // Deletar produto - ADMIN
+  async deleteProduct(id: string): Promise<void> {
+    await api.delete(`/admin/products/${id}`);
+  },
+
+  // Duplicar produto - ADMIN
+  async duplicateProduct(id: string): Promise<Product> {
+    const response = await api.post<ApiResponse<Product>>(`/admin/products/${id}/duplicate`);
+    return response.data.data;
+  },
+
+  // Ativar produtos em lote - ADMIN
+  async bulkActivate(productIds: string[]): Promise<any> {
+    const response = await api.patch('/admin/products/bulk/activate', { productIds });
+    return response.data;
+  },
+
+  // Desativar produtos em lote - ADMIN
+  async bulkDeactivate(productIds: string[]): Promise<any> {
+    const response = await api.patch('/admin/products/bulk/deactivate', { productIds });
+    return response.data;
+  },
+
+  // Deletar produtos em lote - ADMIN
+  async bulkDelete(productIds: string[]): Promise<any> {
+    const response = await api.delete('/admin/products/bulk', { data: { productIds } });
+    return response.data;
   },
 };

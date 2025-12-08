@@ -26,11 +26,25 @@ export const app: Application = express();
 // ================================
 
 // Segurança
-app.use(helmet());
+// Em dev desabilitamos CSP para evitar bloqueio de chamadas cross-origin (frontend em outra porta)
+app.use(helmet({
+  contentSecurityPolicy: config.env === 'production' ? undefined : false,
+  crossOriginEmbedderPolicy: false, // evita bloqueio de recursos remotos em dev
+}));
 
-// CORS
+// CORS - em desenvolvimento libera qualquer origem; em produção usa whitelist
 app.use(cors({
-  origin: config.cors.origin,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // requests sem origin (curl, healthchecks)
+
+    // Em dev, aceitar qualquer origem para facilitar testes locais (localhost, 127.0.0.1, LAN)
+    if (config.env !== 'production') return callback(null, true);
+
+    // Em produção, permitir apenas origens configuradas
+    if (config.cors.origin.includes(origin)) return callback(null, true);
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 

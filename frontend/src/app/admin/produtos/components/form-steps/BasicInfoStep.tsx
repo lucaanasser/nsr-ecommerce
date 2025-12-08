@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import Input from '@/components/ui/Input';
 import { ProductFormData } from '../../hooks/useProductForm';
+import { productService } from '@/services/productService';
 
 interface BasicInfoStepProps {
   formData: ProductFormData;
@@ -11,6 +13,18 @@ interface BasicInfoStepProps {
   onUpdateName: (name: string) => void;
 }
 
+// Categorias pré-definidas (fallback)
+const DEFAULT_CATEGORIES = [
+  'Camiseta',
+  'Moletom',
+  'Calça',
+  'Bermuda',
+  'Jaqueta',
+  'Acessório',
+  'Boné',
+  'Meia',
+];
+
 /**
  * Step 1: Informações Básicas
  */
@@ -20,6 +34,58 @@ export default function BasicInfoStep({
   onUpdateField,
   onUpdateName,
 }: BasicInfoStepProps) {
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_CATEGORIES);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // Buscar categorias do banco ao montar o componente
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const dbCategories = await productService.getCategories();
+        
+        // Combinar categorias do banco com as pré-definidas (sem duplicatas)
+        const combinedCategories = [...new Set([...DEFAULT_CATEGORIES, ...dbCategories])];
+        setAvailableCategories(combinedCategories.sort());
+      } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+        // Em caso de erro, usa apenas as pré-definidas
+        setAvailableCategories(DEFAULT_CATEGORIES);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (value: string) => {
+    if (value === 'CUSTOM') {
+      setShowCustomCategory(true);
+      onUpdateField('category', '');
+    } else {
+      setShowCustomCategory(false);
+      onUpdateField('category', value);
+    }
+  };
+
+  const handleCustomCategoryAdd = () => {
+    if (customCategory.trim()) {
+      const newCategory = customCategory.trim();
+      onUpdateField('category', newCategory);
+      
+      // Adicionar a nova categoria à lista (se não existir)
+      if (!availableCategories.includes(newCategory)) {
+        setAvailableCategories([...availableCategories, newCategory].sort());
+      }
+      
+      setCustomCategory('');
+      setShowCustomCategory(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -119,6 +185,66 @@ export default function BasicInfoStep({
           />
           <p className="mt-1 text-xs text-primary-white/50">
             Preço original para mostrar desconto
+          </p>
+        </div>
+
+        {/* Categoria */}
+        <div>
+          <label className="block text-sm font-medium text-primary-white mb-2">
+            Categoria
+            {loadingCategories && (
+              <span className="ml-2 text-xs text-primary-white/50">(carregando...)</span>
+            )}
+          </label>
+          <select
+            value={showCustomCategory ? 'CUSTOM' : (formData.category || '')}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            disabled={loadingCategories}
+            className="w-full px-4 py-2 bg-dark-bg border border-dark-border text-primary-white rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-gold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="">Selecione uma categoria</option>
+            {availableCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+            <option value="CUSTOM">+ Adicionar outra categoria</option>
+          </select>
+          {showCustomCategory && (
+            <div className="mt-2 flex gap-2">
+              <Input
+                type="text"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                placeholder="Digite a nova categoria"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCustomCategoryAdd();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleCustomCategoryAdd}
+                className="px-4 py-2 bg-primary-gold text-dark-bg font-medium rounded-sm hover:bg-primary-gold/90 transition-colors"
+              >
+                OK
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomCategory(false);
+                  setCustomCategory('');
+                }}
+                className="px-4 py-2 bg-dark-border text-primary-white font-medium rounded-sm hover:bg-dark-border/80 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+          <p className="mt-1 text-xs text-primary-white/50">
+            Categoria para organização e filtros
           </p>
         </div>
 

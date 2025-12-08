@@ -34,7 +34,6 @@ export class ProductRepository extends BaseRepository<Product> {
    * Include padrão para produtos (reutilizável)
    */
   private readonly defaultInclude = {
-    category: true,
     collection: true,
     details: true,
     dimensions: true,
@@ -119,9 +118,12 @@ export class ProductRepository extends BaseRepository<Product> {
     skip?: number;
     orderBy?: Prisma.ProductOrderByWithRelationInput;
   }) {
-    const where: Prisma.ProductWhereInput = {
-      isActive: filters.isActive ?? true,
-    };
+    const where: Prisma.ProductWhereInput = {};
+
+    // Filtro por isActive (só aplicar se explicitamente definido)
+    if (filters.isActive !== undefined) {
+      where.isActive = filters.isActive;
+    }
 
     // Filtro por categoria
     if (filters.category) {

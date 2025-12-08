@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/context/AdminContext';
+import { useAuthContext } from '@/context/AuthContext';
 import Sidebar from '@/components/admin/Sidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 
@@ -17,18 +18,21 @@ export default function AdminLayout({
 }) {
   const { isAdmin, isAuthenticated } = useAdmin();
   const router = useRouter();
+  const { isLoading } = useAuthContext();
 
   useEffect(() => {
-    // Redireciona se não estiver autenticado ou não for admin
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else if (!isAdmin) {
-      router.push('/');
+    // Só redireciona após verificar o loading
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else if (!isAdmin) {
+        router.push('/');
+      }
     }
-  }, [isAuthenticated, isAdmin, router]);
+  }, [isAuthenticated, isAdmin, isLoading, router]);
 
   // Mostra loading enquanto verifica autenticação
-  if (!isAuthenticated || !isAdmin) {
+  if (isLoading || !isAuthenticated || !isAdmin) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-dark-bg">
         <div className="text-center">

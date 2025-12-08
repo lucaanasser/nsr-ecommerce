@@ -1,7 +1,10 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Base API URL
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+// Usa API_URL_SERVER no servidor (SSR) e NEXT_PUBLIC_API_URL no cliente
+const BASE_URL = typeof window === 'undefined'
+  ? (process.env.API_URL_SERVER || 'http://backend:4000/api/v1')
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1');
 
 // Criar instância do axios
 export const api: AxiosInstance = axios.create({

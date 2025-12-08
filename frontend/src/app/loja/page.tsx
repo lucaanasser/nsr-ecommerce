@@ -1,37 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ProductCard from '@/components/product/ProductCard';
 import Button from '@/components/ui/Button';
-import { products } from '@/data/products';
-import { SlidersHorizontal } from 'lucide-react';
+import { useProducts } from '@/hooks/useProducts';
+import { SlidersHorizontal, Loader2 } from 'lucide-react';
 
 /**
  * Produtos - Página de Catálogo
  * 
  * Catálogo completo com grid de produtos, filtros avançados e ordenação.
  * Layout minimalista com espaçamento generoso e cards navegáveis.
+ * 
+ * INTEGRADO COM BACKEND - Busca produtos dinâmicos da API
  */
 export default function ProdutosPage() {
   const [filtro, setFiltro] = useState<'todos' | 'masculino' | 'feminino'>('todos');
   const [ordenarPor, setOrdenarPor] = useState<'novos' | 'preco-asc' | 'preco-desc'>('novos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-  // Aplicar filtros
-  let produtosFiltrados = products;
-  if (filtro !== 'todos') {
-    produtosFiltrados = products.filter(p => p.category === filtro);
-  }
+  // Buscar produtos do backend (apenas ativos)
+  const { products, isLoading, error } = useProducts({ isActive: true });
 
-  // Aplicar ordenação
-  const produtosOrdenados = [...produtosFiltrados].sort((a, b) => {
-    if (ordenarPor === 'preco-asc') return a.price - b.price;
-    if (ordenarPor === 'preco-desc') return b.price - a.price;
-    return b.new ? 1 : -1; // Novos primeiro
-  });
+  // Aplicar filtros localmente (categoria)
+  const produtosFiltrados = useMemo(() => {
+    if (filtro === 'todos') return products;
+    
+    // Mapear filtro para gender do backend
+    const genderMap: Record<string, string> = {
+      'masculino': 'MALE',
+      'feminino': 'FEMALE',
+    };
+    
+    return products.filter(p => {
+      if (!p.gender) return false;
+      return p.gender === genderMap[filtro];
+    });
+  }, [products, filtro]);
+
+  // Aplicar ordenação localmente
+  const produtosOrdenados = useMemo(() => {
+    const sorted = [...produtosFiltrados];
+    
+    if (ordenarPor === 'preco-asc') {
+      return sorted.sort((a, b) => a.price - b.price);
+    }
+    if (ordenarPor === 'preco-desc') {
+      return sorted.sort((a, b) => b.price - a.price);
+    }
+    // 'novos' - ordenar por data de criação (mais recentes primeiro)
+    return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [produtosFiltrados, ordenarPor]);
+
+  // Adaptador: Converter Product do backend para formato do ProductCard (mock)
+  const produtosAdaptados = useMemo(() => {
+    return produtosOrdenados.map(p => {
+      // Extrair tamanhos únicos das variantes
+      const sizes = Array.from(new Set(p.variants?.map(v => v.size) || []));
+      
+      // Extrair cores únicas das variantes
+      const colors = Array.from(new Set(
+        p.variants?.map(v => v.color).filter(Boolean) as string[] || []
+      ));
+      
+      // Extrair URLs das imagens
+      const images = p.images?.map(img => img.url) || [];
+      
+      // Mapear gender para category (mock)
+      const categoryMap: Record<string, 'masculino' | 'feminino'> = {
+        'MALE': 'masculino',
+        'FEMALE': 'feminino',
+      };
+      
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        description: p.details?.description || '',
+        price: Number(p.price),
+        category: categoryMap[p.gender] || 'masculino',
+        collection: p.collection?.name || '',
+        sizes,
+        colors,
+        images,
+        featured: p.isFeatured,
+        new: false, // Campo 'new' não existe no backend, sempre false
+      };
+    });
+  }, [produtosOrdenados]);
 
   return (
     <>
@@ -171,14 +230,40 @@ export default function ProdutosPage() {
 
           {/* Conteúdo Principal - Full Width */}
           <div className="flex-1 px-6 lg:px-12 pt-8">
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-32">
+                <Loader2 className="w-12 h-12 text-primary-gold animate-spin" />
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20"
+              >
+                <p className="text-2xl text-red-500 mb-4">
+                  {error}
+                </p>
+                <Button
+                  variant="primary"
+                  onClick={() => window.location.reload()}
+                >
+                  Tentar Novamente
+                </Button>
+              </motion.div>
+            )}
+
             {/* Grid de Produtos - 3 por linha, cards grandes */}
-            {produtosOrdenados.length > 0 ? (
+            {!isLoading && !error && produtosAdaptados.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
-                {produtosOrdenados.map((product, index) => (
+                {produtosAdaptados.map((product, index) => (
                   <ProductCard key={product.id} product={product} index={index} />
                 ))}
               </div>
-            ) : (
+            ) : !isLoading && !error && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

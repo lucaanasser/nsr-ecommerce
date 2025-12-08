@@ -15,7 +15,7 @@ import EmptyState from './components/EmptyState';
 import ProductQuickView from './components/ProductQuickView';
 import ConfirmModal from './components/ConfirmModal';
 import BulkActionsBar from './components/BulkActionsBar';
-import { Product } from '@/data/products';
+import { Product } from '@/services/product.service';
 
 /**
  * Página de Listagem de Produtos - Versão Completa
@@ -47,8 +47,9 @@ export default function AdminProdutosPage() {
   // Opções de filtro de gênero
   const genderOptions = [
     { value: 'todos' as const, label: 'Todos' },
-    { value: 'masculino' as const, label: 'Masculino' },
-    { value: 'feminino' as const, label: 'Feminino' },
+    { value: 'MALE' as const, label: 'Masculino' },
+    { value: 'FEMALE' as const, label: 'Feminino' },
+    { value: 'UNISEX' as const, label: 'Unissex' },
   ];
 
   // Handlers individuais

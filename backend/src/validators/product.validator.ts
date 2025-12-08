@@ -52,6 +52,16 @@ const productImageSchema = z.object({
   isPrimary: z.boolean().optional(),
 });
 
+// Schema para variantes (usado no createProductSchema)
+const productVariantSchema = z.object({
+  size: z.string().min(1, 'Tamanho é obrigatório'),
+  color: z.string().optional(),
+  colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Código hexadecimal de cor inválido (use formato #RRGGBB)').optional(),
+  stock: z.number().int('Estoque deve ser um número inteiro').min(0, 'Estoque não pode ser negativo'),
+  sku: z.string().optional(),
+  priceAdjustment: z.number().optional(),
+});
+
 // Criar produto
 export const createProductSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(200, 'Nome muito longo'),
@@ -71,6 +81,7 @@ export const createProductSchema = z.object({
   dimensions: productDimensionsSchema,
   seo: productSEOSchema,
   images: z.array(productImageSchema).optional(),
+  variants: z.array(productVariantSchema).optional(),
 });
 
 // Atualizar produto (todos os campos opcionais)
