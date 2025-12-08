@@ -67,3 +67,53 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
     message: 'Pedido cancelado com sucesso'
   });
 };
+
+/**
+ * Retry payment for a pending order
+ */
+export const retryPayment = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const orderId = req.params['id'];
+  const { paymentMethod, creditCard } = req.body;
+  
+  if (!orderId) {
+    res.status(400).json({
+      success: false,
+      message: 'ID do pedido é obrigatório'
+    });
+    return;
+  }
+  
+  const result = await orderService.retryPayment(userId, orderId, {
+    paymentMethod,
+    creditCard,
+  });
+  
+  res.json({
+    success: true,
+    data: result,
+  });
+};
+
+/**
+ * Get payment status for an order
+ */
+export const getPaymentStatus = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const orderId = req.params['id'];
+  
+  if (!orderId) {
+    res.status(400).json({
+      success: false,
+      message: 'ID do pedido é obrigatório'
+    });
+    return;
+  }
+  
+  const status = await orderService.getPaymentStatus(userId, orderId);
+  
+  res.json({
+    success: true,
+    data: status,
+  });
+};

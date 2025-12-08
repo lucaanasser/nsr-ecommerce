@@ -516,4 +516,256 @@ export class OrderService {
 
     return `NSR-${year}-${sequence.toString().padStart(4, '0')}`;
   }
+
+  /**
+   * Retry payment for a pending order
+   */
+  async retryPayment(
+    userId: string,
+    orderId: string,
+    paymentData: { paymentMethod: string; creditCard?: any }
+  ) {
+    // Verify order belongs to user and is in valid state
+    const order = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+        userId,
+        status: 'PENDING',
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        address: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundError('Pedido não encontrado ou não está pendente');
+    }
+
+    // Check if within 24h window
+    const firstAttempt = new Date(order.firstPaymentAttemptAt!);
+    const hoursSinceFirstAttempt =
+      (Date.now() - firstAttempt.getTime()) / (1000 * 60 * 60);
+
+    if (hoursSinceFirstAttempt > 24) {
+      throw new BadRequestError(
+        'Prazo de 24h para pagamento expirado. Crie um novo pedido.'
+      );
+    }
+
+    // Get last payment attempt number
+    const lastPayment = order.payments[0];
+    const attemptNumber = lastPayment ? lastPayment.attemptNumber + 1 : 2;
+
+    logger.info('Retrying payment for order', {
+      orderId,
+      attemptNumber,
+      paymentMethod: paymentData.paymentMethod,
+    });
+
+    // Validate stock availability (without reserving yet)
+    await inventoryService.validateStockAvailability(order.items);
+
+    // Create new payment record
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        method:
+          paymentData.paymentMethod === 'pix'
+            ? PaymentMethod.PIX
+            : PaymentMethod.CREDIT_CARD,
+        status: PaymentStatus.PENDING,
+        amount: order.total,
+        attemptNumber,
+        stockReserved: false,
+      },
+    });
+
+    let paymentResult;
+
+    try {
+      // Process payment via PagBank
+      if (paymentData.paymentMethod === 'pix') {
+        paymentResult = await pagbankService.createPixCharge({
+          referenceId: order.id,
+          amount: order.total,
+          customer: {
+            name: `${order.address.firstName} ${order.address.lastName}`,
+            email: order.address.email,
+            taxId: order.address.cpf,
+            phone: order.address.phone,
+          },
+          items: order.items.map((item) => ({
+            referenceId: item.productId,
+            name: item.productName,
+            quantity: item.quantity,
+            unitAmount: item.price,
+          })),
+        });
+      } else {
+        // Credit card
+        if (!paymentData.creditCard) {
+          throw new BadRequestError(
+            'Dados do cartão são obrigatórios para pagamento com cartão'
+          );
+        }
+
+        paymentResult = await pagbankService.createCreditCardCharge({
+          referenceId: order.id,
+          amount: order.total,
+          customer: {
+            name: `${order.address.firstName} ${order.address.lastName}`,
+            email: order.address.email,
+            taxId: order.address.cpf,
+            phone: order.address.phone,
+          },
+          card: paymentData.creditCard,
+          items: order.items.map((item) => ({
+            referenceId: item.productId,
+            name: item.productName,
+            quantity: item.quantity,
+            unitAmount: item.price,
+          })),
+        });
+      }
+
+      // Update payment with results
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          chargeId: paymentResult.chargeId,
+          status: paymentResult.paymentStatus,
+          pixQrCode: paymentResult.pixQrCode,
+          pixQrCodeBase64: paymentResult.pixQrCodeBase64,
+          pixExpiresAt: paymentResult.pixExpiresAt,
+          errorMessage: paymentResult.errorMessage,
+          metadata: paymentResult.metadata,
+        },
+      });
+
+      // Handle stock based on payment method and result
+      if (paymentResult.success) {
+        if (paymentData.paymentMethod === 'pix') {
+          // Reserve stock for PIX (15 minutes)
+          await inventoryService.reserveStockForPix(order);
+          await prisma.payment.update({
+            where: { id: payment.id },
+            data: { stockReserved: true },
+          });
+        } else if (paymentResult.paymentStatus === PaymentStatus.PAID) {
+          // Credit card approved - decrement stock immediately
+          await inventoryService.decrementStockForOrder(order);
+          await prisma.payment.update({
+            where: { id: payment.id },
+            data: { stockReserved: true },
+          });
+          
+          // Update order status
+          await prisma.order.update({
+            where: { id: order.id },
+            data: { status: 'CONFIRMED' },
+          });
+        }
+      }
+
+      logger.info('Payment retry processed', {
+        orderId,
+        paymentId: payment.id,
+        success: paymentResult.success,
+        status: paymentResult.paymentStatus,
+      });
+
+      return {
+        orderId: order.id,
+        paymentId: payment.id,
+        status: paymentResult.paymentStatus,
+        pixQrCode: paymentResult.pixQrCode,
+        pixQrCodeBase64: paymentResult.pixQrCodeBase64,
+        pixExpiresAt: paymentResult.pixExpiresAt,
+        errorMessage: paymentResult.errorMessage,
+      };
+    } catch (error) {
+      logger.error('Failed to retry payment', {
+        orderId,
+        paymentId: payment.id,
+        error,
+      });
+
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: PaymentStatus.DECLINED,
+          errorMessage:
+            error instanceof Error ? error.message : 'Erro ao processar pagamento',
+        },
+      });
+
+      throw error;
+    }
+  }
+
+  /**
+   * Get payment status for an order
+   */
+  async getPaymentStatus(userId: string, orderId: string) {
+    const order = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+        userId,
+      },
+      include: {
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundError('Pedido não encontrado');
+    }
+
+    const lastPayment = order.payments[0];
+
+    if (!lastPayment) {
+      throw new NotFoundError('Nenhum pagamento encontrado para este pedido');
+    }
+
+    // Check if payment can be retried
+    const firstAttempt = new Date(order.firstPaymentAttemptAt!);
+    const hoursSinceFirstAttempt =
+      (Date.now() - firstAttempt.getTime()) / (1000 * 60 * 60);
+    const canRetry =
+      order.status === 'PENDING' &&
+      hoursSinceFirstAttempt <= 24 &&
+      lastPayment.status !== PaymentStatus.PAID;
+
+    return {
+      orderId: order.id,
+      orderStatus: order.status,
+      orderNumber: order.orderNumber,
+      totalAmount: order.total,
+      payment: {
+        id: lastPayment.id,
+        method: lastPayment.method,
+        status: lastPayment.status,
+        attemptNumber: lastPayment.attemptNumber,
+        pixQrCode: lastPayment.pixQrCode,
+        pixQrCodeBase64: lastPayment.pixQrCodeBase64,
+        pixExpiresAt: lastPayment.pixExpiresAt,
+        errorMessage: lastPayment.errorMessage,
+        createdAt: lastPayment.createdAt,
+      },
+      canRetry,
+      retryDeadline: new Date(
+        firstAttempt.getTime() + 24 * 60 * 60 * 1000
+      ).toISOString(),
+    };
+  }
 }
