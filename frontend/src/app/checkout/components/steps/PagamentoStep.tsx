@@ -210,7 +210,19 @@ export default function PagamentoStep({
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => setDadosPagamento({ ...dadosPagamento, metodo: 'pix' })}
+            onClick={() => {
+              // Limpar dados do cartão ao selecionar PIX
+              setDadosPagamento({
+                metodo: 'pix',
+                numeroCartao: '',
+                nomeCartao: '',
+                validade: '',
+                cvv: '',
+                cpfTitular: '',
+              });
+              // Limpar erros
+              setErrors({});
+            }}
             className={`p-4 border-2 rounded-sm transition-all ${
               dadosPagamento.metodo === 'pix'
                 ? 'border-primary-bronze bg-primary-bronze/10'
@@ -224,7 +236,19 @@ export default function PagamentoStep({
 
           <button
             type="button"
-            onClick={() => setDadosPagamento({ ...dadosPagamento, metodo: 'credit_card' })}
+            onClick={() => {
+              // Limpar dados e garantir estado limpo ao selecionar Cartão
+              setDadosPagamento({
+                metodo: 'credit_card',
+                numeroCartao: '',
+                nomeCartao: '',
+                validade: '',
+                cvv: '',
+                cpfTitular: '',
+              });
+              // Limpar erros
+              setErrors({});
+            }}
             className={`p-4 border-2 rounded-sm transition-all ${
               dadosPagamento.metodo === 'credit_card'
                 ? 'border-primary-bronze bg-primary-bronze/10'
