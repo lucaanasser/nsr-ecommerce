@@ -6,11 +6,15 @@
 
 import { motion } from 'framer-motion';
 import { Truck, MapPin, Check, ChevronRight, Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import type { DadosDestinatario, DadosEntrega } from '@/types/checkout.types';
 import type { SavedAddress } from '@/services';
+import type { CartItem } from '@/context/CartContext';
 import { useCepLookup } from '@/hooks/useCepLookup';
+import { useShippingCalculation } from '../hooks/useShippingCalculation';
+import ShippingMethodSelector from '../ShippingMethodSelector';
 import { formatCep, cleanCep } from '@/utils/cep';
 
 interface EntregaStepProps {
@@ -31,6 +35,17 @@ interface EntregaStepProps {
   onLimparSelecaoEndereco: () => void;
   onSubmit: (e: React.FormEvent) => void;
   onVoltar: () => void;
+  // Props de frete
+  itensCarrinho: CartItem[];
+  totalCarrinho: number;
+  metodosFreteDisponiveis: any[];
+  setMetodosFreteDisponiveis: (metodos: any[]) => void;
+  metodoFreteSelecionado: any | null;
+  setMetodoFreteSelecionado: (metodo: any | null) => void;
+  calculandoFrete: boolean;
+  setCalculandoFrete: (calculando: boolean) => void;
+  erroFrete: string | null;
+  setErroFrete: (erro: string | null) => void;
 }
 
 export default function EntregaStep({
@@ -51,8 +66,41 @@ export default function EntregaStep({
   onLimparSelecaoEndereco,
   onSubmit,
   onVoltar,
+  itensCarrinho,
+  totalCarrinho,
+  metodosFreteDisponiveis,
+  setMetodosFreteDisponiveis,
+  metodoFreteSelecionado,
+  setMetodoFreteSelecionado,
+  calculandoFrete,
+  setCalculandoFrete,
+  erroFrete,
+  setErroFrete,
 }: EntregaStepProps) {
   const { loading: loadingCep, error: cepError, lookupCep } = useCepLookup();
+  const { metodosDisponiveis, calculando, erro, calcularFrete } = useShippingCalculation();
+
+  // Sincronizar estados do hook com os estados globais
+  useEffect(() => {
+    setMetodosFreteDisponiveis(metodosDisponiveis);
+  }, [metodosDisponiveis, setMetodosFreteDisponiveis]);
+
+  useEffect(() => {
+    setCalculandoFrete(calculando);
+  }, [calculando, setCalculandoFrete]);
+
+  useEffect(() => {
+    setErroFrete(erro);
+  }, [erro, setErroFrete]);
+
+  // Calcular frete automaticamente quando CEP estiver completo e válido
+  useEffect(() => {
+    const cepLimpo = dadosEntrega.cep.replace(/\D/g, '');
+    
+    if (cepLimpo.length === 8 && itensCarrinho.length > 0) {
+      calcularFrete(cepLimpo, itensCarrinho, totalCarrinho);
+    }
+  }, [dadosEntrega.cep, itensCarrinho, totalCarrinho, calcularFrete]);
 
   const handleCepChange = async (cep: string) => {
     // Formata o CEP enquanto digita
@@ -330,6 +378,23 @@ export default function EntregaStep({
             </div>
           )}
         </div>
+
+        {/* Seletor de método de frete */}
+        {metodosFreteDisponiveis.length > 0 && (
+          <div className="border-t border-dark-border pt-6 mt-6">
+            <ShippingMethodSelector
+              metodos={metodosFreteDisponiveis}
+              metodoSelecionado={metodoFreteSelecionado}
+              calculando={calculandoFrete}
+              erro={erroFrete}
+              onSelecionar={(metodo) => {
+                setMetodoFreteSelecionado(metodo);
+                // Salvar ID do método no estado de entrega
+                setDadosEntrega({ ...dadosEntrega, metodoEnvioId: metodo.id });
+              }}
+            />
+          </div>
+        )}
 
         <div className="flex gap-3 mt-6">
           <Button

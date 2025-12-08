@@ -334,7 +334,7 @@ export default function CheckoutPage() {
   // ========================================
 
   const subtotal = obterTotalCarrinho();
-  const frete = subtotal > 299 ? 0 : 29.90;
+  const frete = checkoutData.metodoFreteSelecionado?.cost || 0;
   const total = subtotal + frete;
 
   // ========================================
@@ -420,6 +420,16 @@ export default function CheckoutPage() {
                     onLimparSelecaoEndereco={limparSelecaoEndereco}
                     onSubmit={handleSubmitEntrega}
                     onVoltar={() => checkoutData.setEtapa('comprador')}
+                    itensCarrinho={itensCarrinho}
+                    totalCarrinho={obterTotalCarrinho()}
+                    metodosFreteDisponiveis={checkoutData.metodosFreteDisponiveis}
+                    setMetodosFreteDisponiveis={checkoutData.setMetodosFreteDisponiveis}
+                    metodoFreteSelecionado={checkoutData.metodoFreteSelecionado}
+                    setMetodoFreteSelecionado={checkoutData.setMetodoFreteSelecionado}
+                    calculandoFrete={checkoutData.calculandoFrete}
+                    setCalculandoFrete={checkoutData.setCalculandoFrete}
+                    erroFrete={checkoutData.erroFrete}
+                    setErroFrete={checkoutData.setErroFrete}
                   />
                 )}
 

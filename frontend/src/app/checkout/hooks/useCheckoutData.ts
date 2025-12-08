@@ -64,6 +64,12 @@ export function useCheckoutData() {
     cpfTitular: '',
   });
 
+  // Estados - Frete
+  const [metodosFreteDisponiveis, setMetodosFreteDisponiveis] = useState<any[]>([]);
+  const [metodoFreteSelecionado, setMetodoFreteSelecionado] = useState<any | null>(null);
+  const [calculandoFrete, setCalculandoFrete] = useState(false);
+  const [erroFrete, setErroFrete] = useState<string | null>(null);
+
   return {
     // Etapa
     etapa,
@@ -106,5 +112,15 @@ export function useCheckoutData() {
     // Pagamento
     dadosPagamento,
     setDadosPagamento,
+    
+    // Frete
+    metodosFreteDisponiveis,
+    setMetodosFreteDisponiveis,
+    metodoFreteSelecionado,
+    setMetodoFreteSelecionado,
+    calculandoFrete,
+    setCalculandoFrete,
+    erroFrete,
+    setErroFrete,
   };
 }

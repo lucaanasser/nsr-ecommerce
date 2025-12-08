@@ -10,27 +10,36 @@ export interface ShippingOption {
 }
 
 export interface CalculateShippingData {
-  cep: string;
-  weight?: number;
-  volume?: number;
+  zipCode: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+  }>;
+  cartTotal: number;
 }
 
 export interface ShippingMethod {
   id: string;
   name: string;
   description?: string;
-  minDeliveryDays: number;
-  maxDeliveryDays: number;
-  price: number;
-  active: boolean;
+  cost: number;
+  estimatedDays: {
+    min: number;
+    max: number;
+  };
+  isFree: boolean;
+}
+
+export interface ShippingCalculationResponse {
+  methods: ShippingMethod[];
 }
 
 // Serviço de frete
 export const shippingService = {
   // Calcular frete
-  async calculateShipping(data: CalculateShippingData): Promise<ShippingOption[]> {
-    const response = await api.post<ApiResponse<{ options: ShippingOption[] }>>('/shipping/calculate', data);
-    return response.data.data.options;
+  async calculateShipping(data: CalculateShippingData): Promise<ShippingCalculationResponse> {
+    const response = await api.post<ApiResponse<ShippingCalculationResponse>>('/shipping/calculate', data);
+    return response.data.data;
   },
 
   // Listar métodos de envio disponíveis

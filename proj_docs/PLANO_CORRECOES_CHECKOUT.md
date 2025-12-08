@@ -70,16 +70,18 @@ metodoEnvioId: undefined, // ❌ Nunca é definido!
 
 ### 🔴 **FASE 1: CORREÇÕES CRÍTICAS (Bloqueadores)**
 
-#### ✅ **Commit 1: fix: adicionar validação e limpeza de dados no fluxo de pagamento**
+#### ✅ **Commit 1: fix: clear payment data when switching between payment methods** ✅ CONCLUÍDO
 - ✅ Validação de `addressId` e `shippingMethodId` obrigatórios
 - ✅ Correção no `ConfirmacaoStep` para exibir PIX ou Cartão
-- 🔄 **EM ANDAMENTO**: Limpar dados do cartão quando usuário seleciona PIX
+- ✅ Limpar dados do cartão quando usuário seleciona PIX
+- ✅ Limpar estado ao trocar métodos de pagamento
 
 **Arquivos afetados**:
 - `frontend/src/app/checkout/components/steps/PagamentoStep.tsx`
 - `frontend/src/app/checkout/page.tsx`
 
-**Estimativa**: 1-2 horas
+**Tempo real**: 1 hora
+**Commit**: `77eafb7`
 
 ---
 
