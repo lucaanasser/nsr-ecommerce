@@ -17,6 +17,7 @@ export interface Order {
   shippingMethod: string;
   trackingCode?: string;
   couponCode?: string;
+  payment?: OrderPayment;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,10 +51,34 @@ export interface Address {
 }
 
 export interface CreateOrderData {
-  shippingAddressId: string;
+  addressId: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    size?: string;
+    color?: string;
+  }>;
   shippingMethodId: string;
-  paymentMethod: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'BOLETO';
+  paymentMethod: 'credit_card' | 'pix';
   couponCode?: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  notes?: string;
+  creditCard?: {
+    encrypted: string;
+    holderName: string;
+    holderCpf: string;
+  };
+}
+
+export interface OrderPayment {
+  id: string;
+  method: string;
+  status: string;
+  chargeId?: string;
+  pixQrCode?: string;
+  pixQrCodeBase64?: string;
+  pixExpiresAt?: string;
 }
 
 export interface OrderFilters {

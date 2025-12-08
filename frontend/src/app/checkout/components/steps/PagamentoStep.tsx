@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Etapa 3: Dados de Pagamento
  * Suporta PIX e Cartão de Crédito com criptografia PagBank
@@ -104,6 +106,17 @@ export default function PagamentoStep({
     }
   };
 
+  const handleCVVChange = (value: string) => {
+    // Remove tudo exceto números
+    const numbers = value.replace(/\D/g, '');
+    setDadosPagamento({ ...dadosPagamento, cvv: numbers });
+    
+    // Limpar erro se houver
+    if (errors.cvv) {
+      setErrors({ ...errors, cvv: '' });
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -172,11 +185,7 @@ export default function PagamentoStep({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="bg-dark-card border border-dark-border p-6 rounded-sm"
-    >
+    <div className="bg-dark-card border border-dark-border p-6 rounded-sm">
       <div className="flex items-center gap-3 mb-6">
         <CreditCard className="text-primary-bronze" size={24} />
         <h2 className="text-2xl font-semibold">Forma de Pagamento</h2>
@@ -315,13 +324,11 @@ export default function PagamentoStep({
                   placeholder="CVV"
                   required
                   value={dadosPagamento.cvv}
-                  onChange={(e) =>
-                    setDadosPagamento({ ...dadosPagamento, cvv: e.target.value.replace(/\D/g, '') })
-                  }
+                  onChange={(e) => handleCVVChange(e.target.value)}
                   className="bg-dark-bg/50"
                   maxLength={4}
                 />
-                {errors.cvv && <p className="text-red-400 text-sm mt-1">{errors.cvv}</p>)}
+                {errors.cvv && <p className="text-red-400 text-sm mt-1">{errors.cvv}</p>}
               </div>
             </div>
 
@@ -360,6 +367,6 @@ export default function PagamentoStep({
           </Button>
         </div>
       </form>
-    </motion.div>
+    </div>
   );
 }
