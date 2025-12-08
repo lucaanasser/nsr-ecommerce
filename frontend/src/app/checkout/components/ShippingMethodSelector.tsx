@@ -33,18 +33,63 @@ export default function ShippingMethodSelector({
   erro,
   onSelecionar,
 }: ShippingMethodSelectorProps) {
-  // Loading state
+  // Loading state - skeleton placeholders
   if (calculando) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="p-6 bg-dark-card border border-dark-border rounded-sm"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-3"
       >
-        <div className="flex items-center justify-center gap-3 text-primary-white/70">
-          <Loader2 className="animate-spin" size={20} />
-          <span className="text-sm">Calculando opções de frete...</span>
+        {/* Título com spinner */}
+        <div className="flex items-center gap-3 mb-4">
+          <Loader2 className="text-primary-bronze animate-spin" size={20} />
+          <span className="text-sm font-medium text-primary-white/70">
+            Calculando opções de frete...
+          </span>
         </div>
+
+        {/* Skeleton placeholders - 3 cards animados */}
+        {[1, 2, 3].map((index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="relative overflow-hidden p-4 bg-dark-card border border-dark-border rounded-sm"
+          >
+            {/* Animação de shimmer */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-white/5 to-transparent"
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: index * 0.2
+              }}
+            />
+
+            {/* Conteúdo skeleton */}
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-3 flex-1">
+                {/* Ícone skeleton */}
+                <div className="w-10 h-10 bg-primary-white/10 rounded-full animate-pulse" />
+                
+                <div className="flex-1 space-y-2">
+                  {/* Título skeleton */}
+                  <div className="h-4 bg-primary-white/10 rounded w-24 animate-pulse" />
+                  {/* Descrição skeleton */}
+                  <div className="h-3 bg-primary-white/5 rounded w-32 animate-pulse" />
+                </div>
+              </div>
+
+              {/* Preço skeleton */}
+              <div className="h-5 bg-primary-white/10 rounded w-16 animate-pulse" />
+            </div>
+          </motion.div>
+        ))}
       </motion.div>
     );
   }

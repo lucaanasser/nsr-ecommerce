@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button';
 import CheckoutSteps from './components/CheckoutSteps';
 import CheckoutSummary from './components/CheckoutSummary';
 import CheckoutErrorMessage, { useCheckoutError, type ErrorType } from './components/CheckoutErrorMessage';
+import LoadingOverlay from './components/LoadingOverlay';
 import {
   DadosStep,
   EntregaStep,
@@ -52,6 +53,7 @@ export default function CheckoutPage() {
   
   // Estado para controle de processamento
   const [processandoPedido, setProcessandoPedido] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
 
   // ========================================
   // EFFECTS
@@ -240,6 +242,7 @@ export default function CheckoutPage() {
       
       if (checkoutData.dadosPagamento.metodo === 'credit_card') {
         console.log('💳 Criptografando dados do cartão...');
+        setLoadingMessage('Criptografando dados do cartão...');
         
         try {
           // Extrair mês e ano da validade
@@ -297,11 +300,13 @@ export default function CheckoutPage() {
       };
 
       console.log('📤 Enviando pedido para o backend...');
+      setLoadingMessage('Processando pagamento...');
 
       // 4. Criar pedido
       const pedido = await orderService.createOrder(orderData);
 
       console.log('✅ Pedido criado com sucesso:', pedido.orderNumber);
+      setLoadingMessage('Finalizando pedido...');
 
       // 5. Verificar status do pagamento
       if (pedido.payment) {
@@ -337,6 +342,7 @@ export default function CheckoutPage() {
       showError(mensagemErro, errorType);
     } finally {
       setProcessandoPedido(false);
+      setLoadingMessage('');
     }
   };
 
@@ -462,6 +468,7 @@ export default function CheckoutPage() {
                     setDadosPagamento={checkoutData.setDadosPagamento}
                     onSubmit={handleSubmitPagamento}
                     onVoltar={() => checkoutData.setEtapa('destinatario')}
+                    processando={processandoPedido}
                   />
                 )}
 
@@ -495,6 +502,9 @@ export default function CheckoutPage() {
       </main>
 
       <Footer />
+
+      {/* Loading Overlay */}
+      <LoadingOverlay isVisible={processandoPedido} message={loadingMessage} />
 
       {/* Modal de Título de Endereço */}
       <AddressTitleModal

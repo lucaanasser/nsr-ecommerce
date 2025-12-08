@@ -18,6 +18,7 @@ interface PagamentoStepProps {
   setDadosPagamento: (dados: DadosPagamento | ((prev: DadosPagamento) => DadosPagamento)) => void;
   onSubmit: (e: React.FormEvent) => void;
   onVoltar: () => void;
+  processando?: boolean;
 }
 
 export default function PagamentoStep({
@@ -25,6 +26,7 @@ export default function PagamentoStep({
   setDadosPagamento,
   onSubmit,
   onVoltar,
+  processando = false,
 }: PagamentoStepProps) {
   const [sdkLoading, setSdkLoading] = useState(true);
   const [sdkError, setSdkError] = useState<string | null>(null);
@@ -379,15 +381,28 @@ export default function PagamentoStep({
         )}
 
         <div className="flex gap-3 mt-6">
-          <Button variant="secondary" onClick={onVoltar} className="flex-1" type="button">
+          <Button 
+            variant="secondary" 
+            onClick={onVoltar} 
+            className="flex-1" 
+            type="button"
+            disabled={processando}
+          >
             Voltar
           </Button>
           <Button
             type="submit"
             className="flex-1"
-            disabled={sdkLoading || (dadosPagamento.metodo === 'credit_card' && !!sdkError)}
+            disabled={processando || sdkLoading || (dadosPagamento.metodo === 'credit_card' && !!sdkError)}
           >
-            Revisar Pedido
+            {processando ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="animate-spin" size={18} />
+                Processando...
+              </span>
+            ) : (
+              'Revisar Pedido'
+            )}
           </Button>
         </div>
       </form>
