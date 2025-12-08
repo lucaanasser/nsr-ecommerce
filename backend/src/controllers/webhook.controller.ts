@@ -206,7 +206,7 @@ export class WebhookController {
 
     // Release PIX stock reservation if applicable
     if (payment.method === PaymentMethod.PIX && payment.stockReserved) {
-      await inventoryService.releasePixStock(payment.orderId);
+      await inventoryService.releaseStock(payment.orderId);
       
       await prisma.payment.update({
         where: { id: payment.id },
@@ -249,7 +249,7 @@ export class WebhookController {
 
     // Release PIX stock reservation
     if (payment.method === PaymentMethod.PIX && payment.stockReserved) {
-      await inventoryService.releasePixStock(payment.orderId);
+      await inventoryService.releaseStock(payment.orderId);
       
       await prisma.payment.update({
         where: { id: payment.id },

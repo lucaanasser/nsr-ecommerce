@@ -112,7 +112,7 @@ export class PaymentExpirationService {
     for (const payment of expiredPayments) {
       try {
         // Release stock reservation
-        await inventoryService.releasePixStock(payment.orderId);
+        await inventoryService.releaseStock(payment.orderId);
 
         // Update payment status
         await prisma.payment.update({
@@ -195,7 +195,7 @@ export class PaymentExpirationService {
         );
 
         for (const payment of activeReservations) {
-          await inventoryService.releasePixStock(order.id);
+          await inventoryService.releaseStock(order.id);
           
           await prisma.payment.update({
             where: { id: payment.id },
