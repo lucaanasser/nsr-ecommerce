@@ -17,6 +17,7 @@ import { swaggerSpec } from '@config/swagger';
 import { errorHandler, notFoundHandler } from '@middlewares/errorHandler';
 import routes from '@routes/index';
 import { dataRetentionScheduler } from './services/data-retention.scheduler';
+import { paymentExpirationService } from './services/payment-expiration.service';
 
 // Criar aplicação Express
 export const app: Application = express();
@@ -99,6 +100,10 @@ export async function startServer(): Promise<void> {
     dataRetentionScheduler.start();
     logger.info('✓ Data retention scheduler started');
     
+    // Iniciar scheduler de expiração de pagamentos
+    paymentExpirationService.start();
+    logger.info('✓ Payment expiration scheduler started');
+    
     // Iniciar servidor
     app.listen(config.port, () => {
       logger.info(`✓ Server running on port ${config.port}`);
@@ -117,6 +122,7 @@ export async function startServer(): Promise<void> {
 process.on('SIGINT', async () => {
   logger.info('Shutting down gracefully...');
   dataRetentionScheduler.stop();
+  paymentExpirationService.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -124,6 +130,7 @@ process.on('SIGINT', async () => {
 process.on('SIGTERM', async () => {
   logger.info('Shutting down gracefully...');
   dataRetentionScheduler.stop();
+  paymentExpirationService.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
