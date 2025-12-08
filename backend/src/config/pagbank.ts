@@ -5,7 +5,7 @@
 import dotenv from 'dotenv';
 
 // Carregar .env.dev se existir (para testes)
-if (process.env.NODE_ENV !== 'production') {
+if (process.env['NODE_ENV'] !== 'production') {
   dotenv.config({ path: '.env.dev' });
 }
 

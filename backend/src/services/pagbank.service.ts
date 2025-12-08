@@ -298,13 +298,13 @@ class PagBankService {
     if (axios.isAxiosError(error)) {
       const pagbankError = error.response?.data as PagBankError | undefined;
       
-      if (pagbankError?.error_messages) {
+      if (pagbankError?.error_messages && pagbankError.error_messages.length > 0) {
         const firstError = pagbankError.error_messages[0];
         return {
           success: false,
           status: 'DECLINED',
-          errorMessage: firstError.description,
-          errorCode: firstError.code,
+          errorMessage: firstError?.description || 'Erro desconhecido',
+          errorCode: firstError?.code,
         };
       }
     }
