@@ -19,20 +19,28 @@ enum UserRole {
 enum OrderStatus {
   PENDING        // Aguardando pagamento
   PAID           // Pago
+  CONFIRMED      // Confirmado (pagamento aprovado)
   PROCESSING     // Em processamento
   SHIPPED        // Enviado
   DELIVERED      // Entregue
   CANCELLED      // Cancelado
+  CANCELED       // Cancelado (alias para compatibilidade)
   REFUNDED       // Reembolsado
 }
 
 enum PaymentStatus {
   PENDING        // Aguardando pagamento
+  WAITING        // Aguardando ação (PIX gerado, aguardando pagamento)
   PROCESSING     // Processando
-  APPROVED       // Aprovado
+  AUTHORIZED     // Autorizado (cartão pré-autorizado)
+  IN_ANALYSIS    // Em análise (antifraude)
+  APPROVED       // Aprovado (cartão)
+  PAID           // Pago (concluído)
   DECLINED       // Recusado
+  EXPIRED        // Expirado (PIX não pago em 15min)
   REFUNDED       // Reembolsado
   CANCELLED      // Cancelado
+  CANCELED       // Cancelado (alias para compatibilidade)
 }
 
 enum Gender {
