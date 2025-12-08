@@ -683,7 +683,7 @@ export class OrderService {
       if (paymentResult.success) {
         if (paymentData.paymentMethod === 'pix') {
           // Reserve stock for PIX (15 minutes)
-          await inventoryService.reserveStockForPix(
+          await inventoryService.reserveStock(
             order.id,
             order.items.map(item => ({
               productId: item.productId,
