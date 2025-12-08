@@ -65,8 +65,19 @@ export default function ConfirmacaoStep({
         <div className="border-t border-dark-border pt-4">
           <h3 className="text-lg font-semibold mb-3 text-primary-bronze">Pagamento</h3>
           <div className="text-sm text-primary-white/70">
-            <p>Cartão terminado em {dadosPagamento.numeroCartao.slice(-4)}</p>
-            <p>{dadosPagamento.nomeCartao}</p>
+            {dadosPagamento.metodo === 'pix' ? (
+              <>
+                <p className="font-semibold">PIX</p>
+                <p className="text-xs text-primary-white/50 mt-1">
+                  QR Code será gerado após confirmar o pedido
+                </p>
+              </>
+            ) : (
+              <>
+                <p>Cartão terminado em {dadosPagamento.numeroCartao.slice(-4)}</p>
+                <p>{dadosPagamento.nomeCartao}</p>
+              </>
+            )}
           </div>
         </div>
 

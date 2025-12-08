@@ -66,16 +66,7 @@ const TEST_CUSTOMER = {
 // FUNÇÕES AUXILIARES
 // ========================================
 
-/**
- * Simula a criptografia do cartão que aconteceria no frontend
- * NOTA: Esta é uma simulação. Em produção, isso é feito pelo SDK do PagBank no browser
- */
-function simulateCardEncryption(card: typeof TEST_CARDS.VISA_APPROVED): string {
-  // Em produção, o SDK do PagBank faz isso no frontend
-  // Para teste, vamos criar uma representação mockada
-  const cardData = `${card.number}|${card.holder}|${card.expMonth}|${card.expYear}|${card.cvv}`;
-  return Buffer.from(cardData).toString('base64');
-}
+
 
 /**
  * Formata CPF/CNPJ para envio (apenas números)

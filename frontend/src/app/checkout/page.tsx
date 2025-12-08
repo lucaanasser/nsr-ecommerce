@@ -266,18 +266,25 @@ export default function CheckoutPage() {
         }
       }
 
-      // 2. Preparar dados do pedido
+      // 2. Validar dados obrigatórios
+      if (!checkoutData.enderecoSelecionadoId) {
+        throw new Error('Selecione ou cadastre um endereço de entrega');
+      }
+
+      if (!checkoutData.dadosEntrega.metodoEnvioId) {
+        throw new Error('Selecione um método de frete');
+      }
+
+      // 3. Preparar dados do pedido
       const orderData = {
-        addressId: checkoutData.enderecoSelecionadoId || '',
+        addressId: checkoutData.enderecoSelecionadoId,
         items: itensCarrinho.map(item => ({
           productId: item.id,
           quantity: item.quantity,
           size: item.selectedSize,
           color: item.selectedColor,
         })),
-        // TODO: Implementar seleção de método de frete
-        // Por enquanto, usando método fixo baseado no valor do frete
-        shippingMethodId: checkoutData.dadosEntrega.metodoEnvioId || 'standard',
+        shippingMethodId: checkoutData.dadosEntrega.metodoEnvioId,
         paymentMethod: checkoutData.dadosPagamento.metodo,
         creditCard: creditCardData,
         receiverName: checkoutData.destinatarioIgualComprador 
@@ -290,12 +297,12 @@ export default function CheckoutPage() {
 
       console.log('📤 Enviando pedido para o backend...');
 
-      // 3. Criar pedido
+      // 4. Criar pedido
       const pedido = await orderService.createOrder(orderData);
 
       console.log('✅ Pedido criado com sucesso:', pedido.orderNumber);
 
-      // 4. Verificar status do pagamento
+      // 5. Verificar status do pagamento
       if (pedido.payment) {
         if (pedido.payment.status === 'PAID' || pedido.payment.status === 'APPROVED') {
           console.log('🎉 Pagamento aprovado!');
@@ -306,10 +313,10 @@ export default function CheckoutPage() {
         }
       }
 
-      // 5. Limpar carrinho
+      // 6. Limpar carrinho
       limparCarrinho();
 
-      // 6. Redirecionar para página de confirmação
+      // 7. Redirecionar para página de confirmação
       router.push(`/pedidos/${pedido.id}`);
 
     } catch (error: any) {
