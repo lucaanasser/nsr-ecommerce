@@ -4,16 +4,35 @@
  */
 import { prisma } from '@config/database';
 import { CreateOrderDTO } from '../types/order.types';
-import { BadRequestError } from '@utils/errors';
+import { BadRequestError, NotFoundError } from '@utils/errors';
 import { CouponService } from './coupon.service';
 import { emailService } from './email.service';
 import { logger } from '@config/logger.colored';
 import { pagbankService } from './pagbank.service';
 import { inventoryService } from './inventory.service';
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
+import type { ChargeStatus } from '../types/pagbank.types';
 
 export class OrderService {
   private couponService = new CouponService();
+
+  /**
+   * Map PagBank ChargeStatus to Prisma PaymentStatus
+   */
+  private mapChargeStatusToPaymentStatus(status: ChargeStatus): PaymentStatus {
+    const statusMap: Record<ChargeStatus, PaymentStatus> = {
+      WAITING: PaymentStatus.WAITING,
+      IN_ANALYSIS: PaymentStatus.IN_ANALYSIS,
+      PAID: PaymentStatus.PAID,
+      AVAILABLE: PaymentStatus.WAITING, // Map AVAILABLE to WAITING
+      IN_DISPUTE: PaymentStatus.IN_ANALYSIS,
+      RETURNED: PaymentStatus.REFUNDED,
+      CANCELED: PaymentStatus.CANCELED,
+      DECLINED: PaymentStatus.DECLINED,
+      AUTHORIZED: PaymentStatus.AUTHORIZED,
+    };
+    return statusMap[status] || PaymentStatus.PENDING;
+  }
 
   /**
    * Cria um novo pedido
@@ -62,10 +81,13 @@ export class OrderService {
 
       if (!stockValidation.available) {
         const unavailable = stockValidation.unavailableItems[0];
-        const product = products.find(p => p.id === unavailable.productId);
-        throw new BadRequestError(
-          `Estoque insuficiente para ${product?.name}. Disponível: ${unavailable.availableQuantity}, Solicitado: ${unavailable.requestedQuantity}`
-        );
+        if (unavailable) {
+          const product = products.find(p => p.id === unavailable.productId);
+          throw new BadRequestError(
+            `Estoque insuficiente para ${product?.name}. Disponível: ${unavailable.availableQuantity}, Solicitado: ${unavailable.requestedQuantity}`
+          );
+        }
+        throw new BadRequestError('Estoque insuficiente para alguns produtos');
       }
 
       // 4. Calcular subtotal
@@ -210,7 +232,7 @@ export class OrderService {
         address: {
           street: address.street,
           number: address.number,
-          complement: address.complement,
+          complement: address.complement || undefined,
           neighborhood: address.neighborhood,
           city: address.city,
           state: address.state,
@@ -352,9 +374,9 @@ export class OrderService {
       return {
         ...order,
         payment: {
-          status: paymentResult.paymentStatus,
+          status: paymentResult.status,
           pixQrCode: paymentResult.pixQrCode,
-          pixQrCodeBase64: paymentResult.pixQrCodeBase64,
+          pixQrCodeBase64: paymentResult.pixQrCodeImage,
           pixExpiresAt: paymentResult.pixExpiresAt,
           errorMessage: paymentResult.errorMessage,
         },
@@ -445,21 +467,7 @@ export class OrderService {
 
   // ============ MÉTODOS PRIVADOS ============
 
-  private validateStock(products: any[], items: any[]) {
-    for (const item of items) {
-      const product = products.find(p => p.id === item.productId);
-      
-      if (!product) {
-        throw new BadRequestError(`Produto não encontrado: ${item.productId}`);
-      }
 
-      if (product.stock < item.quantity) {
-        throw new BadRequestError(
-          `Estoque insuficiente para ${product.name}`
-        );
-      }
-    }
-  }
 
   private calculateSubtotal(products: any[], items: any[]): number {
     return items.reduce((total, item) => {
@@ -539,6 +547,7 @@ export class OrderService {
           },
         },
         address: true,
+        user: true,
         payments: {
           orderBy: { createdAt: 'desc' },
         },
@@ -571,7 +580,15 @@ export class OrderService {
     });
 
     // Validate stock availability (without reserving yet)
-    await inventoryService.validateStockAvailability(order.items);
+    await inventoryService.validateStockAvailability(
+      order.items.map(item => ({
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        size: item.size || undefined,
+        color: item.color || undefined,
+      }))
+    );
 
     // Create new payment record
     const payment = await prisma.payment.create({
@@ -594,19 +611,27 @@ export class OrderService {
       // Process payment via PagBank
       if (paymentData.paymentMethod === 'pix') {
         paymentResult = await pagbankService.createPixCharge({
-          referenceId: order.id,
-          amount: order.total,
+          orderId: order.id,
+          amount: Number(order.total),
+          method: 'PIX' as const,
           customer: {
-            name: `${order.address.firstName} ${order.address.lastName}`,
-            email: order.address.email,
-            taxId: order.address.cpf,
-            phone: order.address.phone,
+            name: order.customerName,
+            email: order.customerEmail,
+            cpf: order.user.cpf || '',
+            phone: order.customerPhone,
+          },
+          address: {
+            street: '',
+            number: '',
+            neighborhood: '',
+            city: '',
+            state: '',
+            zipCode: '',
           },
           items: order.items.map((item) => ({
-            referenceId: item.productId,
             name: item.productName,
             quantity: item.quantity,
-            unitAmount: item.price,
+            unitAmount: Number(item.unitPrice),
           })),
         });
       } else {
@@ -618,21 +643,29 @@ export class OrderService {
         }
 
         paymentResult = await pagbankService.createCreditCardCharge({
-          referenceId: order.id,
-          amount: order.total,
+          orderId: order.id,
+          amount: Number(order.total),
+          method: 'CREDIT_CARD' as const,
           customer: {
-            name: `${order.address.firstName} ${order.address.lastName}`,
-            email: order.address.email,
-            taxId: order.address.cpf,
-            phone: order.address.phone,
+            name: order.customerName,
+            email: order.customerEmail,
+            cpf: order.user.cpf || '',
+            phone: order.customerPhone,
           },
-          card: paymentData.creditCard,
+          address: {
+            street: '',
+            number: '',
+            neighborhood: '',
+            city: '',
+            state: '',
+            zipCode: '',
+          },
           items: order.items.map((item) => ({
-            referenceId: item.productId,
             name: item.productName,
             quantity: item.quantity,
-            unitAmount: item.price,
+            unitAmount: Number(item.unitPrice),
           })),
+          creditCard: paymentData.creditCard,
         });
       }
 
@@ -641,12 +674,11 @@ export class OrderService {
         where: { id: payment.id },
         data: {
           chargeId: paymentResult.chargeId,
-          status: paymentResult.paymentStatus,
+          status: this.mapChargeStatusToPaymentStatus(paymentResult.status),
           pixQrCode: paymentResult.pixQrCode,
-          pixQrCodeBase64: paymentResult.pixQrCodeBase64,
+          pixQrCodeBase64: paymentResult.pixQrCodeImage,
           pixExpiresAt: paymentResult.pixExpiresAt,
           errorMessage: paymentResult.errorMessage,
-          metadata: paymentResult.metadata,
         },
       });
 
@@ -654,14 +686,30 @@ export class OrderService {
       if (paymentResult.success) {
         if (paymentData.paymentMethod === 'pix') {
           // Reserve stock for PIX (15 minutes)
-          await inventoryService.reserveStockForPix(order);
+          await inventoryService.reserveStockForPix(
+            order.id,
+            order.items.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              size: item.size || undefined,
+              color: item.color || undefined,
+            }))
+          );
           await prisma.payment.update({
             where: { id: payment.id },
             data: { stockReserved: true },
           });
-        } else if (paymentResult.paymentStatus === PaymentStatus.PAID) {
+        } else if (paymentResult.status === 'PAID') {
           // Credit card approved - decrement stock immediately
-          await inventoryService.decrementStockForOrder(order);
+          await inventoryService.decrementStockForOrder(
+            order.id,
+            order.items.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              size: item.size || undefined,
+              color: item.color || undefined,
+            }))
+          );
           await prisma.payment.update({
             where: { id: payment.id },
             data: { stockReserved: true },
@@ -679,15 +727,15 @@ export class OrderService {
         orderId,
         paymentId: payment.id,
         success: paymentResult.success,
-        status: paymentResult.paymentStatus,
+        status: paymentResult.status,
       });
 
       return {
         orderId: order.id,
         paymentId: payment.id,
-        status: paymentResult.paymentStatus,
+        status: paymentResult.status,
         pixQrCode: paymentResult.pixQrCode,
-        pixQrCodeBase64: paymentResult.pixQrCodeBase64,
+        pixQrCodeBase64: paymentResult.pixQrCodeImage,
         pixExpiresAt: paymentResult.pixExpiresAt,
         errorMessage: paymentResult.errorMessage,
       };
