@@ -43,6 +43,14 @@ export const config = {
     from: process.env['EMAIL_FROM'] || 'NSR E-commerce <noreply@nsr.com>',
   },
   
+  // PagBank Payment Gateway
+  pagbank: {
+    environment: process.env['PAGBANK_ENV'] || 'sandbox',
+    token: process.env['PAGBANK_TOKEN'] || '',
+    notificationUrl: process.env['PAGBANK_NOTIFICATION_URL'] || '',
+    publicKey: process.env['PAGBANK_PUBLIC_KEY'] || '',
+  },
+  
   // CORS
   cors: {
     origin: process.env['CORS_ORIGIN']?.split(',') || ['http://localhost:3000'],
@@ -80,6 +88,12 @@ export function validateConfig(): void {
     }
     if (config.jwt.refreshSecret.includes('dev-refresh')) {
       errors.push('JWT_REFRESH_SECRET must be set in production');
+    }
+    if (!config.pagbank.token) {
+      errors.push('PAGBANK_TOKEN must be set in production');
+    }
+    if (!config.pagbank.notificationUrl) {
+      errors.push('PAGBANK_NOTIFICATION_URL must be set in production');
     }
   }
   
