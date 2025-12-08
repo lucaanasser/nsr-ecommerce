@@ -41,6 +41,11 @@ enum Gender {
   UNISEX
 }
 
+enum PaymentMethod {
+  CREDIT_CARD
+  PIX
+}
+
 // ================================
 // MODELS
 // ================================
@@ -351,11 +356,15 @@ model Order {
   // Observações do cliente
   notes         String?
   
+  // Primeira tentativa de pagamento (para controle de expiração 24h)
+  firstPaymentAttemptAt DateTime?
+  
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   
   // Relações
   items         OrderItem[]
+  payments      Payment[]
   
   @@map("orders")
 }
@@ -496,4 +505,75 @@ model ConsentHistory {
   @@index([userId])
   @@index([consentType])
   @@map("consent_history")
+}
+
+// ================================
+// PAGAMENTOS
+// ================================
+
+model Payment {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  // Identificação do pagamento no gateway
+  chargeId  String?  @unique // ID retornado pelo PagBank
+  
+  // Método e status
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDING)
+  amount    Decimal       @db.Decimal(10, 2)
+  
+  // Controle de tentativas
+  attemptNumber Int @default(1) // Número da tentativa (1, 2, 3...)
+  
+  // Dados específicos do PIX
+  pixQrCode       String? // Código QR Code (texto)
+  pixQrCodeBase64 String? @db.Text // QR Code em base64 para exibição
+  pixExpiresAt    DateTime? // Quando o PIX expira
+  
+  // Controle de estoque
+  stockReserved Boolean @default(false) // Se o estoque foi reservado
+  
+  // Metadados e erros
+  metadata     Json? // Dados adicionais do gateway
+  errorMessage String? // Mensagem de erro em caso de falha
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([orderId])
+  @@index([chargeId])
+  @@index([status])
+  @@index([pixExpiresAt])
+  @@map("payments")
+}
+
+model WebhookEvent {
+  id        String   @id @default(uuid())
+  
+  // Tipo e origem
+  provider  String   // "pagbank"
+  eventType String   // Tipo do evento (ex: "CHARGE_PAID", "CHARGE_DECLINED")
+  
+  // Dados do webhook
+  payload   Json     // Payload completo recebido
+  signature String?  // Assinatura para validação
+  
+  // Processamento
+  processed    Boolean  @default(false)
+  processedAt  DateTime?
+  errorMessage String?
+  
+  // Rastreabilidade
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([provider])
+  @@index([eventType])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("webhook_events")
 }
