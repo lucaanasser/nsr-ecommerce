@@ -96,6 +96,7 @@ import cartRoutes from './cart.routes';
 import orderRoutes from './order.routes';
 import shippingRoutes from './shipping.routes';
 import addressRoutes from './address.routes';
+import webhookRoutes from './webhook.routes';
 import testEmailRoutes from './test-email.routes';
 
 // Registrar rotas
@@ -108,6 +109,7 @@ router.use('/api/v1/cart', cartRoutes);
 router.use('/api/v1/orders', orderRoutes);
 router.use('/api/v1/shipping', shippingRoutes);
 router.use('/api/v1/user/addresses', addressRoutes);
+router.use('/api/v1/webhooks', webhookRoutes); // Public webhook endpoints (no JWT auth)
 router.use('/api/v1/test-email', testEmailRoutes); // TEMPORÁRIO - REMOVER EM PRODUÇÃO
 
 export default router;
