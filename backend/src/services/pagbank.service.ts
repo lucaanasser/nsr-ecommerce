@@ -329,7 +329,6 @@ class PagBankService {
       'AUTHORIZED': 'AUTHORIZED',     // Cartão pré-autorizado
       'DECLINED': 'DECLINED',         // Recusado
       'CANCELED': 'CANCELLED',        // Cancelado
-      'CANCELLED': 'CANCELLED',       // Cancelado (alias)
       'IN_DISPUTE': 'IN_ANALYSIS',    // Disputa = análise
       'RETURNED': 'REFUNDED',         // Devolvido = reembolsado
     };
