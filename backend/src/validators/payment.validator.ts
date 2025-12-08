@@ -78,25 +78,27 @@ export const webhookSignatureSchema = z.object({
  * Validator for PagBank webhook payload
  */
 export const pagbankWebhookSchema = z.object({
-  id: z.string().min(1, 'Event ID is required'),
-  reference_id: z.string().optional(),
-  charges: z
-    .array(
-      z.object({
-        id: z.string(),
-        reference_id: z.string().optional(),
-        status: z.string(),
-        created_at: z.string(),
-        paid_at: z.string().optional(),
-        amount: z.object({
-          value: z.number(),
-          currency: z.string(),
-        }),
-        payment_method: z.object({
-          type: z.string(),
-        }),
-      })
-    )
-    .optional(),
-  // Allow any additional fields from PagBank
-}).passthrough();
+  body: z.object({
+    id: z.string().min(1, 'Event ID is required'),
+    reference_id: z.string().optional(),
+    charges: z
+      .array(
+        z.object({
+          id: z.string(),
+          reference_id: z.string().optional(),
+          status: z.string(),
+          created_at: z.string(),
+          paid_at: z.string().optional(),
+          amount: z.object({
+            value: z.number(),
+            currency: z.string(),
+          }),
+          payment_method: z.object({
+            type: z.string(),
+          }),
+        })
+      )
+      .optional(),
+    // Allow any additional fields from PagBank
+  }).passthrough()
+});

@@ -56,8 +56,11 @@ export function useShippingCalculation(): UseShippingCalculationResult {
 
     try {
       // Preparar dados para API
+      // Formatar CEP com hífen: 12345678 -> 12345-678
+      const cepFormatado = cepLimpo.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+      
       const requestData = {
-        zipCode: cepLimpo,
+        zipCode: cepFormatado,
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity

@@ -215,6 +215,7 @@ async function main() {
     // ========================================
     prisma.product.create({
       data: {
+        id: '550e8400-e29b-41d4-a716-446655440001',
         name: 'Oversized Tee Geometric',
         slug: 'oversized-tee-geometric',
         price: 189.90,
@@ -286,6 +287,7 @@ async function main() {
     // ========================================
     prisma.product.create({
       data: {
+        id: '550e8400-e29b-41d4-a716-446655440002',
         name: 'Calça Cargo Urban',
         slug: 'calca-cargo-urban',
         price: 299.90,
@@ -357,6 +359,7 @@ async function main() {
     // ========================================
     prisma.product.create({
       data: {
+        id: '550e8400-e29b-41d4-a716-446655440003',
         name: 'Moletom Medina',
         slug: 'moletom-medina',
         price: 349.90,
@@ -428,6 +431,7 @@ async function main() {
     // ========================================
     prisma.product.create({
       data: {
+        id: '550e8400-e29b-41d4-a716-446655440004',
         name: 'Crop Top Arabesque',
         slug: 'crop-top-arabesque',
         price: 159.90,

@@ -217,7 +217,21 @@ export class OrderService {
         },
       });
 
-      // 11.2. Processar via PagBank
+      // 11.2. Reservar estoque (ANTES de chamar o gateway)
+      // Isso garante que o estoque existe e está reservado.
+      // Se falhar, a transação inteira é abortada.
+      await inventoryService.reserveStock(
+        order.id,
+        data.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color,
+        })),
+        tx // Passar a transação atual
+      );
+
+      // 11.3. Processar via PagBank
       let paymentResult;
       const paymentData = {
         orderId: order.orderNumber,
@@ -258,7 +272,7 @@ export class OrderService {
         paymentResult = await pagbankService.createPixCharge(paymentData);
       }
 
-      // 11.3. Atualizar Payment com resultado
+      // 11.4. Atualizar Payment com resultado
       const mappedStatus = pagbankService.mapChargeStatusToPaymentStatus(paymentResult.status);
       
       await tx.payment.update({
@@ -273,41 +287,22 @@ export class OrderService {
         },
       });
 
-      // 11.4. Gerenciar estoque baseado no método de pagamento
-      if (paymentResult.success) {
-        if (data.paymentMethod === 'pix') {
-          // PIX: Reservar estoque por 15 minutos
-          await inventoryService.reserveStockForPix(
-            order.id,
-            data.items.map(item => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              size: item.size,
-              color: item.color,
-            }))
-          );
-        } else {
-          // Cartão aprovado: Decrementar estoque imediatamente
-          await inventoryService.decrementStockForOrder(
-            order.id,
-            data.items.map(item => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              size: item.size,
-              color: item.color,
-            }))
-          );
-          
-          // Atualizar status do pedido para PAID
-          await tx.order.update({
-            where: { id: order.id },
-            data: {
-              status: 'PAID',
-              paymentStatus: 'APPROVED',
-              paidAt: new Date(),
-            },
-          });
-        }
+      // 11.5. Atualizar status do pedido se aprovado (Cartão)
+      if (paymentResult.success && data.paymentMethod === 'credit_card') {
+        // Atualizar status do pedido para PAID
+        await tx.order.update({
+          where: { id: order.id },
+          data: {
+            status: 'PAID',
+            paymentStatus: 'APPROVED',
+            paidAt: new Date(),
+          },
+        });
+      }
+
+      // Se o pagamento falhar, lançamos erro para abortar a transação (e liberar o estoque)
+      if (!paymentResult.success) {
+        throw new BadRequestError(paymentResult.errorMessage || 'Falha no processamento do pagamento');
       }
 
       // 12. Incrementar uso do cupom

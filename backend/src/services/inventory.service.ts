@@ -60,17 +60,24 @@ class InventoryService {
   }
 
   /**
-   * Reserva estoque para um pedido PIX
+   * Reserva estoque para um pedido (PIX ou Cartão)
    * Decrementa o estoque dos produtos
    */
-  async reserveStockForPix(orderId: string, items: StockItem[]): Promise<void> {
-    logger.info('Reserving stock for PIX order', { orderId, itemCount: items.length });
+  async reserveStock(
+    orderId: string, 
+    items: StockItem[], 
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    logger.info('Reserving stock for order', { orderId, itemCount: items.length });
+    
+    const db = tx || prisma;
 
     try {
-      await prisma.$transaction(async (tx) => {
+      // Se já estiver em transação (tx fornecido), usa ela. Senão, cria uma nova.
+      const operation = async (transaction: Prisma.TransactionClient) => {
         for (const item of items) {
           // Verificar se há estoque disponível
-          const product = await tx.product.findUnique({
+          const product = await transaction.product.findUnique({
             where: { id: item.productId },
             select: { stock: true, name: true },
           });
@@ -86,7 +93,7 @@ class InventoryService {
           }
 
           // Decrementar estoque
-          await tx.product.update({
+          await transaction.product.update({
             where: { id: item.productId },
             data: {
               stock: {
@@ -104,16 +111,22 @@ class InventoryService {
         }
 
         // Marcar que o estoque foi reservado no Payment
-        await tx.payment.updateMany({
+        // Nota: O Payment deve existir antes de chamar este método
+        await transaction.payment.updateMany({
           where: {
             orderId,
-            method: 'PIX',
           },
           data: {
             stockReserved: true,
           },
         });
-      });
+      };
+
+      if (tx) {
+        await operation(tx);
+      } else {
+        await prisma.$transaction(operation);
+      }
 
       logger.info('Stock reservation completed', { orderId });
     } catch (error) {
@@ -123,22 +136,23 @@ class InventoryService {
   }
 
   /**
-   * Libera estoque de um pedido PIX expirado ou cancelado
+   * Libera estoque de um pedido expirado, cancelado ou falho
    * Incrementa o estoque de volta
    */
-  async releasePixStock(orderId: string): Promise<void> {
-    logger.info('Releasing PIX stock', { orderId });
+  async releaseStock(orderId: string, tx?: Prisma.TransactionClient): Promise<void> {
+    logger.info('Releasing stock', { orderId });
+    
+    const db = tx || prisma;
 
     try {
-      await prisma.$transaction(async (tx) => {
+      const operation = async (transaction: Prisma.TransactionClient) => {
         // Buscar o pedido com os itens
-        const order = await tx.order.findUnique({
+        const order = await transaction.order.findUnique({
           where: { id: orderId },
           include: {
             items: true,
             payments: {
               where: {
-                method: 'PIX',
                 stockReserved: true,
               },
             },
@@ -158,7 +172,7 @@ class InventoryService {
 
         // Incrementar estoque de volta
         for (const item of order.items) {
-          await tx.product.update({
+          await transaction.product.update({
             where: { id: item.productId },
             data: {
               stock: {
@@ -175,17 +189,22 @@ class InventoryService {
         }
 
         // Marcar que o estoque foi liberado
-        await tx.payment.updateMany({
+        await transaction.payment.updateMany({
           where: {
             orderId,
-            method: 'PIX',
             stockReserved: true,
           },
           data: {
             stockReserved: false,
           },
         });
-      });
+      };
+
+      if (tx) {
+        await operation(tx);
+      } else {
+        await prisma.$transaction(operation);
+      }
 
       logger.info('Stock release completed', { orderId });
     } catch (error) {
@@ -207,49 +226,8 @@ class InventoryService {
    * Decrementa estoque para pedidos com cartão (sem reserva prévia)
    * Chamado após aprovação do pagamento
    */
-  async decrementStockForOrder(orderId: string, items: StockItem[]): Promise<void> {
-    logger.info('Decrementing stock for approved order', { orderId });
-
-    try {
-      await prisma.$transaction(async (tx) => {
-        for (const item of items) {
-          const product = await tx.product.findUnique({
-            where: { id: item.productId },
-            select: { stock: true, name: true },
-          });
-
-          if (!product) {
-            throw new Error(`Produto ${item.productId} não encontrado`);
-          }
-
-          if (product.stock < item.quantity) {
-            throw new Error(
-              `Estoque insuficiente para ${product.name}. Disponível: ${product.stock}, Solicitado: ${item.quantity}`
-            );
-          }
-
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: {
-                decrement: item.quantity,
-              },
-            },
-          });
-
-          logger.info('Stock decremented', {
-            orderId,
-            productId: item.productId,
-            quantity: item.quantity,
-          });
-        }
-      });
-
-      logger.info('Stock decrement completed', { orderId });
-    } catch (error) {
-      logger.error('Failed to decrement stock', { orderId, error });
-      throw error;
-    }
+  async decrementStockForOrder(orderId: string, items: StockItem[], tx?: Prisma.TransactionClient): Promise<void> {
+    return this.reserveStock(orderId, items, tx);
   }
 }
 

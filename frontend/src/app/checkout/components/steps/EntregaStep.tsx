@@ -380,21 +380,19 @@ export default function EntregaStep({
         </div>
 
         {/* Seletor de método de frete */}
-        {metodosFreteDisponiveis.length > 0 && (
-          <div className="border-t border-dark-border pt-6 mt-6">
-            <ShippingMethodSelector
-              metodos={metodosFreteDisponiveis}
-              metodoSelecionado={metodoFreteSelecionado}
-              calculando={calculandoFrete}
-              erro={erroFrete}
-              onSelecionar={(metodo) => {
-                setMetodoFreteSelecionado(metodo);
-                // Salvar ID do método no estado de entrega
-                setDadosEntrega({ ...dadosEntrega, metodoEnvioId: metodo.id });
-              }}
-            />
-          </div>
-        )}
+        <div className="border-t border-dark-border pt-6 mt-6">
+          <ShippingMethodSelector
+            metodos={metodosFreteDisponiveis}
+            metodoSelecionado={metodoFreteSelecionado}
+            calculando={calculandoFrete}
+            erro={erroFrete}
+            onSelecionar={(metodo) => {
+              setMetodoFreteSelecionado(metodo);
+              // Salvar ID do método no estado de entrega
+              setDadosEntrega({ ...dadosEntrega, metodoEnvioId: metodo.id });
+            }}
+          />
+        </div>
 
         <div className="flex gap-3 mt-6">
           <Button

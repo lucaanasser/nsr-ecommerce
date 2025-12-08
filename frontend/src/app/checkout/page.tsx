@@ -170,6 +170,12 @@ export default function CheckoutPage() {
   const handleSubmitEntrega = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validar se um método de frete foi selecionado
+    if (!checkoutData.metodoFreteSelecionado) {
+      showError('Selecione um método de frete', 'validation');
+      return;
+    }
+
     // Se marcou para salvar e não tem endereço selecionado, pedir título
     if (checkoutData.salvarEndereco && !checkoutData.enderecoSelecionadoId && isAuthenticated) {
       checkoutData.setMostrarModalTitulo(true);
@@ -266,7 +272,8 @@ export default function CheckoutPage() {
           console.log('✅ Cartão criptografado com sucesso');
         } catch (error) {
           console.error('❌ Erro ao criptografar cartão:', error);
-          throw new Error('Erro ao processar dados do cartão. Verifique os dados e tente novamente.');
+          const errorMessage = error instanceof Error ? error.message : 'Verifique os dados e tente novamente.';
+          throw new Error(`Erro ao processar dados do cartão: ${errorMessage}`);
         }
       }
 

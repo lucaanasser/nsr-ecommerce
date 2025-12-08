@@ -113,9 +113,27 @@ export default function ShippingMethodSelector({
     );
   }
 
-  // No methods available
+  // No methods available - show informative message
   if (metodos.length === 0) {
-    return null;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="p-6 bg-primary-white/5 border border-dark-border rounded-sm"
+      >
+        <div className="flex items-start gap-3">
+          <Truck className="text-primary-white/50 flex-shrink-0 mt-0.5" size={20} />
+          <div>
+            <p className="text-sm font-semibold text-primary-white/70 mb-1">
+              Aguardando cálculo de frete
+            </p>
+            <p className="text-xs text-primary-white/50">
+              Preencha o CEP completo para calcular as opções de envio disponíveis.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    );
   }
 
   // Methods list
