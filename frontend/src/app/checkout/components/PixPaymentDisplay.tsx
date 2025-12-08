@@ -59,7 +59,11 @@ export default function PixPaymentDisplay({
       setTimeout(() => setCopied(false), 3000);
     } catch (error) {
       console.error('Erro ao copiar código PIX:', error);
-      alert('Erro ao copiar código PIX. Tente selecionar e copiar manualmente.');
+      // Fallback: selecionar o texto automaticamente
+      const textarea = document.querySelector('textarea');
+      if (textarea) {
+        textarea.select();
+      }
     }
   };
 
@@ -106,13 +110,12 @@ export default function PixPaymentDisplay({
           <p className="text-gray-400 text-sm mb-6">
             Por favor, faça um novo pedido para gerar um novo código PIX
           </p>
-          <Button
-            href="/"
-            variant="secondary"
-            className="mx-auto"
+          <button
+            onClick={() => window.location.href = '/'}
+            className="mx-auto px-6 py-3 bg-dark-border hover:bg-dark-border/80 text-white rounded-lg transition-colors"
           >
             Voltar para a Loja
-          </Button>
+          </button>
         </div>
       ) : (
         <>

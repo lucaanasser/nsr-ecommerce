@@ -14,6 +14,7 @@ import Button from '@/components/ui/Button';
 // Componentes de Checkout (locais)
 import CheckoutSteps from './components/CheckoutSteps';
 import CheckoutSummary from './components/CheckoutSummary';
+import CheckoutErrorMessage, { useCheckoutError, type ErrorType } from './components/CheckoutErrorMessage';
 import {
   DadosStep,
   EntregaStep,
@@ -47,10 +48,10 @@ export default function CheckoutPage() {
   // Hooks customizados para gerenciar estados
   const checkoutData = useCheckoutData();
   const { enderecosSalvos, carregandoEnderecos, carregarEnderecos } = useSavedAddresses(isAuthenticated);
+  const { error, showError, clearError } = useCheckoutError();
   
   // Estado para controle de processamento
   const [processandoPedido, setProcessandoPedido] = useState(false);
-  const [erroPedido, setErroPedido] = useState<string | null>(null);
 
   // ========================================
   // EFFECTS
@@ -179,7 +180,7 @@ export default function CheckoutPage() {
 
   const handleSalvarNovoEndereco = async () => {
     if (!checkoutData.tituloNovoEndereco.trim()) {
-      alert('Por favor, dê um nome ao endereço');
+      showError('Por favor, dê um nome ao endereço', 'validation');
       return;
     }
 
@@ -208,7 +209,7 @@ export default function CheckoutPage() {
       checkoutData.setEtapa('pagamento');
     } catch (error) {
       console.error('Erro ao salvar endereço:', error);
-      alert('Erro ao salvar endereço. Tente novamente.');
+      showError('Erro ao salvar endereço. Tente novamente.', 'server');
     }
   };
 
@@ -229,7 +230,7 @@ export default function CheckoutPage() {
     if (processandoPedido) return;
     
     setProcessandoPedido(true);
-    setErroPedido(null);
+    clearError();
 
     try {
       console.log('🛒 Iniciando finalização do pedido...');
@@ -322,8 +323,18 @@ export default function CheckoutPage() {
     } catch (error: any) {
       console.error('❌ Erro ao finalizar pedido:', error);
       const mensagemErro = error.response?.data?.message || error.message || 'Erro ao processar pedido. Tente novamente.';
-      setErroPedido(mensagemErro);
-      alert(mensagemErro);
+      
+      // Determinar tipo de erro
+      let errorType: ErrorType = 'server';
+      if (error.code === 'ECONNABORTED' || error.message?.includes('network')) {
+        errorType = 'network';
+      } else if (error.response?.status === 400) {
+        errorType = 'validation';
+      } else if (mensagemErro.toLowerCase().includes('pagamento') || mensagemErro.toLowerCase().includes('cartão')) {
+        errorType = 'payment';
+      }
+      
+      showError(mensagemErro, errorType);
     } finally {
       setProcessandoPedido(false);
     }
@@ -385,6 +396,17 @@ export default function CheckoutPage() {
 
             {/* Indicador de Etapas */}
             <CheckoutSteps etapaAtual={checkoutData.etapa} />
+
+            {/* Mensagem de Erro */}
+            {error && (
+              <div className="mb-6">
+                <CheckoutErrorMessage
+                  message={error.message}
+                  type={error.type}
+                  onClose={clearError}
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Formulários das Etapas */}

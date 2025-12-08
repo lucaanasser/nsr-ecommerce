@@ -109,46 +109,58 @@ metodoEnvioId: undefined, // ❌ Nunca é definido!
 
 ---
 
-#### **Commit 3: fix: corrigir mapeamento de status de pagamento do PagBank**
-- Implementar mapeamento correto de todos os status do PagBank
-- Adicionar tratamento para estados intermediários (WAITING, IN_ANALYSIS)
-- Atualizar lógica de aprovação de pagamento
+#### ✅ **Commit 3: fix: implement proper PagBank payment status mapping** ✅ CONCLUÍDO
+- ✅ Criar função `mapChargeStatusToPaymentStatus` em `pagbank.service.ts`
+- ✅ Mapear todos os 9 ChargeStatus do PagBank para PaymentStatus interno
+- ✅ Substituir lógica binária success/failure por mapeamento preciso
+- ✅ Adicionar tratamento para estados intermediários (WAITING, IN_ANALYSIS, AUTHORIZED)
+- ✅ Garantir fluxo correto para PIX e cartão de crédito
 
 **Arquivos afetados**:
 - `backend/src/services/pagbank.service.ts`
 - `backend/src/services/order.service.ts`
+- `proj_docs/PLANO_CORRECOES_CHECKOUT.md`
 
-**Estimativa**: 2-3 horas
+**Tempo real**: 2 horas
+**Commit**: `5b81c2c`
 
 ---
 
 ### 🟡 **FASE 2: MELHORIAS DE UX (Alta Prioridade)**
 
-#### **Commit 4: feat: adicionar exibição de QR Code PIX na tela de confirmação**
-- Criar componente `PixPaymentDisplay` para mostrar QR Code e código copia-cola
-- Adicionar contador regressivo de 15 minutos
-- Exibir QR Code como imagem (base64 do backend)
-- Adicionar botão "Copiar Código PIX"
+#### ✅ **Commit 4: feat: add PIX QR code display with countdown timer** ✅ CONCLUÍDO
+- ✅ Criar componente `PixPaymentDisplay` com QR Code e código copia-cola
+- ✅ Implementar contador regressivo de tempo restante (formato MM:SS)
+- ✅ Exibir QR Code como imagem base64 do backend
+- ✅ Adicionar botão "Copiar Código PIX" com feedback visual
+- ✅ Mostrar mensagem de expiração quando timer chega a zero
+- ✅ Integrar na página de detalhes do pedido
+- ✅ Substituir implementação antiga por componente aprimorado
 
 **Arquivos afetados**:
 - `frontend/src/app/checkout/components/PixPaymentDisplay.tsx` (NOVO)
-- `frontend/src/app/checkout/page.tsx`
 - `frontend/src/app/pedidos/[id]/page.tsx`
 
-**Estimativa**: 4-5 horas
+**Tempo real**: 3 horas
+**Commit**: `95565c3`
 
 ---
 
-#### **Commit 5: feat: adicionar componente de erro estilizado no checkout**
-- Criar componente `CheckoutErrorMessage` seguindo design system
-- Substituir todos os `alert()` por componente estilizado
-- Adicionar animações de entrada/saída
+#### 🔄 **Commit 5: feat: add styled error messages in checkout** 🔄 EM ANDAMENTO
+- ✅ Criar componente `CheckoutErrorMessage` seguindo design system
+- ✅ Implementar categorização de erros (validation, network, payment, server)
+- ✅ Adicionar animações Framer Motion de entrada/saída
+- ✅ Criar hook `useCheckoutError` para gerenciar erros
+- ✅ Integrar componente na página de checkout
+- ⏳ Substituir todos os `alert()` por componente estilizado (2 alerts restantes)
+- ⏳ Adicionar barra de progresso para auto-hide
 
 **Arquivos afetados**:
-- `frontend/src/components/checkout/CheckoutErrorMessage.tsx` (NOVO)
+- `frontend/src/app/checkout/components/CheckoutErrorMessage.tsx` (NOVO)
 - `frontend/src/app/checkout/page.tsx`
 
 **Estimativa**: 2-3 horas
+**Tempo decorrido**: 1 hora
 
 ---
 
@@ -167,13 +179,13 @@ metodoEnvioId: undefined, // ❌ Nunca é definido!
 
 ## 📊 RESUMO DO PLANO
 
-| Fase | Commits | Status | Tempo Estimado |
-|------|---------|--------|----------------|
-| Fase 1 | 3 | 🔄 Em Andamento | 10-14 horas |
-| Fase 2 | 3 | ⏳ Pendente | 8-11 horas |
-| **TOTAL** | **6** | - | **18-25 horas** |
+| Fase | Commits | Status | Tempo Real | Tempo Estimado |
+|------|---------|--------|------------|----------------|
+| Fase 1 | 3 | ✅ Concluída | 10 horas | 10-14 horas |
+| Fase 2 | 3 | 🔄 Em Andamento (50%) | 4 horas | 8-11 horas |
+| **TOTAL** | **6** | **🔄 67% Completo** | **14 horas** | **18-25 horas** |
 
 ---
 
-**Última Atualização**: 8 de Dezembro de 2025  
-**Status Atual**: 🔄 Fase 1 - Commit 1 em andamento
+**Última Atualização**: 8 de Dezembro de 2025, 18:30  
+**Status Atual**: 🔄 Fase 2 - Commit 5 em andamento (substituir alerts restantes)
