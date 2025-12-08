@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
@@ -31,7 +31,8 @@ import { useCart } from '@/context/CartContext';
 import { useAuthContext } from '@/context/AuthContext';
 
 // Services
-import { addressService } from '@/services';
+import { addressService, orderService } from '@/services';
+import { pagbankService } from '@/services/pagbank.service';
 import type { SavedAddress, AuthUser } from '@/services';
 
 /**
@@ -46,6 +47,10 @@ export default function CheckoutPage() {
   // Hooks customizados para gerenciar estados
   const checkoutData = useCheckoutData();
   const { enderecosSalvos, carregandoEnderecos, carregarEnderecos } = useSavedAddresses(isAuthenticated);
+  
+  // Estado para controle de processamento
+  const [processandoPedido, setProcessandoPedido] = useState(false);
+  const [erroPedido, setErroPedido] = useState<string | null>(null);
 
   // ========================================
   // EFFECTS
@@ -220,11 +225,99 @@ export default function CheckoutPage() {
   // FUNÇÕES - FINALIZAÇÃO
   // ========================================
 
-  const handleFinalizarCompra = () => {
-    // Aqui você faria a integração com o backend
-    limparCarrinho();
-    router.push('/');
-    alert('Pedido realizado com sucesso!');
+  const handleFinalizarCompra = async () => {
+    if (processandoPedido) return;
+    
+    setProcessandoPedido(true);
+    setErroPedido(null);
+
+    try {
+      console.log('🛒 Iniciando finalização do pedido...');
+
+      // 1. Preparar dados do cartão (se for cartão de crédito)
+      let creditCardData = undefined;
+      
+      if (checkoutData.dadosPagamento.metodo === 'credit_card') {
+        console.log('💳 Criptografando dados do cartão...');
+        
+        try {
+          // Extrair mês e ano da validade
+          const [expMonth, expYear] = checkoutData.dadosPagamento.validade.split('/');
+          
+          // Criptografar cartão usando SDK do PagBank
+          const encryptedCard = await pagbankService.encryptCard({
+            number: checkoutData.dadosPagamento.numeroCartao.replace(/\s/g, ''),
+            holder: checkoutData.dadosPagamento.nomeCartao,
+            expMonth: expMonth,
+            expYear: '20' + expYear,
+            cvv: checkoutData.dadosPagamento.cvv,
+          }, checkoutData.dadosPagamento.cpfTitular);
+
+          creditCardData = {
+            encrypted: encryptedCard.encrypted,
+            holderName: encryptedCard.holderName,
+            holderCpf: encryptedCard.holderCpf.replace(/\D/g, ''),
+          };
+
+          console.log('✅ Cartão criptografado com sucesso');
+        } catch (error) {
+          console.error('❌ Erro ao criptografar cartão:', error);
+          throw new Error('Erro ao processar dados do cartão. Verifique os dados e tente novamente.');
+        }
+      }
+
+      // 2. Preparar dados do pedido
+      const orderData = {
+        addressId: checkoutData.enderecoSelecionadoId || '',
+        items: itensCarrinho.map(item => ({
+          productId: item.id,
+          quantity: item.quantidade,
+          size: item.tamanho,
+          color: item.cor,
+        })),
+        shippingMethodId: checkoutData.dadosEntrega.metodoEnvio || '',
+        paymentMethod: checkoutData.dadosPagamento.metodo,
+        creditCard: creditCardData,
+        receiverName: checkoutData.destinatarioIgualComprador 
+          ? undefined 
+          : checkoutData.dadosDestinatario.nome,
+        receiverPhone: checkoutData.destinatarioIgualComprador 
+          ? undefined 
+          : checkoutData.dadosDestinatario.telefone,
+      };
+
+      console.log('📤 Enviando pedido para o backend...');
+
+      // 3. Criar pedido
+      const pedido = await orderService.createOrder(orderData);
+
+      console.log('✅ Pedido criado com sucesso:', pedido.orderNumber);
+
+      // 4. Verificar status do pagamento
+      if (pedido.payment) {
+        if (pedido.payment.status === 'PAID' || pedido.payment.status === 'APPROVED') {
+          console.log('🎉 Pagamento aprovado!');
+        } else if (pedido.payment.status === 'DECLINED') {
+          throw new Error('Pagamento recusado. Verifique os dados do cartão e tente novamente.');
+        } else if (pedido.payment.status === 'PENDING' && checkoutData.dadosPagamento.metodo === 'pix') {
+          console.log('⏳ Aguardando pagamento PIX...');
+        }
+      }
+
+      // 5. Limpar carrinho
+      limparCarrinho();
+
+      // 6. Redirecionar para página de confirmação
+      router.push(`/pedidos/${pedido.id}`);
+
+    } catch (error: any) {
+      console.error('❌ Erro ao finalizar pedido:', error);
+      const mensagemErro = error.response?.data?.message || error.message || 'Erro ao processar pedido. Tente novamente.';
+      setErroPedido(mensagemErro);
+      alert(mensagemErro);
+    } finally {
+      setProcessandoPedido(false);
+    }
   };
 
   // ========================================
@@ -341,6 +434,7 @@ export default function CheckoutPage() {
                     dadosPagamento={checkoutData.dadosPagamento}
                     onVoltar={() => checkoutData.setEtapa('pagamento')}
                     onFinalizar={handleFinalizarCompra}
+                    processando={processandoPedido}
                   />
                 )}
               </div>

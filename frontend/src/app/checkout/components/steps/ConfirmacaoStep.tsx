@@ -15,6 +15,7 @@ interface ConfirmacaoStepProps {
   dadosPagamento: DadosPagamento;
   onVoltar: () => void;
   onFinalizar: () => void;
+  processando?: boolean;
 }
 
 export default function ConfirmacaoStep({
@@ -24,7 +25,8 @@ export default function ConfirmacaoStep({
   dadosEntrega,
   dadosPagamento,
   onVoltar,
-  onFinalizar
+  onFinalizar,
+  processando = false
 }: ConfirmacaoStepProps) {
   // Determinar de onde vêm os dados do destinatário
   const receiverName = destinatarioIgualComprador 
@@ -74,14 +76,16 @@ export default function ConfirmacaoStep({
             variant="secondary"
             onClick={onVoltar}
             className="flex-1"
+            disabled={processando}
           >
             Voltar
           </Button>
           <Button
             onClick={onFinalizar}
             className="flex-1"
+            disabled={processando}
           >
-            Finalizar Compra
+            {processando ? 'Processando...' : 'Finalizar Compra'}
           </Button>
         </div>
       </div>
