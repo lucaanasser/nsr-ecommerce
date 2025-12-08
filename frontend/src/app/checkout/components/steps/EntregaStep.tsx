@@ -13,7 +13,7 @@ import type { DadosDestinatario, DadosEntrega } from '@/types/checkout.types';
 import type { SavedAddress } from '@/services';
 import type { CartItem } from '@/context/CartContext';
 import { useCepLookup } from '@/hooks/useCepLookup';
-import { useShippingCalculation } from '../hooks/useShippingCalculation';
+import { useShippingCalculation } from '@/app/checkout/hooks/useShippingCalculation';
 import ShippingMethodSelector from '../ShippingMethodSelector';
 import { formatCep, cleanCep } from '@/utils/cep';
 
