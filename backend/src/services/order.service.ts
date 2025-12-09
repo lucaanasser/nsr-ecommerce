@@ -435,10 +435,21 @@ export class OrderService {
       include: {
         items: {
           include: {
-            product: true
+            product: {
+              include: {
+                images: {
+                  orderBy: { order: 'asc' },
+                  take: 1,
+                },
+              },
+            },
           }
         },
-        address: true
+        address: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
       }
     });
 
@@ -451,7 +462,21 @@ export class OrderService {
       throw new BadRequestError('Pedido não encontrado');
     }
 
-    return order;
+    // Formatar payment para o formato esperado pelo frontend
+    const lastPayment = order.payments[0];
+    
+    return {
+      ...order,
+      payment: lastPayment ? {
+        id: lastPayment.id,
+        method: lastPayment.method,
+        status: lastPayment.status,
+        chargeId: lastPayment.chargeId || undefined,
+        pixQrCode: lastPayment.pixQrCode || undefined,
+        pixQrCodeBase64: lastPayment.pixQrCodeBase64 || undefined,
+        pixExpiresAt: lastPayment.pixExpiresAt?.toISOString() || undefined,
+      } : undefined,
+    };
   }
 
   /**

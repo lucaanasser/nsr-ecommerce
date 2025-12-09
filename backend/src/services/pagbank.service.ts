@@ -233,12 +233,7 @@ class PagBankService {
           status: error.response.status,
           statusText: error.response.statusText,
           data: error.response.data,
-          requestData: {
-            reference_id: request.reference_id,
-            customer_tax_id: request.customer.tax_id,
-            holder_tax_id: request.charges?.[0]?.payment_method?.card?.holder?.tax_id,
-            encrypted_length: request.charges?.[0]?.payment_method?.card?.encrypted?.length,
-          }
+          orderId: data.orderId,
         });
       }
       return this.handleError(error);
