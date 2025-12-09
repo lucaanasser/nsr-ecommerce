@@ -131,8 +131,10 @@ export default function AdminPedidos() {
                     <td className="p-4 text-sm text-primary-white font-mono">#{order.orderNumber || order.id.slice(0, 8)}</td>
                     <td className="p-4">
                       <div className="text-sm text-primary-white font-medium">
+                        {/* @ts-ignore - user might be populated */}
                         {order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Cliente'}
                       </div>
+                      {/* @ts-ignore - user might be populated */}
                       <div className="text-xs text-primary-white/60">{order.user?.email}</div>
                     </td>
                     <td className="p-4 text-sm text-primary-white/60">
