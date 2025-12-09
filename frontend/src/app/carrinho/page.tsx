@@ -81,7 +81,7 @@ export default function PaginaCarrinho() {
                         <Link href={`/produto/${item.slug}`} className="flex-shrink-0">
                           <div className="relative w-32 h-40 rounded-sm overflow-hidden">
                             <Image
-                              src={item.images[0]}
+                              src={item.images?.[0]?.url || '/images/placeholder.jpg'}
                               alt={item.name}
                               fill
                               className="object-cover"
