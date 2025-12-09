@@ -23,12 +23,12 @@ Este documento rastreia o progresso da implementação das funcionalidades reais
 - [x] Atualizar `OrderService` para suportar listagem administrativa (sem filtro de userId obrigatório)
 
 ### 2. Backend: Admin Dashboard API
-- [ ] Criar `backend/src/services/dashboard.service.ts`
+- [x] Criar `backend/src/services/dashboard.service.ts`
     - Implementar lógica de agregação (vendas totais, pedidos recentes, ticket médio)
-- [ ] Criar `backend/src/controllers/admin/dashboard.controller.ts`
+- [x] Criar `backend/src/controllers/admin/dashboard.controller.ts`
     - Implementar `getStats`
-- [ ] Criar `backend/src/routes/admin/dashboard.routes.ts`
-- [ ] Registrar rota em `backend/src/routes/index.ts`
+- [x] Criar `backend/src/routes/admin/dashboard.routes.ts`
+- [x] Registrar rota em `backend/src/routes/index.ts`
 
 ### 3. Frontend: Services Update
 - [ ] Atualizar `frontend/src/services/order.service.ts`
