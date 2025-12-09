@@ -15,14 +15,22 @@ export function validateCartItemsForCheckout(items: CartItem[]) {
     if (!item.selectedSize) {
       throw new Error('Selecione um tamanho para todos os itens');
     }
-    const knownStock = (item as any).stock;
-    if (typeof knownStock === 'number') {
-      if (knownStock <= 0) {
-        throw new Error(`Produto sem estoque: ${item.name}`);
-      }
-      if (item.quantity > knownStock) {
-        throw new Error(`Quantidade acima do estoque para ${item.name}`);
-      }
+
+    // Validar estoque da variante específica (size + color)
+    const variant = item.variants?.find(
+      v => v.size === item.selectedSize && v.color === item.selectedColor
+    );
+
+    if (!variant) {
+      throw new Error(`Variante não encontrada para ${item.name} (${item.selectedSize}/${item.selectedColor})`);
+    }
+
+    if (variant.stock <= 0) {
+      throw new Error(`Produto sem estoque: ${item.name} - ${item.selectedSize}/${item.selectedColor}`);
+    }
+
+    if (item.quantity > variant.stock) {
+      throw new Error(`Estoque insuficiente para ${item.name} - ${item.selectedSize}/${item.selectedColor}. Disponível: ${variant.stock}`);
     }
   });
 }
