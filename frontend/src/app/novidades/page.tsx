@@ -57,54 +57,13 @@ function NovidadesContent() {
     });
   }, [products, filtro]);
 
-  // Adaptador: Converter Product do backend para formato necessário
-  const produtosAdaptados = useMemo(() => {
-    return produtosFiltrados.map(p => {
-      // Extrair tamanhos únicos das variantes
-      const sizes = Array.from(new Set(p.variants?.map(v => v.size) || []));
-      
-      // Extrair cores únicas das variantes
-      const colors = Array.from(new Set(
-        p.variants?.map(v => v.color).filter(Boolean) as string[] || []
-      ));
-      
-      // Extrair URLs das imagens
-      const images = p.images?.map(img => img.url) || [];
-      
-      // Identificar tamanhos indisponíveis (com estoque zero)
-      const unavailableSizes = p.variants
-        ?.filter(v => v.stock === 0)
-        .map(v => v.size) || [];
-      
-      // Mapear gender para category (mock)
-      const categoryMap: Record<string, 'masculino' | 'feminino'> = {
-        'MALE': 'masculino',
-        'FEMALE': 'feminino',
-      };
-      
-      return {
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        description: p.details?.description || '',
-        price: Number(p.price),
-        category: categoryMap[p.gender] || 'masculino',
-        collection: p.collection?.name || '',
-        sizes,
-        unavailableSizes,
-        colors,
-        images,
-        featured: p.isFeatured,
-        new: false, // Campo 'new' não existe no backend
-      };
-    });
-  }, [produtosFiltrados]);
+  // Produtos prontos para uso (sem necessidade de adaptadores)
 
   const manipularAdicaoAoCarrinho = (idProduto: string, tamanho: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const produto = produtosAdaptados.find(p => p.id === idProduto);
+    const produto = produtosFiltrados.find(p => p.id === idProduto);
     if (produto) {
       adicionarAoCarrinho(produto, tamanho);
       setAdicionadoAoCarrinho({ idProduto, tamanho });
@@ -172,9 +131,13 @@ function NovidadesContent() {
         )}
 
         {/* Grid de Produtos - Imagens grandes */}
-        {!isLoading && !error && produtosAdaptados.length > 0 ? (
+        {!isLoading && !error && produtosFiltrados.length > 0 ? (
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-            {produtosAdaptados.map((product, index) => {
+            {produtosFiltrados.map((product, index) => {
+              // Extrair dados do produto
+              const images = product.images?.map(img => img.url) || [];
+              const sizes = Array.from(new Set(product.variants?.map(v => v.size) || []));
+              const unavailableSizes = product.variants?.filter(v => v.stock === 0).map(v => v.size) || [];
               const estaClicado = idProdutoClicado === product.id;
               
               return (
@@ -193,19 +156,19 @@ function NovidadesContent() {
                   >
                     {/* Imagem Principal */}
                     <Image
-                      src={product.images[0]}
+                      src={images[0] || '/images/placeholder.jpg'}
                       alt={product.name}
                       fill
                       className={`object-cover transition-opacity duration-500 ${
-                        (idProdutoHover === product.id || estaClicado) && product.images[1] ? 'opacity-0' : 'opacity-100'
+                        (idProdutoHover === product.id || estaClicado) && images[1] ? 'opacity-0' : 'opacity-100'
                       }`}
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     
                     {/* Segunda Imagem (Hover) */}
-                    {product.images[1] && (
+                    {images[1] && (
                       <Image
-                        src={product.images[1]}
+                        src={images[1]}
                         alt={`${product.name} - ângulo alternativo`}
                         fill
                         className={`object-cover transition-opacity duration-500 ${
@@ -226,9 +189,9 @@ function NovidadesContent() {
                         
                         {/* Tamanhos Disponíveis - Minimalista */}
                         <div className="flex flex-wrap gap-3 mb-4">
-                          {product.sizes.map((size) => {
+                          {sizes.map((size) => {
                             const foiAdicionado = adicionadoAoCarrinho?.idProduto === product.id && adicionadoAoCarrinho?.tamanho === size;
-                            const estaIndisponivel = product.unavailableSizes?.includes(size);
+                            const estaIndisponivel = unavailableSizes.includes(size);
                             
                             return (
                               <motion.button
@@ -279,10 +242,10 @@ function NovidadesContent() {
                       </div>
                     </div>
 
-                    {/* Badge de novidade - Minimalista */}
-                    {product.new && (
+                    {/* Badge de destaque - Minimalista */}
+                    {product.isFeatured && (
                       <div className="absolute top-4 left-4 text-primary-gold text-base uppercase tracking-widest z-10" style={{ fontFamily: 'Nsr, sans-serif' }}>
-                        Novo
+                        Destaque
                       </div>
                     )}
 
