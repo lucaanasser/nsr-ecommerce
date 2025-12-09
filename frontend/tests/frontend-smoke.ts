@@ -6,18 +6,33 @@ const validItem = {
   slug: 'produto-1',
   description: 'desc',
   price: 100,
+  comparePrice: null,
+  stock: 10,
+  sku: 'SKU-001',
   category: 'masculino' as const,
-  collection: 'c1',
-  sizes: ['M'],
-  colors: ['Preto'],
+  gender: 'UNISEX' as const,
+  collection: null,
   images: [],
-  featured: false,
-  new: false,
+  isFeatured: false,
+  isActive: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  variants: [
+    {
+      id: 'v1',
+      size: 'M',
+      color: 'Preto',
+      stock: 2,
+      sku: 'SKU-001-M-PRETO',
+      price: null,
+      comparePrice: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+  ],
   quantity: 1,
   selectedSize: 'M',
   selectedColor: 'Preto',
-  stock: 2,
-  isActive: true,
 };
 
 function expectThrow(fn: () => void, messageSubstring: string) {
@@ -55,15 +70,42 @@ expectThrow(() =>
   'Selecione um tamanho'
 );
 
-// Should fail when stock known and zero
+// Should fail when variant stock is zero
 expectThrow(() =>
-  validateCartItemsForCheckout([{ ...validItem, stock: 0 }]),
+  validateCartItemsForCheckout([{ 
+    ...validItem, 
+    variants: [{ 
+      id: 'v1', 
+      size: 'M', 
+      color: 'Preto', 
+      stock: 0, 
+      sku: 'SKU-001-M-PRETO',
+      price: null,
+      comparePrice: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }]
+  }]),
   'sem estoque'
 );
 
-// Should fail when quantity exceeds stock
+// Should fail when quantity exceeds variant stock
 expectThrow(() =>
-  validateCartItemsForCheckout([{ ...validItem, quantity: 3, stock: 2 }]),
+  validateCartItemsForCheckout([{ 
+    ...validItem, 
+    quantity: 3,
+    variants: [{ 
+      id: 'v1', 
+      size: 'M', 
+      color: 'Preto', 
+      stock: 2, 
+      sku: 'SKU-001-M-PRETO',
+      price: null,
+      comparePrice: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }]
+  }]),
   'acima do estoque'
 );
 

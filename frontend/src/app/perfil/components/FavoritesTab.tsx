@@ -2,14 +2,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-
-interface Product {
-  id: string;
-  slug: string;
-  name: string;
-  price: number;
-  images: string[];
-}
+import { Product } from '@/services/product.service';
 
 interface FavoritesTabProps {
   favoritos: Product[];
@@ -56,7 +49,7 @@ export default function FavoritesTab({ favoritos, onRemoveFavorite }: FavoritesT
           <Link href={`/produto/${produto.slug}`}>
             <div className="relative aspect-[3/4] overflow-hidden">
               <Image
-                src={produto.images[0]}
+                src={produto.images?.[0]?.url || '/images/placeholder.jpg'}
                 alt={produto.name}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -29,7 +29,7 @@ export default function CheckoutSummary({
           <div key={`${item.id}-${item.selectedSize}`} className="flex gap-3">
             <div className="relative w-16 h-20 flex-shrink-0">
               <Image
-                src={item.images[0]}
+                src={item.images?.[0]?.url || '/images/placeholder.jpg'}
                 alt={item.name}
                 fill
                 className="object-cover rounded-sm"

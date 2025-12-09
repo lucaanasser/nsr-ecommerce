@@ -9,8 +9,8 @@ import Footer from '@/components/layout/Footer';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/product/ProductCard';
-import { products } from '@/data/products';
-import { Check, Heart, Share2, Truck, Shield, RefreshCw } from 'lucide-react';
+import { productService, Product } from '@/services/product.service';
+import { Check, Heart, Share2, Truck, Shield, RefreshCw, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { IMAGES } from '@/config/images';
@@ -29,16 +29,64 @@ export default function PaginaDetalhesProduto() {
   const { adicionarAoCarrinho } = useCart();
   const { adicionarAosFavoritos, estaNosFavoritos } = useFavorites();
   
-  const produto = products.find(p => p.slug === slug);
+  const [produto, setProduto] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState('');
   const [corSelecionada, setCorSelecionada] = useState('');
   const [quantidade, setQuantidade] = useState(1);
   const [zoomModalAberto, setZoomModalAberto] = useState(false);
   const [imagemSelecionada, setImagemSelecionada] = useState(0);
+  const [produtosRelacionados, setProdutosRelacionados] = useState<Product[]>([]);
+
+  // Buscar produto do backend
+  useEffect(() => {
+    async function fetchProduct() {
+      if (!slug) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await productService.getProductBySlug(slug);
+        setProduto(data);
+        
+        // Buscar produtos relacionados da mesma coleção
+        if (data.collection?.slug) {
+          const related = await productService.getProducts({ 
+            collection: data.collection.slug,
+            isActive: true,
+            limit: 5
+          });
+          setProdutosRelacionados(related.data.filter(p => p.id !== data.id).slice(0, 4));
+        }
+      } catch (err) {
+        console.error('Erro ao buscar produto:', err);
+        setError('Erro ao carregar produto');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchProduct();
+  }, [slug]);
 
   const estaFavoritado = produto ? estaNosFavoritos(produto.id) : false;
 
-  if (!produto) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <>
+        <Header />
+        <main className="pt-32 pb-20 min-h-screen relative flex items-center justify-center">
+          <Loader2 className="w-12 h-12 text-primary-gold animate-spin" />
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // Error or not found state
+  if (error || !produto) {
     return (
       <>
         <Header />
@@ -58,10 +106,13 @@ export default function PaginaDetalhesProduto() {
 
           <Container className="relative z-10">
             <div className="text-center py-20">
-              <h1 className="text-4xl font-bold mb-4">Produto não encontrado</h1>
-              <p className="text-primary-white/60">
-                O produto que você está procurando não existe.
+              <h1 className="text-4xl font-bold mb-4">{error || 'Produto não encontrado'}</h1>
+              <p className="text-primary-white/60 mb-6">
+                {error ? 'Ocorreu um erro ao carregar o produto.' : 'O produto que você está procurando não existe.'}
               </p>
+              <Button variant="primary" onClick={() => router.push('/loja')}>
+                Voltar para Loja
+              </Button>
             </div>
           </Container>
         </main>
@@ -70,9 +121,10 @@ export default function PaginaDetalhesProduto() {
     );
   }
 
-  const produtosRelacionados = products
-    .filter(p => p.collection === produto.collection && p.id !== produto.id)
-    .slice(0, 4);
+  // Extrair dados do produto
+  const images = produto.images?.map(img => img.url) || [];
+  const sizes = Array.from(new Set(produto.variants?.map(v => v.size) || []));
+  const colors = Array.from(new Set(produto.variants?.map(v => v.color).filter(Boolean) as string[] || []));
 
   const manipularAdicaoAoCarrinho = () => {
     if (!tamanhoSelecionado) {
@@ -140,13 +192,13 @@ export default function PaginaDetalhesProduto() {
             >
               {/* Badge e Coleção */}
               <div className="flex items-center gap-3">
-                {produto.new && (
+                {produto.isFeatured && (
                   <span className="bg-primary-gold text-primary-black text-xs px-3 py-1 uppercase tracking-wider font-semibold">
-                    Novo
+                    Destaque
                   </span>
                 )}
                 <span className="text-sm text-primary-gold/70 uppercase tracking-wider">
-                  {produto.collection}
+                  {produto.collection?.name || 'Sem coleção'}
                 </span>
               </div>
 
@@ -162,20 +214,20 @@ export default function PaginaDetalhesProduto() {
 
               {/* Descrição */}
               <p className="text-sm text-primary-white/70 leading-relaxed">
-                {produto.description}
+                {produto.details?.description || 'Sem descrição disponível'}
               </p>
 
               {/* Navegação de Imagens */}
-              {produto.images.length > 1 && (
+              {images.length > 1 && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs text-primary-white/60">
                     <span className="text-primary-gold font-semibold">
-                      {produto.images.length}
+                      {images.length}
                     </span>
                     <span>imagens</span>
                   </div>
                   <div className="flex gap-2">
-                    {produto.images.map((image, index) => (
+                    {images.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => {
@@ -226,7 +278,7 @@ export default function PaginaDetalhesProduto() {
               transition={{ duration: 0.6 }}
               className="lg:order-2"
             >
-              {produto.images.map((image, index) => (
+              {images.map((image, index) => (
                 <div
                   key={index}
                   id={`image-${index}`}
@@ -260,7 +312,7 @@ export default function PaginaDetalhesProduto() {
                   {corSelecionada || 'Cor'}
                 </p>
                 <div className="flex gap-3">
-                  {produto.colors.map((color) => (
+                  {colors.map((color) => (
                     <button
                       key={color}
                       onClick={() => setCorSelecionada(color)}
@@ -294,7 +346,7 @@ export default function PaginaDetalhesProduto() {
                   {tamanhoSelecionado || 'Tamanho'}
                 </p>
                 <div className="flex gap-2">
-                  {produto.sizes.map((size) => (
+                  {sizes.map((size) => (
                     <button
                       key={size}
                       onClick={() => setTamanhoSelecionado(size)}
@@ -401,7 +453,7 @@ export default function PaginaDetalhesProduto() {
 
       {/* Modal de Zoom */}
       <ImageZoomModal
-        images={produto.images}
+        images={images}
         currentIndex={imagemSelecionada}
         isOpen={zoomModalAberto}
         onClose={() => setZoomModalAberto(false)}
