@@ -55,42 +55,7 @@ export default function ProdutosPage() {
     return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [produtosFiltrados, ordenarPor]);
 
-  // Adaptador: Converter Product do backend para formato do ProductCard (mock)
-  const produtosAdaptados = useMemo(() => {
-    return produtosOrdenados.map(p => {
-      // Extrair tamanhos únicos das variantes
-      const sizes = Array.from(new Set(p.variants?.map(v => v.size) || []));
-      
-      // Extrair cores únicas das variantes
-      const colors = Array.from(new Set(
-        p.variants?.map(v => v.color).filter(Boolean) as string[] || []
-      ));
-      
-      // Extrair URLs das imagens
-      const images = p.images?.map(img => img.url) || [];
-      
-      // Mapear gender para category (mock)
-      const categoryMap: Record<string, 'masculino' | 'feminino'> = {
-        'MALE': 'masculino',
-        'FEMALE': 'feminino',
-      };
-      
-      return {
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        description: p.details?.description || '',
-        price: Number(p.price),
-        category: categoryMap[p.gender] || 'masculino',
-        collection: p.collection?.name || '',
-        sizes,
-        colors,
-        images,
-        featured: p.isFeatured,
-        new: false, // Campo 'new' não existe no backend, sempre false
-      };
-    });
-  }, [produtosOrdenados]);
+  // Produtos prontos para renderizar (sem necessidade de adaptadores)
 
   return (
     <>
@@ -257,9 +222,9 @@ export default function ProdutosPage() {
             )}
 
             {/* Grid de Produtos - 3 por linha, cards grandes */}
-            {!isLoading && !error && produtosAdaptados.length > 0 ? (
+            {!isLoading && !error && produtosOrdenados.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
-                {produtosAdaptados.map((product, index) => (
+                {produtosOrdenados.map((product, index) => (
                   <ProductCard key={product.id} product={product} index={index} />
                 ))}
               </div>
