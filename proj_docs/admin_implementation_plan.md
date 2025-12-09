@@ -3,11 +3,11 @@
 Este documento rastreia o progresso da implementação das funcionalidades reais do painel administrativo, conectando o frontend aos endpoints do backend.
 
 ## Status Geral
-- [ ] **Backend: Admin Orders API**
-- [ ] **Backend: Admin Dashboard API**
-- [ ] **Frontend: Services Update**
-- [ ] **Frontend: Admin Pedidos**
-- [ ] **Frontend: Admin Financeiro**
+- [x] **Backend: Admin Orders API**
+- [x] **Backend: Admin Dashboard API**
+- [x] **Frontend: Services Update**
+- [x] **Frontend: Admin Pedidos**
+- [x] **Frontend: Admin Financeiro**
 
 ---
 
@@ -31,20 +31,20 @@ Este documento rastreia o progresso da implementação das funcionalidades reais
 - [x] Registrar rota em `backend/src/routes/index.ts`
 
 ### 3. Frontend: Services Update
-- [ ] Atualizar `frontend/src/services/order.service.ts`
+- [x] Atualizar `frontend/src/services/order.service.ts`
     - Adicionar `getAdminOrders`
     - Adicionar `updateOrderStatus`
-- [ ] Criar `frontend/src/services/dashboard.service.ts`
+- [x] Criar `frontend/src/services/dashboard.service.ts`
     - Adicionar `getDashboardStats`
 
 ### 4. Frontend: Admin Pedidos
-- [ ] Criar hook `useAdminOrders` em `frontend/src/app/admin/pedidos/hooks/useAdminOrders.ts`
-- [ ] Refatorar `frontend/src/app/admin/pedidos/page.tsx`
+- [x] Criar hook `useAdminOrders` em `frontend/src/app/admin/pedidos/hooks/useAdminOrders.ts`
+- [x] Refatorar `frontend/src/app/admin/pedidos/page.tsx`
     - Remover `mockOrders`
     - Integrar com `useAdminOrders`
     - Adicionar funcionalidade de alterar status
 
 ### 5. Frontend: Admin Financeiro
-- [ ] Refatorar `frontend/src/app/admin/financeiro/page.tsx`
+- [x] Refatorar `frontend/src/app/admin/financeiro/page.tsx`
     - Remover dados fictícios (`financialStats`)
     - Conectar ao `dashboard.service.ts`
