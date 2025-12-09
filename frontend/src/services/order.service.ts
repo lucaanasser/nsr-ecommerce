@@ -87,6 +87,12 @@ export interface OrderFilters {
   limit?: number;
 }
 
+export interface AdminOrderFilters extends OrderFilters {
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 // Serviço de pedidos
 export const orderService = {
   // Criar novo pedido
@@ -101,6 +107,22 @@ export const orderService = {
       params: filters,
     });
     return response.data;
+  },
+
+  // Listar pedidos (Admin)
+  async getAdminOrders(filters?: AdminOrderFilters): Promise<PaginatedResponse<Order>> {
+    const response = await api.get<PaginatedResponse<Order>>('/admin/orders', {
+      params: filters,
+    });
+    return response.data;
+  },
+
+  // Atualizar status do pedido (Admin)
+  async updateOrderStatus(id: string, status: string): Promise<Order> {
+    const response = await api.put<ApiResponse<Order>>(`/admin/orders/${id}/status`, {
+      status,
+    });
+    return response.data.data;
   },
 
   // Obter pedido por ID
