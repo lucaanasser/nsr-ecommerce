@@ -20,6 +20,11 @@ export interface Order {
   payment?: OrderPayment;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface OrderItem {
@@ -93,6 +98,16 @@ export interface AdminOrderFilters extends OrderFilters {
   endDate?: string;
 }
 
+export interface PaginatedOrderResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
 // Serviço de pedidos
 export const orderService = {
   // Criar novo pedido
@@ -102,16 +117,16 @@ export const orderService = {
   },
 
   // Listar pedidos do usuário
-  async getOrders(filters?: OrderFilters): Promise<PaginatedResponse<Order>> {
-    const response = await api.get<PaginatedResponse<Order>>('/orders', {
+  async getOrders(filters?: OrderFilters): Promise<PaginatedOrderResponse<Order>> {
+    const response = await api.get<PaginatedOrderResponse<Order>>('/orders', {
       params: filters,
     });
     return response.data;
   },
 
   // Listar pedidos (Admin)
-  async getAdminOrders(filters?: AdminOrderFilters): Promise<PaginatedResponse<Order>> {
-    const response = await api.get<PaginatedResponse<Order>>('/admin/orders', {
+  async getAdminOrders(filters?: AdminOrderFilters): Promise<PaginatedOrderResponse<Order>> {
+    const response = await api.get<PaginatedOrderResponse<Order>>('/admin/orders', {
       params: filters,
     });
     return response.data;
