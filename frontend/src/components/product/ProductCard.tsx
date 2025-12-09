@@ -4,8 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { Product } from '@/data/products';
+import { useState, useMemo } from 'react';
+import { Product } from '@/services/product.service';
 import { useCart } from '@/context/CartContext';
 import Button from '@/components/ui/Button';
 
@@ -28,6 +28,14 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { adicionarAoCarrinho } = useCart();
   const router = useRouter();
 
+  // Extrair dados do produto do backend
+  const images = useMemo(() => product.images?.map(img => img.url) || [], [product.images]);
+  const sizes = useMemo(() => Array.from(new Set(product.variants?.map(v => v.size) || [])), [product.variants]);
+  const unavailableSizes = useMemo(() => 
+    product.variants?.filter(v => v.stock === 0).map(v => v.size) || [],
+    [product.variants]
+  );
+
   const manipularAdicaoAoCarrinho = (tamanho: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -46,7 +54,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.stopPropagation();
     
     // Verifica se há um tamanho adicionado recentemente ou usa o primeiro disponível
-    const tamanhoParaCompra = adicionadoAoCarrinho || product.sizes[0];
+    const tamanhoParaCompra = adicionadoAoCarrinho || sizes[0];
     
     // Adiciona ao carrinho
     adicionarAoCarrinho(product, tamanhoParaCompra);
@@ -83,19 +91,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         >
           {/* Imagem Principal */}
           <Image
-            src={product.images[0]}
+            src={images[0] || '/images/placeholder.jpg'}
             alt={product.name}
             fill
             className={`object-cover transition-opacity duration-500 ${
-              (estaEmHover || idProdutoClicado) && product.images[1] ? 'opacity-0' : 'opacity-100'
+              (estaEmHover || idProdutoClicado) && images[1] ? 'opacity-0' : 'opacity-100'
             }`}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           
           {/* Segunda Imagem (Hover) */}
-          {product.images[1] && (
+          {images[1] && (
             <Image
-              src={product.images[1]}
+              src={images[1]}
               alt={`${product.name} - ângulo alternativo`}
               fill
               className={`object-cover transition-opacity duration-500 ${
@@ -116,9 +124,9 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               
               {/* Tamanhos Disponíveis - Minimalista */}
               <div className="flex flex-wrap gap-3 mb-3">
-                {product.sizes.map((size) => {
+                {sizes.map((size) => {
                   const foiAdicionado = adicionadoAoCarrinho === size;
-                  const estaIndisponivel = product.unavailableSizes?.includes(size);
+                  const estaIndisponivel = unavailableSizes.includes(size);
                   
                   return (
                     <motion.button
@@ -176,10 +184,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
           </div>
 
-          {/* Badge de novidade - Minimalista */}
-          {product.new && (
+          {/* Badge de destaque - Minimalista */}
+          {product.isFeatured && (
             <div className="absolute top-4 left-4 text-primary-gold text-base uppercase tracking-widest z-10 font-nsr">
-              Novo
+              Destaque
             </div>
           )}
 
