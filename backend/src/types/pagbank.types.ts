@@ -72,13 +72,13 @@ export interface ChargePayment {
     installments?: number;
     capture?: boolean;
     card?: CreditCard;
+    holder?: CardHolder; // Holder fica fora de card
   };
 }
 
 export interface CreditCard {
   encrypted: string; // Dados do cartão criptografados
   security_code?: string;
-  holder: CardHolder;
   store?: boolean;
 }
 

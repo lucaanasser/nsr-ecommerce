@@ -80,9 +80,10 @@ class PagBankService {
             payment_method: {
               ...charge.payment_method,
               card: {
+                ...charge.payment_method.card,
                 encrypted: '[REDACTED]',
-                holder: charge.payment_method.card.holder // Manter holder no log para debug
               },
+              // Manter holder no log para debug (está fora de card agora)
             },
           };
         }
@@ -178,10 +179,11 @@ class PagBankService {
               capture: true,
               card: {
                 encrypted: data.creditCard.encrypted,
-                holder: {
-                  name: data.creditCard.holderName.toUpperCase().trim(),
-                  tax_id: holderCpf,
-                },
+                store: false,
+              },
+              holder: {
+                name: data.creditCard.holderName.toUpperCase().trim(),
+                tax_id: holderCpf,
               },
             },
           },
@@ -213,8 +215,8 @@ class PagBankService {
             card: {
               has_encrypted: !!request.charges?.[0]?.payment_method?.card?.encrypted,
               encrypted_length: request.charges?.[0]?.payment_method?.card?.encrypted?.length,
-              holder: request.charges?.[0]?.payment_method?.card?.holder,
-            }
+            },
+            holder: request.charges?.[0]?.payment_method?.holder,
           }
         }],
         notification_urls: request.notification_urls,
@@ -225,7 +227,7 @@ class PagBankService {
         request
       );
 
-      return this.mapChargeResponse(response.data);
+      return await this.mapChargeResponse(response.data);
     } catch (error) {
       // Log detalhado do erro antes de processar
       if (axios.isAxiosError(error) && error.response) {
@@ -276,7 +278,7 @@ class PagBankService {
         request
       );
 
-      return this.mapChargeResponse(response.data);
+      return await this.mapChargeResponse(response.data);
     } catch (error) {
       return this.handleError(error);
     }
@@ -291,7 +293,7 @@ class PagBankService {
         `/orders/${chargeId}`
       );
 
-      return this.mapChargeResponse(response.data);
+      return await this.mapChargeResponse(response.data);
     } catch (error) {
       return this.handleError(error);
     }
@@ -332,7 +334,7 @@ class PagBankService {
   /**
    * Mapeia a resposta do PagBank para o formato interno
    */
-  private mapChargeResponse(charge: any): PaymentResult {
+  private async mapChargeResponse(charge: any): Promise<PaymentResult> {
     // Para orders com PIX, não tem status na raiz
     const status = charge.status || (charge.qr_codes ? 'WAITING' : 'DECLINED');
     
@@ -349,16 +351,44 @@ class PagBankService {
     if (charge.qr_codes?.[0]) {
       const qrCode = charge.qr_codes[0];
       result.pixQrCode = qrCode.text;
-      result.pixQrCodeImage = qrCode.links?.find((l: any) => l.media === 'image/png')?.href;
       result.pixExpiresAt = new Date(qrCode.expiration_date);
+      
+      // Buscar link do QR Code em base64
+      const base64Link = qrCode.links?.find((l: any) => l.rel === 'QRCODE.BASE64')?.href;
+      if (base64Link) {
+        try {
+          const base64Response = await axios.get(base64Link, {
+            headers: {
+              'Authorization': `Bearer ${pagbankConfig.token}`,
+            },
+          });
+          result.pixQrCodeImage = base64Response.data;
+        } catch (error) {
+          logger.error('Failed to fetch PIX QR Code base64', { error });
+        }
+      }
     }
     
     // Dados do PIX (dentro de payment_method para charges)
     if (charge.payment_method?.pix?.qr_codes?.[0]) {
       const qrCode = charge.payment_method.pix.qr_codes[0];
       result.pixQrCode = qrCode.text;
-      result.pixQrCodeImage = qrCode.links[0]?.href;
       result.pixExpiresAt = new Date(qrCode.expiration_date);
+      
+      // Buscar link do QR Code em base64
+      const base64Link = qrCode.links?.find((l: any) => l.rel === 'QRCODE.BASE64')?.href;
+      if (base64Link) {
+        try {
+          const base64Response = await axios.get(base64Link, {
+            headers: {
+              'Authorization': `Bearer ${pagbankConfig.token}`,
+            },
+          });
+          result.pixQrCodeImage = base64Response.data;
+        } catch (error) {
+          logger.error('Failed to fetch PIX QR Code base64', { error });
+        }
+      }
     }
 
     // Mensagem de erro

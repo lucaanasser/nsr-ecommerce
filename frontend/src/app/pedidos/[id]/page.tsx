@@ -213,7 +213,7 @@ export default function OrderConfirmationPage() {
                   <div className="space-y-2">
                     {order.items.map((item) => (
                       <div key={item.id} className="flex items-center gap-4 p-3 bg-dark-bg/50 rounded-sm">
-                        {item.product.images[0] && (
+                        {item.product.images && item.product.images.length > 0 && item.product.images[0] && (
                           <Image
                             src={item.product.images[0].url}
                             alt={item.product.name}
