@@ -3,14 +3,14 @@
  * Implementa criação, validação, cálculo de totais, uso de cupom e envio de email de confirmação.
  */
 import { prisma } from '@config/database';
-import { CreateOrderDTO } from '../types/order.types';
+import { CreateOrderDTO, OrderFilters } from '../types/order.types';
 import { BadRequestError, NotFoundError } from '@utils/errors';
 import { CouponService } from './coupon.service';
 import { emailService } from './email.service';
 import { logger } from '@config/logger.colored';
 import { pagbankService } from './pagbank.service';
 import { inventoryService } from './inventory.service';
-import { PaymentMethod, PaymentStatus } from '@prisma/client';
+import { PaymentMethod, PaymentStatus, OrderStatus } from '@prisma/client';
 import type { ChargeStatus } from '../types/pagbank.types';
 
 export class OrderService {
@@ -878,5 +878,77 @@ export class OrderService {
         firstAttempt.getTime() + 24 * 60 * 60 * 1000
       ).toISOString(),
     };
+  }
+
+  /**
+   * Lista todos os pedidos (Admin)
+   */
+  async getAllOrders(filters: OrderFilters) {
+    const { status, page = 1, limit = 10, search, startDate, endDate } = filters;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const where: any = {};
+
+    if (status && status !== 'todos') {
+      where.status = status;
+    }
+
+    if (search) {
+      where.OR = [
+        { orderNumber: { contains: search, mode: 'insensitive' } },
+        { customerName: { contains: search, mode: 'insensitive' } },
+        { customerEmail: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate);
+      if (endDate) where.createdAt.lte = new Date(endDate);
+    }
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: {
+          items: {
+            include: {
+              product: true
+            }
+          },
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: Number(limit),
+      }),
+      prisma.order.count({ where })
+    ]);
+
+    return {
+      data: orders,
+      meta: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        pages: Math.ceil(total / Number(limit))
+      }
+    };
+  }
+
+  /**
+   * Atualiza status do pedido (Admin)
+   */
+  async updateOrderStatus(orderId: string, status: OrderStatus) {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: { status }
+    });
   }
 }

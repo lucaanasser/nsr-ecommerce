@@ -51,3 +51,12 @@ export interface OrderItemResponse {
   unitPrice: number;
   totalPrice: number;
 }
+
+export interface OrderFilters {
+  status?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}
