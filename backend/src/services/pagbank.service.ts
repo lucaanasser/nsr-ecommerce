@@ -69,7 +69,7 @@ class PagBankService {
   private sanitizeLogData(data: any): any {
     if (!data) return data;
     
-    const sanitized = { ...data };
+    const sanitized = JSON.parse(JSON.stringify(data)); // Deep clone
     
     // Remove dados do cartão
     if (sanitized.charges) {
@@ -79,7 +79,10 @@ class PagBankService {
             ...charge,
             payment_method: {
               ...charge.payment_method,
-              card: { encrypted: '[REDACTED]' },
+              card: {
+                encrypted: '[REDACTED]',
+                holder: charge.payment_method.card.holder // Manter holder no log para debug
+              },
             },
           };
         }
@@ -99,12 +102,45 @@ class PagBankService {
         throw new Error('Dados do cartão de crédito não fornecidos');
       }
 
+      // Validações
+      const customerCpf = data.customer.cpf.replace(/\D/g, '');
+      const holderCpf = data.creditCard.holderCpf.replace(/\D/g, '');
+      const postalCode = data.address.zipCode.replace(/\D/g, '');
+
+      logger.info('Validating payment data', {
+        customerCpfLength: customerCpf.length,
+        holderCpfLength: holderCpf.length,
+        holderName: data.creditCard.holderName,
+        postalCodeLength: postalCode.length,
+        addressNumber: data.address.number,
+        neighborhood: data.address.neighborhood,
+      });
+
+      if (customerCpf.length !== 11) {
+        throw new Error(`CPF do cliente inválido: ${customerCpf} (${customerCpf.length} dígitos)`);
+      }
+      if (holderCpf.length !== 11) {
+        throw new Error(`CPF do titular do cartão inválido: ${holderCpf} (${holderCpf.length} dígitos)`);
+      }
+      if (!data.creditCard.holderName || data.creditCard.holderName.trim() === '') {
+        throw new Error('Nome do titular do cartão é obrigatório');
+      }
+      if (postalCode.length !== 8) {
+        throw new Error(`CEP inválido: ${postalCode} (${postalCode.length} dígitos)`);
+      }
+      if (!data.address.number || data.address.number.trim() === '') {
+        throw new Error('Número do endereço é obrigatório');
+      }
+      if (!data.address.neighborhood || data.address.neighborhood.trim() === '') {
+        throw new Error('Bairro é obrigatório');
+      }
+
       const request: CreateChargeRequest = {
         reference_id: data.orderId,
         customer: {
           name: data.customer.name,
           email: data.customer.email,
-          tax_id: data.customer.cpf.replace(/\D/g, ''),
+          tax_id: customerCpf,
           phones: [this.parsePhone(data.customer.phone)],
         },
         items: data.items.map((item, index) => ({
@@ -117,12 +153,12 @@ class PagBankService {
           address: {
             street: data.address.street,
             number: data.address.number,
-            complement: data.address.complement || '',
+            ...(data.address.complement && { complement: data.address.complement }),
             locality: data.address.neighborhood,
             city: data.address.city,
             region_code: data.address.state,
             country: 'BRA',
-            postal_code: data.address.zipCode.replace(/\D/g, ''),
+            postal_code: postalCode,
           },
         },
         notification_urls: pagbankConfig.notificationUrl
@@ -143,14 +179,46 @@ class PagBankService {
               card: {
                 encrypted: data.creditCard.encrypted,
                 holder: {
-                  name: data.creditCard.holderName,
-                  tax_id: data.creditCard.holderCpf.replace(/\D/g, ''),
+                  name: data.creditCard.holderName.toUpperCase().trim(),
+                  tax_id: holderCpf,
                 },
               },
             },
           },
         ],
       };
+
+      // Log detalhado antes de enviar
+      logger.info('Sending request to PagBank - Detailed payload', {
+        reference_id: request.reference_id,
+        customer: {
+          name: request.customer?.name,
+          email: request.customer?.email,
+          tax_id: request.customer?.tax_id,
+          tax_id_length: request.customer?.tax_id?.length,
+          phones: request.customer?.phones,
+        },
+        items_count: request.items?.length,
+        shipping: {
+          ...request.shipping?.address,
+          postal_code_length: request.shipping?.address?.postal_code?.length,
+        },
+        charges: [{
+          reference_id: request.charges?.[0]?.reference_id,
+          amount: request.charges?.[0]?.amount,
+          payment_method: {
+            type: request.charges?.[0]?.payment_method?.type,
+            installments: request.charges?.[0]?.payment_method?.installments,
+            capture: request.charges?.[0]?.payment_method?.capture,
+            card: {
+              has_encrypted: !!request.charges?.[0]?.payment_method?.card?.encrypted,
+              encrypted_length: request.charges?.[0]?.payment_method?.card?.encrypted?.length,
+              holder: request.charges?.[0]?.payment_method?.card?.holder,
+            }
+          }
+        }],
+        notification_urls: request.notification_urls,
+      });
 
       const response = await this.client.post<ChargeResponse>(
         '/orders',
@@ -159,6 +227,20 @@ class PagBankService {
 
       return this.mapChargeResponse(response.data);
     } catch (error) {
+      // Log detalhado do erro antes de processar
+      if (axios.isAxiosError(error) && error.response) {
+        logger.error('PagBank Credit Card Error - Full Response', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+          requestData: {
+            reference_id: request.reference_id,
+            customer_tax_id: request.customer.tax_id,
+            holder_tax_id: request.charges?.[0]?.payment_method?.card?.holder?.tax_id,
+            encrypted_length: request.charges?.[0]?.payment_method?.card?.encrypted?.length,
+          }
+        });
+      }
       return this.handleError(error);
     }
   }
@@ -259,9 +341,12 @@ class PagBankService {
     // Para orders com PIX, não tem status na raiz
     const status = charge.status || (charge.qr_codes ? 'WAITING' : 'DECLINED');
     
+    // O chargeId correto está dentro de charges[0].id, não no charge.id (que é o orderId)
+    const chargeId = charge.charges?.[0]?.id || charge.id;
+    
     const result: PaymentResult = {
       success: true, // Se chegou aqui, foi criado com sucesso
-      chargeId: charge.id,
+      chargeId: chargeId,
       status: status as ChargeStatus,
     };
 
@@ -299,11 +384,32 @@ class PagBankService {
       const pagbankError = error.response?.data as PagBankError | undefined;
       
       if (pagbankError?.error_messages && pagbankError.error_messages.length > 0) {
+        // Logar todos os erros para debug
+        logger.error('PagBank detailed errors', {
+          errors: pagbankError.error_messages,
+          fullResponse: pagbankError,
+        });
+
         const firstError = pagbankError.error_messages[0];
+        
+        // Construir mensagem mais descritiva
+        let errorMessage = firstError?.description || 'Erro desconhecido';
+        
+        // Se tiver parameter_name ou error, adicionar à mensagem
+        if (firstError && typeof firstError === 'object') {
+          const errorObj = firstError as any;
+          if (errorObj.parameter_name) {
+            errorMessage += ` (campo: ${errorObj.parameter_name})`;
+          }
+          if (errorObj.error) {
+            errorMessage = errorObj.error;
+          }
+        }
+        
         return {
           success: false,
           status: 'DECLINED',
-          errorMessage: firstError?.description || 'Erro desconhecido',
+          errorMessage,
           errorCode: firstError?.code,
         };
       }
@@ -342,9 +448,17 @@ class PagBankService {
   private parsePhone(phone: string): { country: string; area: string; number: string; type: 'MOBILE' } {
     const cleaned = phone.replace(/\D/g, '');
     
+    if (cleaned.length < 10 || cleaned.length > 11) {
+      throw new Error(`Telefone inválido: ${phone} (deve ter 10 ou 11 dígitos)`);
+    }
+    
     // Formato esperado: (11) 99999-9999 -> 11999999999
     const area = cleaned.slice(0, 2);
     const number = cleaned.slice(2);
+
+    if (number.length < 8 || number.length > 9) {
+      throw new Error(`Número de telefone inválido: ${number} (deve ter 8 ou 9 dígitos)`);
+    }
 
     return {
       country: '55',

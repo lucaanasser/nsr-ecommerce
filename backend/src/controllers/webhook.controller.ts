@@ -19,6 +19,13 @@ export class WebhookController {
       logger.info('Received PagBank webhook', {
         eventId: webhookData.id,
         referenceId: webhookData.reference_id,
+        hasCharges: !!webhookData.charges,
+        chargesCount: webhookData.charges?.length || 0,
+      });
+
+      // Log full webhook data for debugging
+      logger.info('Full webhook payload', {
+        payload: JSON.stringify(webhookData, null, 2),
       });
 
       // Store webhook event for audit

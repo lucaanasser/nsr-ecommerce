@@ -67,7 +67,7 @@ export default function OrdersTab({ pedidos, isLoading }: OrdersTabProps) {
             </div>
             <div className="text-right">
               <p className="text-primary-white font-semibold">
-                R$ {pedido.total?.toFixed(2) || '-'}
+                R$ {pedido.total ? Number(pedido.total).toFixed(2) : '-'}
               </p>
               <p
                 className={`text-sm mt-1 ${

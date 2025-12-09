@@ -404,6 +404,8 @@ export class OrderService {
           errorMessage: paymentResult.errorMessage,
         },
       };
+    }, {
+      timeout: 15000, // 15 segundos (chamada ao PagBank pode demorar)
     });
   }
 

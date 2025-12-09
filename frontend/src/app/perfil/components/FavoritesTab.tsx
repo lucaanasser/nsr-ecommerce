@@ -63,7 +63,7 @@ export default function FavoritesTab({ favoritos, onRemoveFavorite }: FavoritesT
               </h3>
             </Link>
             <p className="text-primary-gold font-bold mb-3">
-              R$ {produto.price.toFixed(2)}
+              R$ {Number(produto.price).toFixed(2)}
             </p>
             <div className="flex gap-2">
               <Link
