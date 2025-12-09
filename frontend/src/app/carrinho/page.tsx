@@ -165,31 +165,31 @@ export default function PaginaCarrinho() {
                     <h2 className="text-2xl font-bold mb-6">Resumo do Pedido</h2>
 
                     <div className="space-y-4 mb-6">
-                      <div className="flex justify-between text-primary-white/70">
+                      <div className="flex justify-between text-sm mb-2">
                         <span>Subtotal</span>
-                        <span>R$ {subtotal.toFixed(2)}</span>
+                        <span>R$ {Number(subtotal).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-primary-white/70">
                         <span>Frete</span>
                         <span>
                           {frete === 0 ? (
-                            <span className="text-primary-gold">Grátis</span>
+                            <span className="text-green-500">Grátis</span>
                           ) : (
-                            `R$ ${frete.toFixed(2)}`
+                            `R$ ${Number(frete).toFixed(2)}`
                           )}
                         </span>
                       </div>
                       {subtotal < 299 && (
                         <p className="text-xs text-primary-gold/70">
-                          Falta R$ {(299 - subtotal).toFixed(2)} para frete grátis
+                          Falta R$ {(299 - Number(subtotal)).toFixed(2)} para frete grátis
                         </p>
                       )}
                     </div>
 
                     <div className="border-t border-dark-border pt-4 mb-6">
-                      <div className="flex justify-between text-xl font-bold">
+                      <div className="flex justify-between font-semibold text-lg">
                         <span>Total</span>
-                        <span className="text-gradient">R$ {total.toFixed(2)}</span>
+                        <span className="text-gradient">R$ {Number(total).toFixed(2)}</span>
                       </div>
                     </div>
 

@@ -194,7 +194,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Preço sempre visível - Simples e discreto */}
           <div className="absolute bottom-4 right-4 z-10">
             <p className="text-2xl text-black group-hover:text-primary-gold transition-colors font-nsr">
-              R$ {product.price.toFixed(2)}
+              R$ {Number(product.price).toFixed(2)}
             </p>
           </div>
         </div>

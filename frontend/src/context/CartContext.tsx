@@ -77,6 +77,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           ...items,
           {
             ...product,
+            price: Number(product.price), // Garantir que price seja número
             quantity: 1,
             selectedSize: size,
             selectedColor: selectedColor,
@@ -122,7 +123,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const getCartTotal = () => {
-    return cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return cartItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
   };
 
   const getCartCount = () => {

@@ -243,6 +243,22 @@ export class OrderService {
 
       // 11.3. Processar via PagBank
       let paymentResult;
+      
+      // Determinar o CPF a ser usado:
+      // - Para cartão de crédito: usar o CPF do titular do cartão
+      // - Para PIX: usar o CPF do usuário logado
+      const customerCpf = data.paymentMethod === 'credit_card' 
+        ? data.creditCard?.holderCpf 
+        : user.cpf;
+      
+      if (!customerCpf) {
+        throw new BadRequestError(
+          data.paymentMethod === 'credit_card' 
+            ? 'CPF do titular do cartão é obrigatório'
+            : 'CPF não encontrado no cadastro. Por favor, atualize seu perfil.'
+        );
+      }
+      
       const paymentData = {
         orderId: order.orderNumber,
         amount: Number(total),
@@ -250,7 +266,7 @@ export class OrderService {
         customer: {
           name: order.customerName,
           email: user.email,
-          cpf: user.cpf || '00000000000', // CPF obrigatório - deve ser validado no cadastro
+          cpf: customerCpf,
           phone: order.customerPhone,
         },
         address: {

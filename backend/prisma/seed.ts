@@ -169,7 +169,7 @@ async function main() {
       lastName: 'Silva',
       role: 'CUSTOMER',
       phone: '11988888888',
-      cpf: '12345678900',
+      cpf: '11144477735', // CPF válido para testes
       birthDate: new Date('1995-05-15'),
     },
   });

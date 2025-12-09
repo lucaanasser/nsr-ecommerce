@@ -10,12 +10,13 @@ import { motion } from 'framer-motion';
 import { CreditCard, QrCode, AlertCircle, Loader2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import type { DadosPagamento } from '@/types/checkout.types';
+import type { DadosPagamento, DadosComprador } from '@/types/checkout.types';
 import { pagbankService } from '@/services/pagbank.service';
 
 interface PagamentoStepProps {
   dadosPagamento: DadosPagamento;
   setDadosPagamento: (dados: DadosPagamento | ((prev: DadosPagamento) => DadosPagamento)) => void;
+  dadosComprador: DadosComprador;
   onSubmit: (e: React.FormEvent) => void;
   onVoltar: () => void;
   processando?: boolean;
@@ -24,6 +25,7 @@ interface PagamentoStepProps {
 export default function PagamentoStep({
   dadosPagamento,
   setDadosPagamento,
+  dadosComprador,
   onSubmit,
   onVoltar,
   processando = false,
@@ -32,6 +34,7 @@ export default function PagamentoStep({
   const [sdkError, setSdkError] = useState<string | null>(null);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [usarMeuCpf, setUsarMeuCpf] = useState(false);
 
   // Carregar SDK do PagBank
   useEffect(() => {
@@ -58,6 +61,13 @@ export default function PagamentoStep({
       setCardBrand(null);
     }
   }, [dadosPagamento.numeroCartao, dadosPagamento.metodo]);
+
+  // Auto-preencher CPF quando checkbox marcada
+  useEffect(() => {
+    if (usarMeuCpf && dadosComprador.cpf) {
+      setDadosPagamento({ ...dadosPagamento, cpfTitular: dadosComprador.cpf });
+    }
+  }, [usarMeuCpf]);
 
   const handleCardNumberChange = (value: string) => {
     // Remove tudo exceto números
@@ -358,15 +368,38 @@ export default function PagamentoStep({
               </div>
             </div>
 
-            <div>
+            <div className="space-y-3">
+              {/* Checkbox para usar CPF do comprador */}
+              {dadosComprador.cpf && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={usarMeuCpf}
+                    onChange={(e) => {
+                      setUsarMeuCpf(e.target.checked);
+                      if (!e.target.checked) {
+                        setDadosPagamento({ ...dadosPagamento, cpfTitular: '' });
+                      }
+                    }}
+                    className="w-4 h-4 text-primary-bronze bg-dark-bg border-dark-border rounded focus:ring-primary-bronze focus:ring-2"
+                  />
+                  <span className="text-sm text-primary-white/80">Usar meu CPF ({dadosComprador.cpf})</span>
+                </label>
+              )}
+              
+              {/* Campo CPF */}
               <Input
                 type="text"
                 placeholder="CPF do Titular"
                 required
                 value={dadosPagamento.cpfTitular}
-                onChange={(e) => handleCPFChange(e.target.value)}
+                onChange={(e) => {
+                  handleCPFChange(e.target.value);
+                  if (usarMeuCpf) setUsarMeuCpf(false);
+                }}
                 className="bg-dark-bg/50"
                 maxLength={14}
+                disabled={usarMeuCpf}
               />
               {errors.cpfTitular && (
                 <p className="text-red-400 text-sm mt-1">{errors.cpfTitular}</p>

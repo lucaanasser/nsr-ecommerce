@@ -66,6 +66,15 @@ export default function CheckoutPage() {
       const hasCpf = user.cpf && user.cpf.trim() !== '';
       const hasPhone = user.phone && user.phone.trim() !== '';
       
+      // Preencher dadosComprador com dados do usuário
+      checkoutData.setDadosComprador({
+        nome: user.firstName,
+        sobrenome: user.lastName,
+        email: user.email,
+        telefone: user.phone || '',
+        cpf: user.cpf || '',
+      });
+      
       // Se tem todos os dados, pula direto para entrega
       if (hasCpf && hasPhone) {
         console.log('[Checkout] ✅ Usuário com dados completos, pulando para entrega');
@@ -119,6 +128,16 @@ export default function CheckoutPage() {
       console.log('🔄 Atualizando contexto e avançando para entrega...');
       // Atualizar contexto com novos dados SEM reload
       await refreshUser();
+      
+      // Atualizar dadosComprador com os dados completos
+      checkoutData.setDadosComprador({
+        nome: updatedUser.firstName,
+        sobrenome: updatedUser.lastName,
+        email: updatedUser.email,
+        telefone: updatedUser.phone || '',
+        cpf: updatedUser.cpf || '',
+      });
+      
       console.log('✅ Dados atualizados, avançando para destinatário');
       // Avançar para próxima etapa
       checkoutData.setEtapa('destinatario');
@@ -477,6 +496,7 @@ export default function CheckoutPage() {
                   <PagamentoStep
                     dadosPagamento={checkoutData.dadosPagamento}
                     setDadosPagamento={checkoutData.setDadosPagamento}
+                    dadosComprador={checkoutData.dadosComprador}
                     onSubmit={handleSubmitPagamento}
                     onVoltar={() => checkoutData.setEtapa('destinatario')}
                     processando={processandoPedido}

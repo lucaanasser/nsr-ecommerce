@@ -42,7 +42,7 @@ export default function CheckoutSummary({
               </p>
               <p className="text-xs text-primary-white/50">Qtd: {item.quantity}</p>
               <p className="text-sm text-primary-gold mt-1">
-                R$ {(item.price * item.quantity).toFixed(2)}
+                R$ {(Number(item.price) * item.quantity).toFixed(2)}
               </p>
             </div>
           </div>
@@ -53,17 +53,17 @@ export default function CheckoutSummary({
       <div className="border-t border-dark-border pt-4 space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-primary-white/70">Subtotal</span>
-          <span>R$ {subtotal.toFixed(2)}</span>
+          <span>R$ {Number(subtotal).toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-primary-white/70">Frete</span>
           <span className={frete === 0 ? 'text-green-500' : ''}>
-            {frete === 0 ? 'Grátis' : `R$ ${frete.toFixed(2)}`}
+            {frete === 0 ? 'Grátis' : `R$ ${Number(frete).toFixed(2)}`}
           </span>
         </div>
-        <div className="flex justify-between text-lg font-bold pt-2 border-t border-dark-border">
+        <div className="flex justify-between font-semibold text-lg pt-3 border-t border-dark-border">
           <span>Total</span>
-          <span className="text-primary-bronze">R$ {total.toFixed(2)}</span>
+          <span className="text-primary-bronze">R$ {Number(total).toFixed(2)}</span>
         </div>
       </div>
     </div>
