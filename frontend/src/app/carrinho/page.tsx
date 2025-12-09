@@ -99,7 +99,7 @@ export default function PaginaCarrinho() {
                               {item.name}
                             </Link>
                             <p className="text-sm text-primary-white/60 mt-1">
-                              {item.collection}
+                              {item.collection?.name || 'Sem coleção'}
                             </p>
                             <div className="flex gap-4 mt-3 text-sm">
                               <span className="text-primary-white/60">
