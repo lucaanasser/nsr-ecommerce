@@ -23,6 +23,15 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
+  
+  if (!id) {
+    res.status(400).json({
+      success: false,
+      message: 'ID do usuário é obrigatório'
+    });
+    return;
+  }
+
   const user = await userService.getUserById(id);
 
   if (!user) {
