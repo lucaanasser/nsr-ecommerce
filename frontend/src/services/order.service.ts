@@ -9,10 +9,10 @@ export interface Order {
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
   paymentMethod: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'BOLETO';
   items: OrderItem[];
-  subtotal: number;
-  discount: number;
-  shippingCost: number;
-  total: number;
+  subtotal: number | string;
+  discount: number | string;
+  shippingCost: number | string;
+  total: number | string;
   shippingAddress: Address;
   shippingMethod: string;
   trackingCode?: string;
@@ -34,8 +34,8 @@ export interface OrderItem {
   quantity: number;
   size: string;
   color?: string;
-  price: number;
-  subtotal: number;
+  unitPrice: number | string;
+  totalPrice: number | string;
 }
 
 export interface Address {

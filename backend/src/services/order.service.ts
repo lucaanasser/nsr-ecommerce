@@ -396,8 +396,9 @@ export class OrderService {
       // Return order with payment data for frontend
       return {
         ...order,
+        shippingAddress: order.address,
         payment: {
-          status: paymentResult.status,
+          status: paymentResult.status === 'WAITING' ? 'PENDING' : paymentResult.status,
           pixQrCode: paymentResult.pixQrCode,
           pixQrCodeBase64: paymentResult.pixQrCodeImage,
           pixExpiresAt: paymentResult.pixExpiresAt,
@@ -467,10 +468,11 @@ export class OrderService {
     
     return {
       ...order,
+      shippingAddress: order.address,
       payment: lastPayment ? {
         id: lastPayment.id,
         method: lastPayment.method,
-        status: lastPayment.status,
+        status: lastPayment.status === 'WAITING' ? 'PENDING' : lastPayment.status,
         chargeId: lastPayment.chargeId || undefined,
         pixQrCode: lastPayment.pixQrCode || undefined,
         pixQrCodeBase64: lastPayment.pixQrCodeBase64 || undefined,

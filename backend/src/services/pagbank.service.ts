@@ -335,14 +335,26 @@ class PagBankService {
    * Mapeia a resposta do PagBank para o formato interno
    */
   private async mapChargeResponse(charge: any): Promise<PaymentResult> {
-    // Para orders com PIX, não tem status na raiz
-    const status = charge.status || (charge.qr_codes ? 'WAITING' : 'DECLINED');
+    // Identificar onde estão os dados da cobrança (pode ser na raiz ou dentro de charges[0])
+    let chargeData = charge;
+    let status = charge.status;
+
+    if (charge.charges && charge.charges.length > 0) {
+      chargeData = charge.charges[0];
+      status = chargeData.status;
+    } else if (charge.qr_codes) {
+      status = 'WAITING';
+    }
+
+    // Fallback
+    if (!status) {
+      status = 'DECLINED';
+    }
     
-    // O chargeId correto está dentro de charges[0].id, não no charge.id (que é o orderId)
-    const chargeId = charge.charges?.[0]?.id || charge.id;
+    const chargeId = chargeData.id || charge.id;
     
     const result: PaymentResult = {
-      success: true, // Se chegou aqui, foi criado com sucesso
+      success: true,
       chargeId: chargeId,
       status: status as ChargeStatus,
     };
@@ -370,8 +382,8 @@ class PagBankService {
     }
     
     // Dados do PIX (dentro de payment_method para charges)
-    if (charge.payment_method?.pix?.qr_codes?.[0]) {
-      const qrCode = charge.payment_method.pix.qr_codes[0];
+    if (chargeData.payment_method?.pix?.qr_codes?.[0]) {
+      const qrCode = chargeData.payment_method.pix.qr_codes[0];
       result.pixQrCode = qrCode.text;
       result.pixExpiresAt = new Date(qrCode.expiration_date);
       
@@ -391,11 +403,15 @@ class PagBankService {
       }
     }
 
-    // Mensagem de erro
-    if (charge.payment_response?.message) {
-      result.errorMessage = charge.payment_response.message;
-      result.errorCode = charge.payment_response.code;
-      result.success = false;
+    // Mensagem de erro / Detalhes da resposta
+    const paymentResponse = chargeData.payment_response;
+    if (paymentResponse) {
+      // Se o status for de erro, marcamos success = false e pegamos a mensagem
+      if (status === 'DECLINED' || status === 'CANCELED') {
+        result.errorMessage = paymentResponse.message;
+        result.errorCode = paymentResponse.code;
+        result.success = false;
+      }
     }
 
     return result;

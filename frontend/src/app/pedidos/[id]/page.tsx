@@ -232,7 +232,7 @@ export default function OrderConfirmationPage() {
                           </p>
                         </div>
                         <p className="font-semibold">
-                          R$ {item.subtotal.toFixed(2)}
+                          R$ {Number(item.totalPrice).toFixed(2)}
                         </p>
                       </div>
                     ))}
@@ -256,21 +256,21 @@ export default function OrderConfirmationPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-primary-white/70">
                       <span>Subtotal:</span>
-                      <span>R$ {order.subtotal.toFixed(2)}</span>
+                      <span>R$ {Number(order.subtotal).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-primary-white/70">
                       <span>Frete:</span>
-                      <span>R$ {order.shippingCost.toFixed(2)}</span>
+                      <span>R$ {Number(order.shippingCost).toFixed(2)}</span>
                     </div>
-                    {order.discount > 0 && (
+                    {Number(order.discount) > 0 && (
                       <div className="flex justify-between text-green-500">
                         <span>Desconto:</span>
-                        <span>- R$ {order.discount.toFixed(2)}</span>
+                        <span>- R$ {Number(order.discount).toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-xl font-bold pt-2 border-t border-dark-border">
                       <span>Total:</span>
-                      <span className="text-primary-bronze">R$ {order.total.toFixed(2)}</span>
+                      <span className="text-primary-bronze">R$ {Number(order.total).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

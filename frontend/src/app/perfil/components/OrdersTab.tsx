@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 
 interface Order {
@@ -18,6 +19,8 @@ interface OrdersTabProps {
  * Componente da aba de pedidos do usuário
  */
 export default function OrdersTab({ pedidos, isLoading }: OrdersTabProps) {
+  const router = useRouter();
+
   if (isLoading) {
     return (
       <motion.div
@@ -81,6 +84,7 @@ export default function OrdersTab({ pedidos, isLoading }: OrdersTabProps) {
           <Button
             variant="ghost"
             className="mt-4 text-sm text-primary-bronze hover:underline p-0"
+            onClick={() => router.push(`/pedidos/${pedido.id}`)}
           >
             Ver detalhes →
           </Button>
