@@ -1,14 +1,12 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Product } from '@/data/products';
+import { Product } from '@/services/product.service';
 
 export interface CartItem extends Product {
   quantity: number;
   selectedSize: string;
   selectedColor: string;
-  stock?: number;
-  isActive?: boolean;
 }
 
 interface CartContextType {
@@ -35,13 +33,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const addToCart = (product: Product, size: string, color?: string) => {
-    // Bloqueia inclusão se produto estiver inativo ou sem estoque conhecido
-    if ((product as any).isActive === false) {
+    // Bloqueia inclusão se produto estiver inativo
+    if (product.isActive === false) {
       console.warn('Produto inativo, não será adicionado ao carrinho');
       return;
     }
-    if (typeof (product as any).stock === 'number' && (product as any).stock <= 0) {
-      console.warn('Produto sem estoque, não será adicionado ao carrinho');
+
+    // Valida estoque da variante específica
+    const selectedColor = color || product.variants?.[0]?.color || '';
+    const variant = product.variants?.find(
+      v => v.size === size && v.color === selectedColor
+    );
+
+    if (!variant || variant.stock <= 0) {
+      console.warn('Variante sem estoque disponível');
       return;
     }
 
@@ -53,11 +58,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       if (existingItem) {
         const newQuantity = existingItem.quantity + 1;
-        const stockLimit = (existingItem as any).stock;
-        if (typeof stockLimit === 'number' && newQuantity > stockLimit) {
+        
+        // Valida estoque da variante antes de aumentar quantidade
+        if (newQuantity > variant.stock) {
           console.warn('Estoque insuficiente para aumentar quantidade no carrinho');
           return items;
         }
+
         // Se existir, aumenta a quantidade
         return items.map(item =>
           item.id === product.id && item.selectedSize === size
@@ -72,7 +79,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             ...product,
             quantity: 1,
             selectedSize: size,
-            selectedColor: color || product.colors[0],
+            selectedColor: selectedColor,
           },
         ];
       }
@@ -87,11 +94,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateQuantity = (id: string, size: string, delta: number) => {
     setCartItems(items =>
-      items.map(item =>
-        item.id === id && item.selectedSize === size
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
+      items.map(item => {
+        if (item.id === id && item.selectedSize === size) {
+          const newQuantity = Math.max(1, item.quantity + delta);
+          
+          // Valida estoque da variante ao aumentar quantidade
+          if (delta > 0) {
+            const variant = item.variants?.find(
+              v => v.size === item.selectedSize && v.color === item.selectedColor
+            );
+            
+            if (variant && newQuantity > variant.stock) {
+              console.warn('Estoque insuficiente para aumentar quantidade');
+              return item; // Mantém quantidade atual
+            }
+          }
+          
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      })
     );
   };
 
